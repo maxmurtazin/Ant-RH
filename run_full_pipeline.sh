@@ -28,21 +28,58 @@ echo " RANGE: [$T_MIN, $T_MAX]"
 echo "========================================"
 
 # =========================
-# STEP 0: Generate ground truth if missing
 # =========================
+
+# STEP 0: Generate ground truth if missing
+
+# =========================
+
 echo "=== STEP 0: Ground truth zeros ==="
 
 if [ ! -f "$TRUTH_FILE" ]; then
+
   echo "[INFO] Truth file not found. Generating: $TRUTH_FILE"
 
-  python3 validation/fractal_dtes_aco_zeta_all_zeros_scan.py \
+  if [ -f "fractal_dtes_aco_zeta_all_zeros_scan.py" ]; then
+
+    TRUTH_SCRIPT="fractal_dtes_aco_zeta_all_zeros_scan.py"
+
+  elif [ -f "validation/fractal_dtes_aco_zeta_all_zeros_scan.py" ]; then
+
+    TRUTH_SCRIPT="validation/fractal_dtes_aco_zeta_all_zeros_scan.py"
+
+  elif [ -f "validation/validate_zeros_and_spacing_eta.py" ]; then
+
+    echo "[ERROR] all_zeros_scan script not found."
+
+    echo "Put fractal_dtes_aco_zeta_all_zeros_scan.py into validation/ or repo root."
+
+    exit 1
+
+  else
+
+    echo "[ERROR] No truth-generation script found."
+
+    exit 1
+
+  fi
+
+  python3 "$TRUTH_SCRIPT" \
+
     --t_min $T_MIN \
+
     --t_max $T_MAX \
+
     --step $STEP \
+
     --dps $DPS_TRUTH \
+
     --output "$TRUTH_PREFIX"
+
 else
+
   echo "[OK] Truth file exists: $TRUTH_FILE"
+
 fi
 
 # =========================
