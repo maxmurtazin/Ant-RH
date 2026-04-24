@@ -1,0 +1,320 @@
+from __future__ import annotations
+
+import json
+import math
+import os
+import time
+from dataclasses import asdict
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
+
+from fractal_dtes_aco_zeta_metrics import AntPath, ZetaSearchConfig
+from fractal_dtes_aco_zeta_visual import VisualFractalDTESACOZeta, save_metrics_json
+
+
+class ETALogger:
+    def __init__(self, enabled: bool = True, log_path: Optional[str] = None):
+        self.enabled = enabled
+        self.log_path = log_path
+        self.global_start = time.time()
+        self.records: List[dict] = []
+        if log_path:
+            os.makedirs(os.path.dirname(log_path) or ".", exist_ok=True)
+            with open(log_path, "w", encoding="utf-8") as f:
+                f.write("")
+
+    def emit(self, stage: str, message: str, **data) -> None:
+        elapsed = time.time() - self.global_start
+        record = {"time_s": elapsed, "stage": stage, "message": message, **data}
+        self.records.append(record)
+        line = f"[{stage}] {message} | elapsed={elapsed:.2f}s"
+        extra = " ".join(f"{k}={v}" for k, v in data.items() if v is not None)
+        if extra:
+            line += " | " + extra
+        if self.enabled:
+            print(line, flush=True)
+        if self.log_path:
+            with open(self.log_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def _format_seconds(x: float) -> str:
+    x = max(0.0, float(x))
+    if x < 60:
+        return f"{x:.1f}s"
+    if x < 3600:
+        return f"{x / 60:.1f}m"
+    return f"{x / 3600:.2f}h"
+
+
+class ETAFractalDTESACOZeta(VisualFractalDTESACOZeta):
+    """Visual + metrics version with stage ETA, ACO live monitoring and early stopping."""
+
+    def __init__(self, cfg: ZetaSearchConfig):
+        super().__init__(cfg)
+        self.out_dir = getattr(cfg, "out_dir", "fractal_dtes_aco_eta_output")
+        os.makedirs(self.out_dir, exist_ok=True)
+        self.logger = ETALogger(
+            enabled=getattr(cfg, "verbose_eta", True),
+            log_path=os.path.join(self.out_dir, "run_log.jsonl"),
+        )
+        self.aco_history: List[dict] = []
+        self.stage_timings: Dict[str, float] = {}
+
+    def _time_stage(self, name: str, fn, *args, **kwargs):
+        t0 = time.time()
+        self.logger.emit("STAGE", f"{name} started")
+        result = fn(*args, **kwargs)
+        dt = time.time() - t0
+        self.stage_timings[name] = dt
+        self.logger.emit("STAGE", f"{name} done", stage_time=_format_seconds(dt))
+        return result
+
+    def run(self) -> List[float]:
+        self.logger.emit("START", "Fractal-DTES-ACO-Zeta ETA run started")
+        self._time_stage("evaluate_grid", self.evaluate_grid)
+        self._time_stage(
+            "compute_multiscale_features", self.compute_multiscale_features
+        )
+        self._time_stage("build_dyadic_tree", self.build_dyadic_tree)
+        self._time_stage("aggregate_node_statistics", self.aggregate_node_statistics)
+        self._time_stage("build_graph", self.build_graph)
+        self._time_stage("compute_node_stability", self.compute_node_stability)
+        self._time_stage("initialize_pheromones", self.initialize_pheromones)
+        self._time_stage("run_aco", self.run_aco)
+        candidate_nodes = self._time_stage(
+            "rank_candidate_nodes", self.rank_candidate_nodes
+        )
+        candidates = self._time_stage(
+            "refine_candidates", self.refine_candidates, candidate_nodes
+        )
+        candidates = self.merge_close_candidates(candidates)
+
+        self.metrics = self.compute_metrics(candidate_nodes, candidates)
+        self.metrics["stage_timings_s"] = self.stage_timings
+        self.metrics["aco_history"] = self.aco_history
+        self.metrics["config"] = self._safe_config_dict()
+        save_metrics_json(
+            os.path.join(self.out_dir, "metrics_summary.json"), self.metrics
+        )
+        save_metrics_json(
+            os.path.join(self.out_dir, "aco_history.json"), self.aco_history
+        )
+        self.plot_all(candidates, self.out_dir)
+        self.logger.emit(
+            "DONE",
+            "run completed",
+            candidates=len(candidates),
+            total_time=_format_seconds(time.time() - self.logger.global_start),
+        )
+        return candidates
+
+    def _safe_config_dict(self) -> dict:
+        try:
+            base = asdict(self.cfg)
+        except Exception:
+            base = dict(getattr(self.cfg, "__dict__", {}))
+        for k, v in list(getattr(self.cfg, "__dict__", {}).items()):
+            if k not in base:
+                base[k] = v
+        return base
+
+    def run_aco(self) -> None:
+        if self.root_id is None:
+            raise RuntimeError("Tree root is not built.")
+
+        ants = [self.make_ant(k) for k in range(self.cfg.n_ants)]
+        ema_iter_time: Optional[float] = None
+        ema_alpha = float(getattr(self.cfg, "eta_ema_alpha", 0.20))
+        log_every = int(getattr(self.cfg, "eta_log_every", 1))
+        early_patience = int(getattr(self.cfg, "early_stop_patience", 0))
+        min_delta = float(getattr(self.cfg, "early_stop_min_delta", 1e-9))
+        best_score = -math.inf
+        stale = 0
+        start = time.time()
+
+        for it in range(self.cfg.n_iterations):
+            iter_start = time.time()
+            paths: List[AntPath] = []
+            for ant in ants:
+                path_nodes = self.sample_ant_path(self.root_id, ant)
+                score = self.evaluate_path(path_nodes, ant.agent_type)
+                paths.append(
+                    AntPath(node_ids=path_nodes, score=score, agent_type=ant.agent_type)
+                )
+                self.update_ant_memory(ant, path_nodes)
+                for nid in path_nodes:
+                    self.nodes[nid].visit_count += 1
+
+            self.evaporate_pheromones()
+            self.reinforce_pheromones(paths)
+
+            iter_time = time.time() - iter_start
+            ema_iter_time = (
+                iter_time
+                if ema_iter_time is None
+                else (ema_alpha * iter_time + (1.0 - ema_alpha) * ema_iter_time)
+            )
+            done = it + 1
+            remaining = self.cfg.n_iterations - done
+            eta = ema_iter_time * remaining
+            scores = np.array([p.score for p in paths], dtype=float)
+            mean_score = float(np.mean(scores)) if scores.size else None
+            max_score = float(np.max(scores)) if scores.size else None
+            best_energy = self._current_best_leaf_energy()
+            pheromone_mass = (
+                float(sum(self.pheromones.values())) if self.pheromones else 0.0
+            )
+            diversity = self._terminal_diversity(paths)
+            rec = {
+                "iteration": done,
+                "n_iterations": self.cfg.n_iterations,
+                "iter_time_s": iter_time,
+                "ema_iter_time_s": ema_iter_time,
+                "elapsed_s": time.time() - start,
+                "eta_s": eta,
+                "mean_score": mean_score,
+                "max_score": max_score,
+                "best_leaf_energy": best_energy,
+                "shared_pheromone_mass": pheromone_mass,
+                "terminal_diversity": diversity,
+            }
+            self.aco_history.append(rec)
+
+            if done % max(1, log_every) == 0 or done == self.cfg.n_iterations:
+                self.logger.emit(
+                    "ACO",
+                    f"iter {done}/{self.cfg.n_iterations}",
+                    iter_time=_format_seconds(iter_time),
+                    eta=_format_seconds(eta),
+                    best_E=f"{best_energy:.5g}" if best_energy is not None else None,
+                    max_score=f"{max_score:.5g}" if max_score is not None else None,
+                    diversity=f"{diversity:.3f}",
+                )
+
+            if max_score is not None and max_score > best_score + min_delta:
+                best_score = max_score
+                stale = 0
+            else:
+                stale += 1
+            if early_patience > 0 and stale >= early_patience:
+                self.logger.emit(
+                    "EARLY_STOP",
+                    f"no max_score improvement for {early_patience} iterations",
+                    iteration=done,
+                )
+                break
+
+    def refine_candidates(self, candidate_nodes: List[int]) -> List[float]:
+        refined: List[float] = []
+        start = time.time()
+        ema: Optional[float] = None
+        alpha = float(getattr(self.cfg, "eta_ema_alpha", 0.20))
+        total = len(candidate_nodes)
+        for i, nid in enumerate(candidate_nodes):
+            t0 = time.time()
+            node = self.nodes[nid]
+            t_star = self.local_refinement(node.interval)
+            if t_star is not None and self.verify_zero_candidate(t_star):
+                refined.append(t_star)
+            dt = time.time() - t0
+            ema = dt if ema is None else alpha * dt + (1.0 - alpha) * ema
+            remaining = total - (i + 1)
+            if getattr(self.cfg, "verbose_eta", True):
+                self.logger.emit(
+                    "REFINE",
+                    f"candidate {i + 1}/{total}",
+                    iter_time=_format_seconds(dt),
+                    eta=_format_seconds(ema * remaining),
+                    accepted=len(refined),
+                )
+        self.stage_timings["refine_candidates_inner_s"] = time.time() - start
+        return refined
+
+    def _current_best_leaf_energy(self) -> Optional[float]:
+        target_level = self.cfg.target_level or self.cfg.tree_depth
+        ids = self.nodes_by_level.get(target_level, [])
+        if not ids:
+            return None
+        return float(min(self.nodes[nid].energy for nid in ids))
+
+    def _terminal_diversity(self, paths: List[AntPath]) -> float:
+        terminals = [p.node_ids[-1] for p in paths if p.node_ids]
+        return float(len(set(terminals)) / max(1, len(terminals)))
+
+    def plot_aco_history(self, out_dir: str) -> List[str]:
+        import matplotlib.pyplot as plt
+
+        if not self.aco_history:
+            return []
+        os.makedirs(out_dir, exist_ok=True)
+        paths = []
+        xs = [r["iteration"] for r in self.aco_history]
+        for key, ylabel, filename in [
+            ("max_score", "max path score", "aco_max_score.png"),
+            ("best_leaf_energy", "best leaf energy", "aco_best_energy.png"),
+            ("terminal_diversity", "terminal diversity", "aco_terminal_diversity.png"),
+            ("eta_s", "ETA, seconds", "aco_eta.png"),
+        ]:
+            ys = [r.get(key) for r in self.aco_history]
+            if all(y is None for y in ys):
+                continue
+            fig = plt.figure(figsize=(9, 5))
+            ax = fig.add_subplot(111)
+            ax.plot(xs, ys, linewidth=1.5)
+            ax.set_title(key.replace("_", " "))
+            ax.set_xlabel("ACO iteration")
+            ax.set_ylabel(ylabel)
+            ax.grid(True, alpha=0.3)
+            fig.tight_layout()
+            path = os.path.join(out_dir, filename)
+            fig.savefig(path, dpi=180)
+            plt.close(fig)
+            paths.append(path)
+        return paths
+
+    def plot_all(self, candidates: Optional[List[float]], out_dir: str) -> List[str]:
+        paths = self._plot_all_local(candidates, out_dir)
+        paths.extend(self.plot_aco_history(out_dir))
+        return paths
+
+
+def default_eta_demo() -> None:
+    out_dir = "fractal_dtes_aco_eta_output"
+    cfg = ZetaSearchConfig(
+        t_min=10.0,
+        t_max=40.0,
+        n_grid=2048,
+        tree_depth=8,
+        feature_levels=5,
+        n_ants=48,
+        n_iterations=60,
+        max_ant_steps=20,
+        top_candidate_nodes=16,
+        verification_abs_tol=1e-6,
+        refinement_subgrid=128,
+        r0=6.0,
+        mp_dps=50,
+    )
+    cfg.out_dir = out_dir
+    cfg.verbose_eta = True
+    cfg.eta_log_every = 1
+    cfg.eta_ema_alpha = 0.20
+    cfg.early_stop_patience = 0  # set e.g. 12 to enable
+    cfg.early_stop_min_delta = 1e-9
+    cfg.metrics_out_path = os.path.join(out_dir, "metrics_summary.json")
+
+    searcher = ETAFractalDTESACOZeta(cfg)
+    candidates = searcher.run()
+    print("\nCandidates:")
+    import mpmath as mp
+
+    for t in candidates:
+        z = mp.zeta(mp.mpf("0.5") + 1j * mp.mpf(str(float(t))))
+        print(f"t = {t:.12f} |zeta| = {abs(complex(z)):.3e}")
+    print(f"\nOutputs: {out_dir}")
+
+
+if __name__ == "__main__":
+    default_eta_demo()
