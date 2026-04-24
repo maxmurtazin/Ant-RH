@@ -146,3 +146,10 @@ Optional colored-ant refinement
 Hybrid local scan
         ↓
 Distance / recall analysis
+```
+
+---
+
+## Documentation
+
+Extended guides (setup, repo layout, CLI flags, JSON formats): [Docs/README.md](Docs/README.md).
