@@ -27,6 +27,10 @@ Outputs:
    <out>_histogram.png
    <out>_cdf.png
    <out>_window_recall.png
+
+Ant-RH:
+    Implements the “distance / recall analysis” step after DTES or hybrid runs
+    (see repository README pipeline).
 """
 
 from __future__ import annotations

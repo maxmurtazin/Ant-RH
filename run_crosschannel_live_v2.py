@@ -29,6 +29,10 @@ For pure DTES analysis:
 
 For hybrid scan with boundary protection:
     use dtes_candidates_edgeaware.json
+
+Repo note (Ant-RH):
+    Prefer this v2 runner over older live scripts when comparing DTES distance metrics,
+    because core vs edge-aware JSON outputs are strictly separated for analysis.
 """
 
 from __future__ import annotations

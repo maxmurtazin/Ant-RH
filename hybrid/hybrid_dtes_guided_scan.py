@@ -48,6 +48,7 @@ import numpy as np
 # ------------------------------
 # IO helpers
 # ------------------------------
+# Throughout this script, ``t`` is the Gram/Hardy axis: s = 1/2 + i t on the critical line.
 
 def load_json(path: Path) -> Any:
     with path.open("r", encoding="utf-8") as f:

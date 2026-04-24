@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+"""Build matplotlib figures from an ETA / CrossChannel run directory (Ant-RH).
+
+Reads ``metrics_summary.json``, ``aco_history.json``, etc. under a run folder and
+writes ``fig_result_*.png``. Invoked by ``run_with_result_figures.py`` or standalone
+``python -m`` / direct run from repo root.
+"""
+
 import argparse
 import json
 import math

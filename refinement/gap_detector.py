@@ -3,6 +3,10 @@
 gap_detector.py
 
 Find large gaps in DTES candidate coverage.
+
+Ant-RH refinement:
+    Use after a candidate JSON is produced to see where the sampler may need
+    wider windows or extra anchors before hybrid scanning.
 """
 
 from __future__ import annotations

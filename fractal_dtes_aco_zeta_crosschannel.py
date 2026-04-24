@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+# Small I/O helpers defined first so external patch scripts can import them without
+# pulling the full NumPy/mpmath stack if only JSON merging is needed.
+
 def _edge_aware_candidates(candidates, t_min, t_max, edge_padding=2.5, edge_step=0.05):
     import math
 
@@ -56,6 +59,9 @@ import mpmath as mp
 # ------------------------------------------------------------
 # Fractal-DTES-ACO-Zeta: research skeleton / MVP
 # ------------------------------------------------------------
+# Self-contained CrossChannel variant (duplicated config/core vs metrics.py) so this
+# module can be patched or run in isolation; for a dependency-light grid-only path see
+# ``core/fractal_dtes_crosschannel_explore_eta_clean.py``.
 # This file implements a practical first version of the scheme:
 #   1) sample zeta(1/2 + i t) on a grid,
 #   2) build multi-scale local features,

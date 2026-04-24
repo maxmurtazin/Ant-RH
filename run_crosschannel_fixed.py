@@ -24,6 +24,10 @@ Then:
       --dtes dtes_candidates.json \
       --t_min 100 --t_max 400 \
       --out distance_edge_fixed
+
+Ant-RH:
+    Thin CLI over ``fractal_dtes_aco_zeta_crosschannel`` when you need explicit
+    ``ZetaSearchConfig`` without the interactive demo path.
 """
 
 from __future__ import annotations

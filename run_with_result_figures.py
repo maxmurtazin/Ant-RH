@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+"""One-shot demo: run ``ETAFractalDTESACOZeta`` then build paper-style figures.
+
+Expects ``figures_from_results`` (under ``validation/``) on ``PYTHONPATH`` or run
+from repo root so imports resolve. Output defaults: ``fractal_dtes_aco_eta_output/``
+and ``paper_figures_from_results/``.
+"""
+
 import argparse
 import os
 from fractal_dtes_aco_zeta_eta import ETAFractalDTESACOZeta

@@ -21,6 +21,10 @@ Usage:
       --iters 80 \
       --output dtes_candidates.json \
       --metrics run_metrics.json
+
+Ant-RH:
+    Older “live” runner; for strict core vs edge-aware JSON separation prefer
+    ``run_crosschannel_live_v2.py``.
 """
 
 from __future__ import annotations

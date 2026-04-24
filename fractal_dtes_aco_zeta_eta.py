@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+"""ETA-enabled Fractal-DTES-ACO-Zeta runner (Ant-RH).
+
+Wraps ``VisualFractalDTESACOZeta`` with stage timing, JSONL run logs, per-iteration
+ACO history (EMA-based ETA, diversity, pheromone mass), and optional early stopping.
+Use this module when you need reproducible metrics files plus live progress; the base
+search implementation lives in ``fractal_dtes_aco_zeta_metrics`` / ``_visual``.
+"""
+
 import json
 import math
 import os

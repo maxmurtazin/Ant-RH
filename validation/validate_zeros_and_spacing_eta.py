@@ -10,6 +10,11 @@ It reuses validate_zeros_and_spacing.py and adds:
   - --scan_only_candidates
   - ETA for candidate verification
   - ETA for independent Hardy-Z scan
+
+Ant-RH:
+    Optional validation layer on top of ``validate_zeros_and_spacing`` (imported as
+    ``base``). That base module is not in this repository snapshot; ship it next to
+    this file or adjust ``PYTHONPATH`` if imports fail.
 """
 from __future__ import annotations
 

@@ -6,6 +6,10 @@ Ground-truth generator for Riemann zeta zeros on the critical line.
 
 Compatible with run_full_pipeline.sh:
 python3 validation/fractal_dtes_aco_zeta_all_zeros_scan.py --t_min 100 --t_max 400 --step 0.01 --dps 80 --output runs/zeros_100_400_precise
+
+Ant-RH:
+    Same ground-truth scanner as the repo-root copy; kept here so pipelines invoked
+    from ``validation/`` need no ``PYTHONPATH`` tweak.
 """
 
 from __future__ import annotations
@@ -83,6 +87,7 @@ def merge_close_zeros(zeros: List[Dict], tol_t: float) -> List[Dict]:
 
 
 def scan_zeros(t_min: float, t_max: float, step: float, max_bisect_iter: int, zero_value_tol: float, tol_t: float, progress_every: int) -> List[Dict]:
+    # Uniform t-grid: sign changes of Z(t) bracket zeros; bisection refines each bracket.
     start = time.time()
 
     a0 = mp.mpf(str(t_min))

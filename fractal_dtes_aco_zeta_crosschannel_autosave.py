@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+"""
+Minimal DTES-shaped demo (Ant-RH).
+
+Grid local minima of |zeta(1/2+it)| plus JSON autosave — not the full fractal/ACO
+pipeline. For production candidates use ``run_crosschannel_live_v2.py`` or
+``core/fractal_dtes_crosschannel_explore_eta_clean.py``.
+"""
 
 import numpy as np
 import mpmath as mp
@@ -17,7 +24,7 @@ def zeta_on_critical_line(t):
 
 
 # ----------------------------
-# SIMPLE DTES-ACO MOCK (твоя логика сюда)
+# SIMPLE DTES-ACO MOCK (placeholder — replace with real ACO/DTES if extending this file)
 # ----------------------------
 def find_candidates(t_min, t_max, n0):
     """

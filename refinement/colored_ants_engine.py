@@ -20,6 +20,10 @@ Color semantics:
     blue    = exploration / low-visit regions
     green   = boundary-aware ants
     violet  = bridge / gap-closing ants
+
+Ant-RH:
+    Optional refinement after a coarse candidate pool exists; pairs with
+    ``gap_detector.py`` / ``dynamic_roads.py`` for coverage-aware selection.
 """
 
 from __future__ import annotations

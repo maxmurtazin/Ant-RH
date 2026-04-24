@@ -29,7 +29,8 @@ import mpmath as mp
 # - the path score,
 # - the refinement routine.
 # ------------------------------------------------------------
-
+# ``fractal_dtes_aco_zeta_crosschannel.py`` embeds a parallel copy of this pipeline for
+# cross-channel experiments; keep behavioral changes in sync or consolidate via import.
 
 @dataclass
 class ZetaSearchConfig:

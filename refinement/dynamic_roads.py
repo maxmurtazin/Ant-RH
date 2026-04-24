@@ -15,4 +15,7 @@ Color policies:
     blue    - prefer under-visited regions
     green   - prefer boundary regions
     violet  - prefer gaps between selected candidates
+
+Ant-RH:
+    Reference formulas shared with ``colored_ants_engine.py``; not a standalone runner.
 """

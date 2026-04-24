@@ -77,6 +77,8 @@ def fmt_time(sec: float) -> str:
 
 
 class Timer:
+    """Structured wall-clock log for long mpmath grids (human-readable + JSON metrics)."""
+
     def __init__(self) -> None:
         self.start = time.time()
         self.records: List[Dict[str, object]] = []
@@ -99,9 +101,11 @@ def json_dump(path: str | Path, obj: object) -> None:
 # -----------------------------
 
 def hardy_z(t: float) -> float:
+    # Hardy Z(t) is real on the critical line; zeros of Z match zeros of zeta(1/2+it).
     try:
         return float(mp.siegelz(mp.mpf(str(float(t)))))
     except Exception:
+        # Fallback if siegelz is unavailable or fails at extreme precision.
         s = mp.mpf("0.5") + 1j * mp.mpf(str(float(t)))
         return float(mp.re(mp.zeta(s)))
 
@@ -201,7 +205,7 @@ def evaluate_grid(t_min: float, t_max: float, n0: int, timer: Timer, use_tqdm: b
                 eta = (n0 - k - 1) * (ema or dt)
                 timer.log("GRID", f"{k+1}/{n0}", eta=fmt_time(eta))
 
-    # log(|Z| + eps) energy
+    # Tropical-style energy: -log|zeta| in README; here we store log|Z| for downstream scoring conventions.
     eps = 1e-14
     energy = np.log(absvals + eps)
     timer.log("GRID", "done", stage_time=fmt_time(time.time() - t_stage))

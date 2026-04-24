@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+"""Matplotlib diagnostics for Fractal-DTES-ACO-Zeta (Ant-RH).
+
+Plots energy landscapes, ACO-related views, and writes ``save_metrics_json`` helpers.
+Depends on ``FractalDTESACOZeta`` from ``fractal_dtes_aco_zeta_metrics``; does not add
+new search logic beyond visualization I/O.
+"""
+
 import json
 import os
 from typing import Dict, List, Optional
