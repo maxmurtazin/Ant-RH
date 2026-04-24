@@ -2,125 +2,106 @@
 
 ## Abstract
 
-We propose a novel computational framework for locating non-trivial zeros of the [Riemann zeta function](chatgpt://generic-entity?number=0) on the critical line using a hybrid of:
+We propose a computational framework for locating non-trivial zeros of the Riemann zeta function on the critical line using:
 
 - Deformable Tropical Energy Space (DTES)
-- Multi-agent exploration (Ant Colony Optimization)
-- Local refinement via windowed root-finding
+- Ant Colony Optimization (ACO)
+- Hybrid local refinement via windowed root-finding
 
-The method replaces uniform scanning with **structured exploration of an implicit energy landscape**, achieving **order-of-magnitude computational speedups** while preserving exact recovery of zeros.
+The method replaces uniform scanning with structured exploration of an implicit energy landscape.
 
 ---
 
 ## Problem formulation
 
-We seek zeros of:
+We seek zeros of the Riemann zeta function on the critical line:
 
-\zeta\left(\tfrac{1}{2} + it\right) = 0
+$$
+\zeta\left(\frac{1}{2} + it\right) = 0.
+$$
 
 Equivalently, using the Hardy Z-function:
 
-Z(t) = e^{i\theta(t)} \zeta\left(\tfrac{1}{2} + it\right) \in \mathbb{R}
+$$
+Z(t) = e^{i\theta(t)}\zeta\left(\frac{1}{2} + it\right) \in \mathbb{R}.
+$$
 
 Zeros correspond to sign changes:
 
-\[
-Z(t_k) = 0, \quad Z(t_{k^-}) \cdot Z(t_{k^+}) < 0
-\]
+$$
+Z(t_k) = 0,
+\qquad
+Z(t_{k}^{-})Z(t_{k}^{+}) < 0.
+$$
 
 ---
 
 ## DTES formulation
 
-We model the search space as a **tropical energy landscape**:
+We define an energy landscape:
 
-E(t) = -\log |\zeta(\tfrac{1}{2} + it)|
+$$
+E(t) = -\log\left|\zeta\left(\frac{1}{2} + it\right)\right|.
+$$
 
-DTES constructs a piecewise-linear surrogate:
+DTES constructs a piecewise-linear tropical surrogate:
 
-\[
-E_{\text{trop}}(t) = \max_i (a_i t + b_i)
-\]
+$$
+E_{\mathrm{trop}}(t)
+=
+\max_i (a_i t + b_i).
+$$
 
-interpreting zeros as **energy minima / structural transitions**.
-
----
-
-## Algorithm
-
-### Step 1: DTES exploration
-
-Agents (ants) traverse the domain:
-
-\[
-t_{k+1} = t_k + \eta \cdot \nabla_{\text{trop}} E(t_k) + \xi_k
-\]
-
-where:
-- $\nabla_{\text{trop}}$ — tropical gradient
-- $\xi_k$ — stochastic exploration
-
-### Step 2: Candidate set
-
-Define DTES candidate set:
-
-\[
-\mathcal{C} = \{t_i : E(t_i) \text{ locally minimal}\}
-\]
-
-### Step 3: Hybrid refinement
-
-Construct windows:
-
-\[
-W_i = [t_i - w, t_i + w]
-\]
-
-Perform local root-finding inside each window.
+Zeros are interpreted as high-energy attractors or structural transition points in this landscape.
 
 ---
 
-## Main result (empirical)
+## Hybrid recovery theorem
 
 Let:
-- $\mathcal{Z}$ — true zero set
-- $\mathcal{C}$ — DTES candidates
-- $\mathcal{W}$ — hybrid windows
 
-### Theorem (Empirical DTES covering)
+- $\mathcal{Z}$ be the true zero set;
+- $\mathcal{C}$ be the DTES candidate set;
+- $w > 0$ be the hybrid scan half-window.
 
-If DTES produces candidates such that:
+If:
 
-\[
-\forall z \in \mathcal{Z}, \quad \exists c \in \mathcal{C} : |z - c| \le \delta
-\]
+$$
+\forall z \in \mathcal{Z},
+\quad
+\exists c \in \mathcal{C}
+\quad
+\text{such that}
+\quad
+|z-c| \leq \delta,
+$$
 
-then hybrid scan with window size $w \ge \delta$ recovers all zeros:
+then for any $w \geq \delta$, the hybrid scan over
 
-\[
-\text{Recall} = 1.0
-\]
+$$
+\bigcup_{c \in \mathcal{C}} [c-w,c+w]
+$$
+
+recovers all zeros in $\mathcal{Z}$.
 
 ---
 
-## Experimental results
+## Experimental result
 
-Interval: $[100, 160]$
+Fast validation interval:
+
+$$
+[100,160]
+$$
 
 | Metric | Value |
-|------|------|
+|---|---:|
 | True zeros | 29 |
 | DTES candidates | 29 |
 | Hybrid recovered | 29 |
-| Recall | **1.0** |
-| Scan fraction | 0.077 |
-| Speedup | **10–13×** |
-
-Distance distribution:
-
-\[
-\max |z - c| \approx 10^{-14}
-\]
+| Recall | 1.0 |
+| Scanned fraction | 0.077 |
+| Estimated speedup | 10–13x |
 
 ---
 
@@ -128,77 +109,40 @@ Distance distribution:
 
 Full scan:
 
-\[
-O(N)
-\]
+$$
+T_{\mathrm{full}} = O(N).
+$$
 
-Hybrid:
+Hybrid DTES-guided scan:
 
-\[
-O(k \cdot w / h)
-\]
+$$
+T_{\mathrm{hybrid}}
+=
+O\left(\sum_i \frac{2w_i}{h}\right),
+$$
 
 where:
-- $k$ — number of candidates
-- $w$ — window size
-- $h$ — scan step
 
-Empirically:
+- $w_i$ is the local scan half-window;
+- $h$ is the scan step.
 
-\[
-k \ll N \quad \Rightarrow \quad \text{speedup} \sim 10\times
-\]
+If the DTES candidate set is sparse and accurate, then:
 
----
-
-## Interpretation
-
-DTES acts as a **low-dimensional structural prior**:
-
-- zeros are not random
-- they lie on a structured manifold
-- DTES approximates this manifold
+$$
+T_{\mathrm{hybrid}} \ll T_{\mathrm{full}}.
+$$
 
 ---
 
-## Hypothesis
+## Pipeline
 
-> The zero set of $\zeta(1/2 + it)$ admits a compact tropical representation,
-> enabling sublinear search via DTES abstraction.
-
----
-
-## Extensions
-
-- Edge-aware DTES metric
-- Colored multi-agent refinement
-- Adaptive window selection
-- Scaling to $[100, 400]+$
-- Connection to random matrix theory
-
-
----
-
-## Status
-
-- DTES core: stable
-- Hybrid scan: exact
-- Colored ants: experimental
-
----
-
-## Conclusion
-
-We demonstrate that:
-
-\[
-\text{structured exploration} \gg \text{uniform scanning}
-\]
-
-for zero-finding in analytic functions.
-
-This suggests a new paradigm:
-
-> **DTES as a general-purpose search accelerator for implicit mathematical structures**
-
----
+```text
+Ground truth Hardy-Z scan
+        ↓
+DTES core candidate discovery
+        ↓
+Optional colored-ant refinement
+        ↓
+Hybrid local scan
+        ↓
+Distance / recall analysis
