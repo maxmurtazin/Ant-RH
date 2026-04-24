@@ -1,0 +1,75 @@
+{
+  "candidates": [
+    {
+      "rank": 1,
+      "t": 105.44662305232609,
+      "score": 5.033970307108481,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    },
+    {
+      "rank": 2,
+      "t": 114.32022091545272,
+      "score": 5.104267223850381,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    },
+    {
+      "rank": 3,
+      "t": 129.57870419995606,
+      "score": 4.891623672806655,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    },
+    {
+      "rank": 4,
+      "t": 131.08768853093267,
+      "score": 4.8645019851712865,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    },
+    {
+      "rank": 5,
+      "t": 133.4977372029976,
+      "score": 4.808192909020783,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    },
+    {
+      "rank": 6,
+      "t": 139.7362089521214,
+      "score": 4.977639547496142,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    },
+    {
+      "rank": 7,
+      "t": 143.11184580762063,
+      "score": 4.805675859493504,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    },
+    {
+      "rank": 8,
+      "t": 147.42276534255961,
+      "score": 4.826156642811312,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    },
+    {
+      "rank": 9,
+      "t": 150.05352042078488,
+      "score": 4.881246557195094,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    },
+    {
+      "rank": 10,
+      "t": 157.59759181759404,
+      "score": 5.098640890583363,
+      "color_selected": true,
+      "source": "colored_group_ants"
+    }
+  ],
+  "count": 10
+}

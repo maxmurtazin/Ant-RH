@@ -1,0 +1,101 @@
+{
+  "config": {
+    "t_min": 100.0,
+    "t_max": 160.0,
+    "n0": 1200,
+    "ants": 40,
+    "iters": 30,
+    "dps": 50,
+    "target_count": null,
+    "coverage_bins": 64,
+    "exploration_strength": 1.0,
+    "refine_radius": null,
+    "merge_tol": 1e-06,
+    "edge_padding": 2.5,
+    "edge_step": 0.05,
+    "no_tqdm": false,
+    "output": "runs/run_20260424_202518/dtes_candidates.json",
+    "edge_output": "runs/run_20260424_202518/dtes_candidates_edgeaware.json",
+    "anchors_output": "runs/run_20260424_202518/edge_anchors.json",
+    "metrics": "runs/run_20260424_202518/run_metrics_dtes.json"
+  },
+  "grid_step": 0.05004170141784821,
+  "refine_radius": 0.12510425354462051,
+  "pool_size": 29,
+  "selected_count": 29,
+  "merged_core_count": 29,
+  "edge_anchor_count": 102,
+  "timing_records": [
+    {
+      "elapsed_s": 2.1457672119140625e-06,
+      "stage": "START",
+      "message": "clean exploration DTES runner started"
+    },
+    {
+      "elapsed_s": 9.9180748462677,
+      "stage": "GRID",
+      "message": "250/1200",
+      "eta": "32.3s"
+    },
+    {
+      "elapsed_s": 20.87415313720703,
+      "stage": "GRID",
+      "message": "500/1200",
+      "eta": "26.6s"
+    },
+    {
+      "elapsed_s": 32.51665687561035,
+      "stage": "GRID",
+      "message": "750/1200",
+      "eta": "32.6s"
+    },
+    {
+      "elapsed_s": 43.75075697898865,
+      "stage": "GRID",
+      "message": "1000/1200",
+      "eta": "8.9s"
+    },
+    {
+      "elapsed_s": 54.15048885345459,
+      "stage": "GRID",
+      "message": "1200/1200",
+      "eta": "0.0s"
+    },
+    {
+      "elapsed_s": 54.151910066604614,
+      "stage": "GRID",
+      "message": "done",
+      "stage_time": "54.2s"
+    },
+    {
+      "elapsed_s": 54.44441509246826,
+      "stage": "POOL",
+      "message": "candidate pool built",
+      "pool_size": 29,
+      "sign_changes": 29,
+      "minima": 29
+    },
+    {
+      "elapsed_s": 54.49320888519287,
+      "stage": "SELECT",
+      "message": "exploration-aware selection done",
+      "selected": 29,
+      "bins_used": 29
+    },
+    {
+      "elapsed_s": 182.39275097846985,
+      "stage": "REFINE",
+      "message": "29/29",
+      "eta": "0.0s"
+    },
+    {
+      "elapsed_s": 182.39404392242432,
+      "stage": "REFINE",
+      "message": "done",
+      "stage_time": "2.1m"
+    }
+  ],
+  "runtime_s": 182.46183705329895,
+  "core_abs_zeta_min": 5.693782984319461e-16,
+  "core_abs_zeta_max": 1.5355192052874064e-13
+}

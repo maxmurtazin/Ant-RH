@@ -1,0 +1,922 @@
+{
+  "candidates": [
+    {
+      "rank": 1,
+      "t": 100.0,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 2,
+      "t": 100.05,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 3,
+      "t": 100.1,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 4,
+      "t": 100.15,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 5,
+      "t": 100.2,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 6,
+      "t": 100.25,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 7,
+      "t": 100.3,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 8,
+      "t": 100.35,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 9,
+      "t": 100.4,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 10,
+      "t": 100.45,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 11,
+      "t": 100.5,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 12,
+      "t": 100.55,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 13,
+      "t": 100.6,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 14,
+      "t": 100.65,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 15,
+      "t": 100.7,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 16,
+      "t": 100.75,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 17,
+      "t": 100.8,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 18,
+      "t": 100.85,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 19,
+      "t": 100.9,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 20,
+      "t": 100.95,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 21,
+      "t": 101.0,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 22,
+      "t": 101.05,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 23,
+      "t": 101.1,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 24,
+      "t": 101.15,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 25,
+      "t": 101.2,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 26,
+      "t": 101.25,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 27,
+      "t": 101.3,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 28,
+      "t": 101.317851005731,
+      "score": 4.995588249598018,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 29,
+      "t": 101.35,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 30,
+      "t": 101.4,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 31,
+      "t": 101.45,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 32,
+      "t": 101.5,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 33,
+      "t": 101.55,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 34,
+      "t": 101.6,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 35,
+      "t": 101.65,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 36,
+      "t": 101.7,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 37,
+      "t": 101.75,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 38,
+      "t": 101.8,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 39,
+      "t": 101.85,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 40,
+      "t": 101.9,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 41,
+      "t": 101.95,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 42,
+      "t": 102.0,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 43,
+      "t": 102.05,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 44,
+      "t": 102.1,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 45,
+      "t": 102.15,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 46,
+      "t": 102.2,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 47,
+      "t": 102.25,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 48,
+      "t": 102.3,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 49,
+      "t": 102.35,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 50,
+      "t": 102.4,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 51,
+      "t": 102.45,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 52,
+      "t": 102.5,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 53,
+      "t": 103.725538040478,
+      "score": 4.836134175847337,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 54,
+      "t": 105.446623052326,
+      "score": 5.033970307108481,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 55,
+      "t": 107.168611184276,
+      "score": 4.830205527744356,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 56,
+      "t": 111.02953554317,
+      "score": 4.731892845865442,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 57,
+      "t": 111.874659176993,
+      "score": 4.812528473350577,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 58,
+      "t": 114.320220915453,
+      "score": 5.104267223850381,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 59,
+      "t": 116.226680320858,
+      "score": 4.917305559425224,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 60,
+      "t": 118.790782865976,
+      "score": 4.964213824794178,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 61,
+      "t": 121.370125002421,
+      "score": 4.94023943699842,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 62,
+      "t": 122.946829293553,
+      "score": 4.944399817870729,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 63,
+      "t": 124.256818554346,
+      "score": 4.841280770560192,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 64,
+      "t": 127.516683879596,
+      "score": 4.89321530195406,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 65,
+      "t": 129.578704199956,
+      "score": 4.891623672806655,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 66,
+      "t": 131.087688530933,
+      "score": 4.8645019851712865,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 67,
+      "t": 133.497737202998,
+      "score": 4.808192909020783,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 68,
+      "t": 134.756509753374,
+      "score": 4.743756435724136,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 69,
+      "t": 138.116042054533,
+      "score": 4.8191915389411175,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 70,
+      "t": 139.736208952121,
+      "score": 4.977639547496142,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 71,
+      "t": 141.123707404021,
+      "score": 4.9069978170659825,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 72,
+      "t": 143.111845807621,
+      "score": 4.805675859493504,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 73,
+      "t": 146.000982486766,
+      "score": 4.843169391896936,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 74,
+      "t": 147.42276534256,
+      "score": 4.826156642811312,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 75,
+      "t": 150.053520420785,
+      "score": 4.881246557195094,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 76,
+      "t": 150.925257612241,
+      "score": 4.819728136093786,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 77,
+      "t": 153.024693811199,
+      "score": 4.83059642060857,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 78,
+      "t": 156.112909294238,
+      "score": 4.789431952943358,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 79,
+      "t": 157.5,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 80,
+      "t": 157.55,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 81,
+      "t": 157.597591817594,
+      "score": 5.098640890583363,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 82,
+      "t": 157.6,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 83,
+      "t": 157.65,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 84,
+      "t": 157.7,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 85,
+      "t": 157.75,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 86,
+      "t": 157.8,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 87,
+      "t": 157.85,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 88,
+      "t": 157.9,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 89,
+      "t": 157.95,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 90,
+      "t": 158.0,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 91,
+      "t": 158.05,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 92,
+      "t": 158.1,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 93,
+      "t": 158.15,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 94,
+      "t": 158.2,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 95,
+      "t": 158.25,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 96,
+      "t": 158.3,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 97,
+      "t": 158.35,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 98,
+      "t": 158.4,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 99,
+      "t": 158.45,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 100,
+      "t": 158.5,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 101,
+      "t": 158.55,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 102,
+      "t": 158.6,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 103,
+      "t": 158.65,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 104,
+      "t": 158.7,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 105,
+      "t": 158.75,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 106,
+      "t": 158.8,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 107,
+      "t": 158.84998817142,
+      "score": 5.028965713581772,
+      "kind": "core",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 108,
+      "t": 158.85,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 109,
+      "t": 158.9,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 110,
+      "t": 158.95,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 111,
+      "t": 159.0,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 112,
+      "t": 159.05,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 113,
+      "t": 159.1,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 114,
+      "t": 159.15,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 115,
+      "t": 159.2,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 116,
+      "t": 159.25,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 117,
+      "t": 159.3,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 118,
+      "t": 159.35,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 119,
+      "t": 159.4,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 120,
+      "t": 159.45,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 121,
+      "t": 159.5,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 122,
+      "t": 159.55,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 123,
+      "t": 159.6,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 124,
+      "t": 159.65,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 125,
+      "t": 159.7,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 126,
+      "t": 159.75,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 127,
+      "t": 159.8,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 128,
+      "t": 159.85,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 129,
+      "t": 159.9,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 130,
+      "t": 159.95,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    },
+    {
+      "rank": 131,
+      "t": 160.0,
+      "score": 0.0,
+      "kind": "edge_anchor",
+      "source": "fractal_dtes_crosschannel_explore_eta_clean_edgeaware"
+    }
+  ],
+  "count": 131
+}
