@@ -1,0 +1,31 @@
+{
+  "config": {
+    "dtes": "runs/run_20260424_202518/dtes_candidates.json",
+    "t_min": 100.0,
+    "t_max": 160.0,
+    "window": 0.08,
+    "top_k": null,
+    "step": 0.02,
+    "dps": 60,
+    "zero_value_tol": 1e-30,
+    "verify_abs_zeta": 1e-08,
+    "max_bisect_iter": 120,
+    "merge_tol": 1e-07,
+    "progress_every": 1,
+    "out": "runs/run_20260424_202518/hybrid_core"
+  },
+  "runtime_s": 214.03899598121643,
+  "dtes_candidates_in_range": 29,
+  "windows_after_merge": 29,
+  "full_length": 60.0,
+  "hybrid_length": 4.640000000000356,
+  "scanned_fraction": 0.07733333333333926,
+  "estimated_speedup_by_length": 12.93103448275763,
+  "full_points_est": 3001,
+  "hybrid_points_est": 277,
+  "estimated_speedup_by_points": 10.833935018050541,
+  "found_zeros": 29,
+  "verified_zeros": 29,
+  "min_abs_zeta": 1.9604891353351778e-16,
+  "max_abs_zeta": 6.024077039619984e-14
+}
