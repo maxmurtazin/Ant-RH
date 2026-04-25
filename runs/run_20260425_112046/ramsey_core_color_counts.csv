@@ -1,0 +1,5 @@
+color,edge_count,max_clique_size,triangles,clustering_coefficient
+red,144,4,30,0.33923611111111107
+blue,274,4,113,0.346381702287214
+green,107,9,217,0.8584736251402918
+violet,89,2,0,0.0

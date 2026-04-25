@@ -1,0 +1,515 @@
+{
+  "candidates": [
+    {
+      "rank": 1,
+      "t": 150.0,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 2,
+      "t": 150.05,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 3,
+      "t": 150.1,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 4,
+      "t": 150.15,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 5,
+      "t": 150.2,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 6,
+      "t": 150.25,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 7,
+      "t": 150.3,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 8,
+      "t": 150.35,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 9,
+      "t": 150.4,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 10,
+      "t": 150.45,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 11,
+      "t": 150.5,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 12,
+      "t": 150.55,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 13,
+      "t": 150.6,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 14,
+      "t": 150.65,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 15,
+      "t": 150.7,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 16,
+      "t": 150.75,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 17,
+      "t": 150.8,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 18,
+      "t": 150.85,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 19,
+      "t": 150.9,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 20,
+      "t": 150.95,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 21,
+      "t": 151.0,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 22,
+      "t": 151.05,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 23,
+      "t": 151.1,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 24,
+      "t": 151.15,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 25,
+      "t": 151.2,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 26,
+      "t": 151.25,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 27,
+      "t": 151.3,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 28,
+      "t": 151.35,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 29,
+      "t": 151.4,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 30,
+      "t": 151.45,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 31,
+      "t": 151.5,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 32,
+      "t": 151.55,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 33,
+      "t": 151.6,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 34,
+      "t": 151.65,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 35,
+      "t": 151.7,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 36,
+      "t": 151.75,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 37,
+      "t": 151.8,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 38,
+      "t": 151.85,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 39,
+      "t": 151.9,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 40,
+      "t": 151.95,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 41,
+      "t": 152.0,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 42,
+      "t": 152.05,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 43,
+      "t": 152.1,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 44,
+      "t": 152.15,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 45,
+      "t": 152.2,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 46,
+      "t": 152.25,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 47,
+      "t": 152.3,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 48,
+      "t": 152.35,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 49,
+      "t": 152.4,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 50,
+      "t": 152.45,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 51,
+      "t": 152.5,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 52,
+      "t": 447.5,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 53,
+      "t": 447.55,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 54,
+      "t": 447.6,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 55,
+      "t": 447.65,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 56,
+      "t": 447.7,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 57,
+      "t": 447.75,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 58,
+      "t": 447.8,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 59,
+      "t": 447.85,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 60,
+      "t": 447.9,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 61,
+      "t": 447.95,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 62,
+      "t": 448.0,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 63,
+      "t": 448.05,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 64,
+      "t": 448.1,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 65,
+      "t": 448.15,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 66,
+      "t": 448.2,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 67,
+      "t": 448.25,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 68,
+      "t": 448.3,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 69,
+      "t": 448.35,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 70,
+      "t": 448.4,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 71,
+      "t": 448.45,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 72,
+      "t": 448.5,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 73,
+      "t": 448.55,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 74,
+      "t": 448.6,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 75,
+      "t": 448.65,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 76,
+      "t": 448.7,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 77,
+      "t": 448.75,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 78,
+      "t": 448.8,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 79,
+      "t": 448.85,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 80,
+      "t": 448.9,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 81,
+      "t": 448.95,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 82,
+      "t": 449.0,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 83,
+      "t": 449.05,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 84,
+      "t": 449.1,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 85,
+      "t": 449.15,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 86,
+      "t": 449.2,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 87,
+      "t": 449.25,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 88,
+      "t": 449.3,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 89,
+      "t": 449.35,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 90,
+      "t": 449.4,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 91,
+      "t": 449.45,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 92,
+      "t": 449.5,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 93,
+      "t": 449.55,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 94,
+      "t": 449.6,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 95,
+      "t": 449.65,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 96,
+      "t": 449.7,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 97,
+      "t": 449.75,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 98,
+      "t": 449.8,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 99,
+      "t": 449.85,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 100,
+      "t": 449.9,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 101,
+      "t": 449.95,
+      "kind": "edge_anchor"
+    },
+    {
+      "rank": 102,
+      "t": 450.0,
+      "kind": "edge_anchor"
+    }
+  ],
+  "count": 102
+}

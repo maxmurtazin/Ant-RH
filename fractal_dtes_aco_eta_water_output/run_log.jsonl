@@ -1,99 +1,99 @@
-{"time_s": 0.0008080005645751953, "stage": "START", "message": "Fractal-DTES-ACO-Zeta ETA run started"}
-{"time_s": 0.0009229183197021484, "stage": "STAGE", "message": "evaluate_grid started"}
-{"time_s": 1.138246774673462, "stage": "STAGE", "message": "evaluate_grid done", "stage_time": "1.1s"}
-{"time_s": 1.1385219097137451, "stage": "STAGE", "message": "compute_multiscale_features started"}
-{"time_s": 1.8169620037078857, "stage": "STAGE", "message": "compute_multiscale_features done", "stage_time": "0.7s"}
-{"time_s": 1.8171749114990234, "stage": "STAGE", "message": "build_dyadic_tree started"}
-{"time_s": 1.8200109004974365, "stage": "STAGE", "message": "build_dyadic_tree done", "stage_time": "0.0s"}
-{"time_s": 1.8200998306274414, "stage": "STAGE", "message": "aggregate_node_statistics started"}
-{"time_s": 1.8347997665405273, "stage": "STAGE", "message": "aggregate_node_statistics done", "stage_time": "0.0s"}
-{"time_s": 1.8349077701568604, "stage": "STAGE", "message": "build_graph started"}
-{"time_s": 1.8354570865631104, "stage": "STAGE", "message": "build_graph done", "stage_time": "0.0s"}
-{"time_s": 1.8355109691619873, "stage": "STAGE", "message": "compute_node_stability started"}
-{"time_s": 1.8374478816986084, "stage": "STAGE", "message": "compute_node_stability done", "stage_time": "0.0s"}
-{"time_s": 1.8374958038330078, "stage": "STAGE", "message": "initialize_pheromones started"}
-{"time_s": 1.8385238647460938, "stage": "STAGE", "message": "initialize_pheromones done", "stage_time": "0.0s"}
-{"time_s": 1.838566780090332, "stage": "STAGE", "message": "run_aco started"}
-{"time_s": 1.8455910682678223, "stage": "WATER", "message": "water field initialized", "rain": 0.012, "evap": 0.985, "flow": 0.35, "alpha": 2.0}
-{"time_s": 1.8892109394073486, "stage": "ACO+WATER", "message": "iter 1/60", "iter_time": "0.0s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.292", "water_mean": "0.087", "wet_nodes": 10}
-{"time_s": 1.9358508586883545, "stage": "ACO+WATER", "message": "iter 2/60", "iter_time": "0.0s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.208", "water_mean": "0.098", "wet_nodes": 10}
-{"time_s": 1.9869678020477295, "stage": "ACO+WATER", "message": "iter 3/60", "iter_time": "0.1s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.229", "water_mean": "0.109", "wet_nodes": 10}
-{"time_s": 2.0360267162323, "stage": "ACO+WATER", "message": "iter 4/60", "iter_time": "0.0s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.208", "water_mean": "0.119", "wet_nodes": 10}
-{"time_s": 2.0864980220794678, "stage": "ACO+WATER", "message": "iter 5/60", "iter_time": "0.0s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.208", "water_mean": "0.130", "wet_nodes": 10}
-{"time_s": 2.1359059810638428, "stage": "ACO+WATER", "message": "iter 6/60", "iter_time": "0.0s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.229", "water_mean": "0.140", "wet_nodes": 10}
-{"time_s": 2.1841180324554443, "stage": "ACO+WATER", "message": "iter 7/60", "iter_time": "0.0s", "eta": "2.5s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.188", "water_mean": "0.151", "wet_nodes": 10}
-{"time_s": 2.2354648113250732, "stage": "ACO+WATER", "message": "iter 8/60", "iter_time": "0.1s", "eta": "2.5s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.161", "wet_nodes": 10}
-{"time_s": 2.2824487686157227, "stage": "ACO+WATER", "message": "iter 9/60", "iter_time": "0.0s", "eta": "2.4s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.188", "water_mean": "0.171", "wet_nodes": 10}
-{"time_s": 2.331462860107422, "stage": "ACO+WATER", "message": "iter 10/60", "iter_time": "0.0s", "eta": "2.4s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.188", "water_mean": "0.181", "wet_nodes": 10}
-{"time_s": 2.3831937313079834, "stage": "ACO+WATER", "message": "iter 11/60", "iter_time": "0.1s", "eta": "2.4s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.146", "water_mean": "0.191", "wet_nodes": 11}
-{"time_s": 2.4273438453674316, "stage": "ACO+WATER", "message": "iter 12/60", "iter_time": "0.0s", "eta": "2.3s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.167", "water_mean": "0.201", "wet_nodes": 11}
-{"time_s": 2.4732749462127686, "stage": "ACO+WATER", "message": "iter 13/60", "iter_time": "0.0s", "eta": "2.2s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.146", "water_mean": "0.210", "wet_nodes": 11}
-{"time_s": 2.517922878265381, "stage": "ACO+WATER", "message": "iter 14/60", "iter_time": "0.0s", "eta": "2.2s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.167", "water_mean": "0.220", "wet_nodes": 12}
-{"time_s": 2.5658156871795654, "stage": "ACO+WATER", "message": "iter 15/60", "iter_time": "0.0s", "eta": "2.1s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.208", "water_mean": "0.229", "wet_nodes": 12}
-{"time_s": 2.608912944793701, "stage": "ACO+WATER", "message": "iter 16/60", "iter_time": "0.0s", "eta": "2.0s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.146", "water_mean": "0.238", "wet_nodes": 13}
-{"time_s": 2.6564218997955322, "stage": "ACO+WATER", "message": "iter 17/60", "iter_time": "0.0s", "eta": "2.0s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.146", "water_mean": "0.248", "wet_nodes": 13}
-{"time_s": 2.701591730117798, "stage": "ACO+WATER", "message": "iter 18/60", "iter_time": "0.0s", "eta": "1.9s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.208", "water_mean": "0.257", "wet_nodes": 13}
-{"time_s": 2.74660587310791, "stage": "ACO+WATER", "message": "iter 19/60", "iter_time": "0.0s", "eta": "1.9s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.266", "wet_nodes": 13}
-{"time_s": 2.7932538986206055, "stage": "ACO+WATER", "message": "iter 20/60", "iter_time": "0.0s", "eta": "1.8s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.274", "wet_nodes": 13}
-{"time_s": 2.8388419151306152, "stage": "ACO+WATER", "message": "iter 21/60", "iter_time": "0.0s", "eta": "1.8s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.283", "wet_nodes": 13}
-{"time_s": 2.8866658210754395, "stage": "ACO+WATER", "message": "iter 22/60", "iter_time": "0.0s", "eta": "1.8s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.292", "wet_nodes": 13}
-{"time_s": 2.9324958324432373, "stage": "ACO+WATER", "message": "iter 23/60", "iter_time": "0.0s", "eta": "1.7s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.167", "water_mean": "0.300", "wet_nodes": 13}
-{"time_s": 2.9742519855499268, "stage": "ACO+WATER", "message": "iter 24/60", "iter_time": "0.0s", "eta": "1.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.309", "wet_nodes": 14}
-{"time_s": 3.018317699432373, "stage": "ACO+WATER", "message": "iter 25/60", "iter_time": "0.0s", "eta": "1.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.317", "wet_nodes": 16}
-{"time_s": 3.0613560676574707, "stage": "ACO+WATER", "message": "iter 26/60", "iter_time": "0.0s", "eta": "1.5s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.325", "wet_nodes": 18}
-{"time_s": 3.106905698776245, "stage": "ACO+WATER", "message": "iter 27/60", "iter_time": "0.0s", "eta": "1.5s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.167", "water_mean": "0.333", "wet_nodes": 18}
-{"time_s": 3.1506707668304443, "stage": "ACO+WATER", "message": "iter 28/60", "iter_time": "0.0s", "eta": "1.4s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.146", "water_mean": "0.341", "wet_nodes": 19}
-{"time_s": 3.196631669998169, "stage": "ACO+WATER", "message": "iter 29/60", "iter_time": "0.0s", "eta": "1.4s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.146", "water_mean": "0.349", "wet_nodes": 19}
-{"time_s": 3.2435860633850098, "stage": "ACO+WATER", "message": "iter 30/60", "iter_time": "0.0s", "eta": "1.4s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.357", "wet_nodes": 19}
-{"time_s": 3.287463903427124, "stage": "ACO+WATER", "message": "iter 31/60", "iter_time": "0.0s", "eta": "1.3s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.146", "water_mean": "0.365", "wet_nodes": 19}
-{"time_s": 3.33223295211792, "stage": "ACO+WATER", "message": "iter 32/60", "iter_time": "0.0s", "eta": "1.3s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.373", "wet_nodes": 19}
-{"time_s": 3.3751957416534424, "stage": "ACO+WATER", "message": "iter 33/60", "iter_time": "0.0s", "eta": "1.2s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.380", "wet_nodes": 19}
-{"time_s": 3.417843818664551, "stage": "ACO+WATER", "message": "iter 34/60", "iter_time": "0.0s", "eta": "1.1s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.188", "water_mean": "0.388", "wet_nodes": 19}
-{"time_s": 3.4633290767669678, "stage": "ACO+WATER", "message": "iter 35/60", "iter_time": "0.0s", "eta": "1.1s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.146", "water_mean": "0.395", "wet_nodes": 19}
-{"time_s": 3.507399797439575, "stage": "ACO+WATER", "message": "iter 36/60", "iter_time": "0.0s", "eta": "1.1s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.402", "wet_nodes": 20}
-{"time_s": 3.552819013595581, "stage": "ACO+WATER", "message": "iter 37/60", "iter_time": "0.0s", "eta": "1.0s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.104", "water_mean": "0.409", "wet_nodes": 20}
-{"time_s": 3.5990638732910156, "stage": "ACO+WATER", "message": "iter 38/60", "iter_time": "0.0s", "eta": "1.0s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.167", "water_mean": "0.417", "wet_nodes": 21}
-{"time_s": 3.6433987617492676, "stage": "ACO+WATER", "message": "iter 39/60", "iter_time": "0.0s", "eta": "0.9s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.424", "wet_nodes": 23}
-{"time_s": 3.6837868690490723, "stage": "ACO+WATER", "message": "iter 40/60", "iter_time": "0.0s", "eta": "0.9s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.430", "wet_nodes": 24}
-{"time_s": 3.725250720977783, "stage": "ACO+WATER", "message": "iter 41/60", "iter_time": "0.0s", "eta": "0.8s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.104", "water_mean": "0.437", "wet_nodes": 24}
-{"time_s": 3.7686500549316406, "stage": "ACO+WATER", "message": "iter 42/60", "iter_time": "0.0s", "eta": "0.8s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.083", "water_mean": "0.444", "wet_nodes": 24}
-{"time_s": 3.813046932220459, "stage": "ACO+WATER", "message": "iter 43/60", "iter_time": "0.0s", "eta": "0.7s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.083", "water_mean": "0.451", "wet_nodes": 24}
-{"time_s": 3.8581650257110596, "stage": "ACO+WATER", "message": "iter 44/60", "iter_time": "0.0s", "eta": "0.7s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.457", "wet_nodes": 24}
-{"time_s": 3.903568744659424, "stage": "ACO+WATER", "message": "iter 45/60", "iter_time": "0.0s", "eta": "0.7s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.167", "water_mean": "0.464", "wet_nodes": 24}
-{"time_s": 3.947558879852295, "stage": "ACO+WATER", "message": "iter 46/60", "iter_time": "0.0s", "eta": "0.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.146", "water_mean": "0.470", "wet_nodes": 24}
-{"time_s": 3.994255781173706, "stage": "ACO+WATER", "message": "iter 47/60", "iter_time": "0.0s", "eta": "0.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.104", "water_mean": "0.477", "wet_nodes": 24}
-{"time_s": 4.037873983383179, "stage": "ACO+WATER", "message": "iter 48/60", "iter_time": "0.0s", "eta": "0.5s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.483", "wet_nodes": 24}
-{"time_s": 4.080887794494629, "stage": "ACO+WATER", "message": "iter 49/60", "iter_time": "0.0s", "eta": "0.5s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.489", "wet_nodes": 24}
-{"time_s": 4.124422788619995, "stage": "ACO+WATER", "message": "iter 50/60", "iter_time": "0.0s", "eta": "0.4s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.083", "water_mean": "0.495", "wet_nodes": 24}
-{"time_s": 4.167202711105347, "stage": "ACO+WATER", "message": "iter 51/60", "iter_time": "0.0s", "eta": "0.4s", "best_E": "-7.5236", "max_score": "1852.1", "diversity": "0.125", "water_mean": "0.501", "wet_nodes": 24}
-{"time_s": 4.207706928253174, "stage": "ACO+WATER", "message": "iter 52/60", "iter_time": "0.0s", "eta": "0.3s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.507", "wet_nodes": 24}
-{"time_s": 4.254757881164551, "stage": "ACO+WATER", "message": "iter 53/60", "iter_time": "0.0s", "eta": "0.3s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.188", "water_mean": "0.513", "wet_nodes": 24}
-{"time_s": 4.299264907836914, "stage": "ACO+WATER", "message": "iter 54/60", "iter_time": "0.0s", "eta": "0.3s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.125", "water_mean": "0.519", "wet_nodes": 24}
-{"time_s": 4.33978796005249, "stage": "ACO+WATER", "message": "iter 55/60", "iter_time": "0.0s", "eta": "0.2s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.104", "water_mean": "0.525", "wet_nodes": 24}
-{"time_s": 4.388183832168579, "stage": "ACO+WATER", "message": "iter 56/60", "iter_time": "0.0s", "eta": "0.2s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.104", "water_mean": "0.531", "wet_nodes": 25}
-{"time_s": 4.433542966842651, "stage": "ACO+WATER", "message": "iter 57/60", "iter_time": "0.0s", "eta": "0.1s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.104", "water_mean": "0.536", "wet_nodes": 25}
-{"time_s": 4.476331949234009, "stage": "ACO+WATER", "message": "iter 58/60", "iter_time": "0.0s", "eta": "0.1s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.104", "water_mean": "0.542", "wet_nodes": 25}
-{"time_s": 4.522506952285767, "stage": "ACO+WATER", "message": "iter 59/60", "iter_time": "0.0s", "eta": "0.0s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.104", "water_mean": "0.548", "wet_nodes": 25}
-{"time_s": 4.566754102706909, "stage": "ACO+WATER", "message": "iter 60/60", "iter_time": "0.0s", "eta": "0.0s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.104", "water_mean": "0.553", "wet_nodes": 25}
-{"time_s": 4.56692099571228, "stage": "STAGE", "message": "run_aco done", "stage_time": "2.7s"}
-{"time_s": 4.566994905471802, "stage": "STAGE", "message": "rank_candidate_nodes started"}
-{"time_s": 4.567428827285767, "stage": "STAGE", "message": "rank_candidate_nodes done", "stage_time": "0.0s"}
-{"time_s": 4.5674889087677, "stage": "STAGE", "message": "refine_candidates started"}
-{"time_s": 4.672450065612793, "stage": "REFINE", "message": "candidate 1/16", "iter_time": "0.1s", "eta": "1.6s", "accepted": 0}
-{"time_s": 4.776026725769043, "stage": "REFINE", "message": "candidate 2/16", "iter_time": "0.1s", "eta": "1.5s", "accepted": 1}
-{"time_s": 4.892890930175781, "stage": "REFINE", "message": "candidate 3/16", "iter_time": "0.1s", "eta": "1.4s", "accepted": 1}
-{"time_s": 5.0064568519592285, "stage": "REFINE", "message": "candidate 4/16", "iter_time": "0.1s", "eta": "1.3s", "accepted": 1}
-{"time_s": 5.104413986206055, "stage": "REFINE", "message": "candidate 5/16", "iter_time": "0.1s", "eta": "1.2s", "accepted": 1}
-{"time_s": 5.202861785888672, "stage": "REFINE", "message": "candidate 6/16", "iter_time": "0.1s", "eta": "1.0s", "accepted": 1}
-{"time_s": 5.309217929840088, "stage": "REFINE", "message": "candidate 7/16", "iter_time": "0.1s", "eta": "0.9s", "accepted": 1}
-{"time_s": 5.418570041656494, "stage": "REFINE", "message": "candidate 8/16", "iter_time": "0.1s", "eta": "0.8s", "accepted": 1}
-{"time_s": 5.535772800445557, "stage": "REFINE", "message": "candidate 9/16", "iter_time": "0.1s", "eta": "0.8s", "accepted": 1}
-{"time_s": 5.647572040557861, "stage": "REFINE", "message": "candidate 10/16", "iter_time": "0.1s", "eta": "0.7s", "accepted": 1}
-{"time_s": 5.767561912536621, "stage": "REFINE", "message": "candidate 11/16", "iter_time": "0.1s", "eta": "0.6s", "accepted": 1}
-{"time_s": 5.886722087860107, "stage": "REFINE", "message": "candidate 12/16", "iter_time": "0.1s", "eta": "0.5s", "accepted": 1}
-{"time_s": 5.991374731063843, "stage": "REFINE", "message": "candidate 13/16", "iter_time": "0.1s", "eta": "0.3s", "accepted": 1}
-{"time_s": 6.096226692199707, "stage": "REFINE", "message": "candidate 14/16", "iter_time": "0.1s", "eta": "0.2s", "accepted": 1}
-{"time_s": 6.201556921005249, "stage": "REFINE", "message": "candidate 15/16", "iter_time": "0.1s", "eta": "0.1s", "accepted": 1}
-{"time_s": 6.30947470664978, "stage": "REFINE", "message": "candidate 16/16", "iter_time": "0.1s", "eta": "0.0s", "accepted": 1}
-{"time_s": 6.309723854064941, "stage": "STAGE", "message": "refine_candidates done", "stage_time": "1.7s"}
-{"time_s": 6.8900086879730225, "stage": "DONE", "message": "run completed", "candidates": 1, "total_time": "6.9s"}
+{"time_s": 0.00020503997802734375, "stage": "START", "message": "Fractal-DTES-ACO-Zeta ETA run started"}
+{"time_s": 0.0003237724304199219, "stage": "STAGE", "message": "evaluate_grid started"}
+{"time_s": 1.135991096496582, "stage": "STAGE", "message": "evaluate_grid done", "stage_time": "1.1s"}
+{"time_s": 1.1363139152526855, "stage": "STAGE", "message": "compute_multiscale_features started"}
+{"time_s": 1.8380138874053955, "stage": "STAGE", "message": "compute_multiscale_features done", "stage_time": "0.7s"}
+{"time_s": 1.8382668495178223, "stage": "STAGE", "message": "build_dyadic_tree started"}
+{"time_s": 1.8408408164978027, "stage": "STAGE", "message": "build_dyadic_tree done", "stage_time": "0.0s"}
+{"time_s": 1.8409290313720703, "stage": "STAGE", "message": "aggregate_node_statistics started"}
+{"time_s": 1.8565146923065186, "stage": "STAGE", "message": "aggregate_node_statistics done", "stage_time": "0.0s"}
+{"time_s": 1.8566498756408691, "stage": "STAGE", "message": "build_graph started"}
+{"time_s": 1.8589019775390625, "stage": "STAGE", "message": "build_graph done", "stage_time": "0.0s"}
+{"time_s": 1.8589797019958496, "stage": "STAGE", "message": "compute_node_stability started"}
+{"time_s": 1.8609378337860107, "stage": "STAGE", "message": "compute_node_stability done", "stage_time": "0.0s"}
+{"time_s": 1.8609929084777832, "stage": "STAGE", "message": "initialize_pheromones started"}
+{"time_s": 1.862097978591919, "stage": "STAGE", "message": "initialize_pheromones done", "stage_time": "0.0s"}
+{"time_s": 1.862185001373291, "stage": "STAGE", "message": "run_aco started"}
+{"time_s": 1.8664240837097168, "stage": "WATER", "message": "water field initialized", "rain": 0.012, "evap": 0.985, "flow": 0.35, "alpha": 2.0}
+{"time_s": 1.9112629890441895, "stage": "ACO+WATER", "message": "iter 1/60", "iter_time": "0.0s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.292", "water_mean": "0.069", "wet_nodes": 9}
+{"time_s": 1.959744930267334, "stage": "ACO+WATER", "message": "iter 2/60", "iter_time": "0.0s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.208", "water_mean": "0.063", "wet_nodes": 5}
+{"time_s": 2.0113677978515625, "stage": "ACO+WATER", "message": "iter 3/60", "iter_time": "0.1s", "eta": "2.7s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.229", "water_mean": "0.058", "wet_nodes": 4}
+{"time_s": 2.064114809036255, "stage": "ACO+WATER", "message": "iter 4/60", "iter_time": "0.1s", "eta": "2.7s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.208", "water_mean": "0.054", "wet_nodes": 3}
+{"time_s": 2.1174068450927734, "stage": "ACO+WATER", "message": "iter 5/60", "iter_time": "0.1s", "eta": "2.7s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.208", "water_mean": "0.050", "wet_nodes": 3}
+{"time_s": 2.170097827911377, "stage": "ACO+WATER", "message": "iter 6/60", "iter_time": "0.1s", "eta": "2.7s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.229", "water_mean": "0.047", "wet_nodes": 2}
+{"time_s": 2.221137762069702, "stage": "ACO+WATER", "message": "iter 7/60", "iter_time": "0.1s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1852", "diversity": "0.188", "water_mean": "0.044", "wet_nodes": 2}
+{"time_s": 2.2730958461761475, "stage": "ACO+WATER", "message": "iter 8/60", "iter_time": "0.1s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.042", "wet_nodes": 2}
+{"time_s": 2.3242969512939453, "stage": "ACO+WATER", "message": "iter 9/60", "iter_time": "0.1s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.208", "water_mean": "0.040", "wet_nodes": 2}
+{"time_s": 2.374448776245117, "stage": "ACO+WATER", "message": "iter 10/60", "iter_time": "0.0s", "eta": "2.5s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.167", "water_mean": "0.039", "wet_nodes": 2}
+{"time_s": 2.4225809574127197, "stage": "ACO+WATER", "message": "iter 11/60", "iter_time": "0.0s", "eta": "2.4s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.188", "water_mean": "0.037", "wet_nodes": 2}
+{"time_s": 2.4734508991241455, "stage": "ACO+WATER", "message": "iter 12/60", "iter_time": "0.1s", "eta": "2.4s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.036", "wet_nodes": 2}
+{"time_s": 2.5212268829345703, "stage": "ACO+WATER", "message": "iter 13/60", "iter_time": "0.0s", "eta": "2.3s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.125", "water_mean": "0.035", "wet_nodes": 2}
+{"time_s": 2.570965051651001, "stage": "ACO+WATER", "message": "iter 14/60", "iter_time": "0.0s", "eta": "2.3s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.167", "water_mean": "0.034", "wet_nodes": 2}
+{"time_s": 2.6225368976593018, "stage": "ACO+WATER", "message": "iter 15/60", "iter_time": "0.1s", "eta": "2.2s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.034", "wet_nodes": 2}
+{"time_s": 2.6735849380493164, "stage": "ACO+WATER", "message": "iter 16/60", "iter_time": "0.1s", "eta": "2.2s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.208", "water_mean": "0.033", "wet_nodes": 2}
+{"time_s": 2.7221367359161377, "stage": "ACO+WATER", "message": "iter 17/60", "iter_time": "0.0s", "eta": "2.1s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.033", "wet_nodes": 2}
+{"time_s": 2.7715978622436523, "stage": "ACO+WATER", "message": "iter 18/60", "iter_time": "0.0s", "eta": "2.1s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.167", "water_mean": "0.032", "wet_nodes": 2}
+{"time_s": 2.8232860565185547, "stage": "ACO+WATER", "message": "iter 19/60", "iter_time": "0.1s", "eta": "2.0s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.167", "water_mean": "0.032", "wet_nodes": 2}
+{"time_s": 2.872248888015747, "stage": "ACO+WATER", "message": "iter 20/60", "iter_time": "0.0s", "eta": "2.0s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.032", "wet_nodes": 2}
+{"time_s": 2.9223108291625977, "stage": "ACO+WATER", "message": "iter 21/60", "iter_time": "0.0s", "eta": "1.9s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.125", "water_mean": "0.031", "wet_nodes": 2}
+{"time_s": 2.9720540046691895, "stage": "ACO+WATER", "message": "iter 22/60", "iter_time": "0.0s", "eta": "1.9s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.167", "water_mean": "0.031", "wet_nodes": 2}
+{"time_s": 3.018965005874634, "stage": "ACO+WATER", "message": "iter 23/60", "iter_time": "0.0s", "eta": "1.8s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.125", "water_mean": "0.031", "wet_nodes": 2}
+{"time_s": 3.064976930618286, "stage": "ACO+WATER", "message": "iter 24/60", "iter_time": "0.0s", "eta": "1.7s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.188", "water_mean": "0.031", "wet_nodes": 2}
+{"time_s": 3.113135814666748, "stage": "ACO+WATER", "message": "iter 25/60", "iter_time": "0.0s", "eta": "1.7s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.031", "wet_nodes": 2}
+{"time_s": 3.162172794342041, "stage": "ACO+WATER", "message": "iter 26/60", "iter_time": "0.0s", "eta": "1.6s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.125", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.207462787628174, "stage": "ACO+WATER", "message": "iter 27/60", "iter_time": "0.0s", "eta": "1.6s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.188", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.2542951107025146, "stage": "ACO+WATER", "message": "iter 28/60", "iter_time": "0.0s", "eta": "1.5s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.300985813140869, "stage": "ACO+WATER", "message": "iter 29/60", "iter_time": "0.0s", "eta": "1.5s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.146", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.346745729446411, "stage": "ACO+WATER", "message": "iter 30/60", "iter_time": "0.0s", "eta": "1.4s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.3939099311828613, "stage": "ACO+WATER", "message": "iter 31/60", "iter_time": "0.0s", "eta": "1.4s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.125", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.440903902053833, "stage": "ACO+WATER", "message": "iter 32/60", "iter_time": "0.0s", "eta": "1.3s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.485773801803589, "stage": "ACO+WATER", "message": "iter 33/60", "iter_time": "0.0s", "eta": "1.3s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.533064842224121, "stage": "ACO+WATER", "message": "iter 34/60", "iter_time": "0.0s", "eta": "1.2s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.580559730529785, "stage": "ACO+WATER", "message": "iter 35/60", "iter_time": "0.0s", "eta": "1.2s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.6276190280914307, "stage": "ACO+WATER", "message": "iter 36/60", "iter_time": "0.0s", "eta": "1.1s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.673795700073242, "stage": "ACO+WATER", "message": "iter 37/60", "iter_time": "0.0s", "eta": "1.1s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.7203989028930664, "stage": "ACO+WATER", "message": "iter 38/60", "iter_time": "0.0s", "eta": "1.0s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.766221761703491, "stage": "ACO+WATER", "message": "iter 39/60", "iter_time": "0.0s", "eta": "1.0s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.8124029636383057, "stage": "ACO+WATER", "message": "iter 40/60", "iter_time": "0.0s", "eta": "0.9s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.8619210720062256, "stage": "ACO+WATER", "message": "iter 41/60", "iter_time": "0.0s", "eta": "0.9s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.125", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.9068050384521484, "stage": "ACO+WATER", "message": "iter 42/60", "iter_time": "0.0s", "eta": "0.8s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.9513299465179443, "stage": "ACO+WATER", "message": "iter 43/60", "iter_time": "0.0s", "eta": "0.8s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 3.9995529651641846, "stage": "ACO+WATER", "message": "iter 44/60", "iter_time": "0.0s", "eta": "0.7s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.047629117965698, "stage": "ACO+WATER", "message": "iter 45/60", "iter_time": "0.0s", "eta": "0.7s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.125", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.093816041946411, "stage": "ACO+WATER", "message": "iter 46/60", "iter_time": "0.0s", "eta": "0.7s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.142528057098389, "stage": "ACO+WATER", "message": "iter 47/60", "iter_time": "0.0s", "eta": "0.6s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.185214996337891, "stage": "ACO+WATER", "message": "iter 48/60", "iter_time": "0.0s", "eta": "0.6s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.228551864624023, "stage": "ACO+WATER", "message": "iter 49/60", "iter_time": "0.0s", "eta": "0.5s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.062", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.27676796913147, "stage": "ACO+WATER", "message": "iter 50/60", "iter_time": "0.0s", "eta": "0.5s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.319661855697632, "stage": "ACO+WATER", "message": "iter 51/60", "iter_time": "0.0s", "eta": "0.4s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.3630499839782715, "stage": "ACO+WATER", "message": "iter 52/60", "iter_time": "0.0s", "eta": "0.4s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.411592960357666, "stage": "ACO+WATER", "message": "iter 53/60", "iter_time": "0.0s", "eta": "0.3s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.458213806152344, "stage": "ACO+WATER", "message": "iter 54/60", "iter_time": "0.0s", "eta": "0.3s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.5059120655059814, "stage": "ACO+WATER", "message": "iter 55/60", "iter_time": "0.0s", "eta": "0.2s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.553741693496704, "stage": "ACO+WATER", "message": "iter 56/60", "iter_time": "0.0s", "eta": "0.2s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.599534749984741, "stage": "ACO+WATER", "message": "iter 57/60", "iter_time": "0.0s", "eta": "0.1s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.6459877490997314, "stage": "ACO+WATER", "message": "iter 58/60", "iter_time": "0.0s", "eta": "0.1s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.104", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.692652940750122, "stage": "ACO+WATER", "message": "iter 59/60", "iter_time": "0.0s", "eta": "0.0s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.083", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.738151788711548, "stage": "ACO+WATER", "message": "iter 60/60", "iter_time": "0.0s", "eta": "0.0s", "best_E": "-7.5236", "max_score": "1851.9", "diversity": "0.062", "water_mean": "0.030", "wet_nodes": 2}
+{"time_s": 4.738293886184692, "stage": "STAGE", "message": "run_aco done", "stage_time": "2.9s"}
+{"time_s": 4.738382816314697, "stage": "STAGE", "message": "rank_candidate_nodes started"}
+{"time_s": 4.73881983757019, "stage": "STAGE", "message": "rank_candidate_nodes done", "stage_time": "0.0s"}
+{"time_s": 4.73889684677124, "stage": "STAGE", "message": "refine_candidates started"}
+{"time_s": 4.843443870544434, "stage": "REFINE", "message": "candidate 1/16", "iter_time": "0.1s", "eta": "1.6s", "accepted": 0}
+{"time_s": 4.949815034866333, "stage": "REFINE", "message": "candidate 2/16", "iter_time": "0.1s", "eta": "1.5s", "accepted": 1}
+{"time_s": 5.066582918167114, "stage": "REFINE", "message": "candidate 3/16", "iter_time": "0.1s", "eta": "1.4s", "accepted": 1}
+{"time_s": 5.164108037948608, "stage": "REFINE", "message": "candidate 4/16", "iter_time": "0.1s", "eta": "1.3s", "accepted": 1}
+{"time_s": 5.280034065246582, "stage": "REFINE", "message": "candidate 5/16", "iter_time": "0.1s", "eta": "1.2s", "accepted": 1}
+{"time_s": 5.426459789276123, "stage": "REFINE", "message": "candidate 6/16", "iter_time": "0.1s", "eta": "1.1s", "accepted": 1}
+{"time_s": 5.5341949462890625, "stage": "REFINE", "message": "candidate 7/16", "iter_time": "0.1s", "eta": "1.0s", "accepted": 1}
+{"time_s": 5.642261028289795, "stage": "REFINE", "message": "candidate 8/16", "iter_time": "0.1s", "eta": "0.9s", "accepted": 1}
+{"time_s": 5.756314754486084, "stage": "REFINE", "message": "candidate 9/16", "iter_time": "0.1s", "eta": "0.8s", "accepted": 1}
+{"time_s": 5.872291088104248, "stage": "REFINE", "message": "candidate 10/16", "iter_time": "0.1s", "eta": "0.7s", "accepted": 1}
+{"time_s": 6.006192922592163, "stage": "REFINE", "message": "candidate 11/16", "iter_time": "0.1s", "eta": "0.6s", "accepted": 1}
+{"time_s": 6.125420093536377, "stage": "REFINE", "message": "candidate 12/16", "iter_time": "0.1s", "eta": "0.5s", "accepted": 1}
+{"time_s": 6.23124885559082, "stage": "REFINE", "message": "candidate 13/16", "iter_time": "0.1s", "eta": "0.3s", "accepted": 1}
+{"time_s": 6.337238073348999, "stage": "REFINE", "message": "candidate 14/16", "iter_time": "0.1s", "eta": "0.2s", "accepted": 1}
+{"time_s": 6.445642948150635, "stage": "REFINE", "message": "candidate 15/16", "iter_time": "0.1s", "eta": "0.1s", "accepted": 1}
+{"time_s": 6.5533058643341064, "stage": "REFINE", "message": "candidate 16/16", "iter_time": "0.1s", "eta": "0.0s", "accepted": 1}
+{"time_s": 6.553467750549316, "stage": "STAGE", "message": "refine_candidates done", "stage_time": "1.8s"}
+{"time_s": 6.962171792984009, "stage": "DONE", "message": "run completed", "candidates": 1, "total_time": "7.0s"}

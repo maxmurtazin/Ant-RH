@@ -1,0 +1,65 @@
+{
+  "config": {
+    "t_min": 150.0,
+    "t_max": 450.0,
+    "n0": 2500,
+    "ants": 100,
+    "iters": 120,
+    "dps": 50,
+    "target_count": null,
+    "coverage_bins": 64,
+    "exploration_strength": 1.0,
+    "refine_radius": null,
+    "merge_tol": 1e-06,
+    "edge_padding": 2.5,
+    "edge_step": 0.05,
+    "no_tqdm": false,
+    "output": "runs/run_20260425_112046/dtes_candidates.json",
+    "edge_output": "runs/run_20260425_112046/dtes_candidates_edgeaware.json",
+    "anchors_output": "runs/run_20260425_112046/edge_anchors.json",
+    "metrics": "runs/run_20260425_112046/run_metrics_dtes.json"
+  },
+  "grid_step": 0.12004801920768307,
+  "refine_radius": 0.30012004801920766,
+  "pool_size": 183,
+  "selected_count": 183,
+  "merged_core_count": 183,
+  "edge_anchor_count": 102,
+  "timing_records": [
+    {
+      "elapsed_s": 0.0,
+      "stage": "START",
+      "message": "clean exploration DTES runner started"
+    },
+    {
+      "elapsed_s": 11.44856595993042,
+      "stage": "GRID",
+      "message": "done",
+      "stage_time": "11.4s"
+    },
+    {
+      "elapsed_s": 11.470627069473267,
+      "stage": "POOL",
+      "message": "candidate pool built",
+      "pool_size": 183,
+      "sign_changes": 183,
+      "minima": 182
+    },
+    {
+      "elapsed_s": 11.511433839797974,
+      "stage": "SELECT",
+      "message": "exploration-aware selection done",
+      "selected": 183,
+      "bins_used": 64
+    },
+    {
+      "elapsed_s": 138.03061604499817,
+      "stage": "REFINE",
+      "message": "done",
+      "stage_time": "2.1m"
+    }
+  ],
+  "runtime_s": 138.03361082077026,
+  "core_abs_zeta_min": 5.089319456031664e-17,
+  "core_abs_zeta_max": 4.660730757113867e-13
+}

@@ -1,0 +1,782 @@
+{
+  "config": {
+    "candidates": "runs/run_20260425_112046/dtes_candidates.json",
+    "t_min": 100.0,
+    "t_max": 400.0,
+    "k_neighbors": 8,
+    "radius": null,
+    "boundary_fraction": 0.08,
+    "n_perm": 500,
+    "seed": 7,
+    "max_nodes_for_exact": 80,
+    "out": "runs/run_20260425_112046/ramsey_core",
+    "no_plots": false
+  },
+  "global_stats": {
+    "max_clique_size": 9,
+    "max_mono_clique_size": 9,
+    "ramsey_score": 0.06,
+    "n_nodes": 150,
+    "n_edges": 614
+  },
+  "color_stats": {
+    "red": {
+      "edge_count": 144,
+      "max_clique_size": 4,
+      "triangles": 30,
+      "clustering_coefficient": 0.33923611111111107,
+      "top_cliques": [
+        {
+          "rank": 1,
+          "color": "red",
+          "size": 4,
+          "node_indices": "118 120 121 122",
+          "t_min": 351.8786490253593,
+          "t_max": 357.95268510163226,
+          "diameter_t": 6.074036076272932
+        },
+        {
+          "rank": 2,
+          "color": "red",
+          "size": 4,
+          "node_indices": "120 121 122 124",
+          "t_min": 356.017574977265,
+          "t_max": 361.2893616958047,
+          "diameter_t": 5.271786718539715
+        },
+        {
+          "rank": 3,
+          "color": "red",
+          "size": 3,
+          "node_indices": "12 14 15",
+          "t_min": 173.41153651959155,
+          "t_max": 178.37740777609997,
+          "diameter_t": 4.9658712565084215
+        },
+        {
+          "rank": 4,
+          "color": "red",
+          "size": 3,
+          "node_indices": "16 18 19",
+          "t_min": 179.91648402025697,
+          "t_max": 185.5987836777075,
+          "diameter_t": 5.682299657450528
+        },
+        {
+          "rank": 5,
+          "color": "red",
+          "size": 3,
+          "node_indices": "20 21 23",
+          "t_min": 187.22892258350186,
+          "t_max": 193.0797266038457,
+          "diameter_t": 5.850804020343844
+        },
+        {
+          "rank": 6,
+          "color": "red",
+          "size": 3,
+          "node_indices": "22 24 26",
+          "t_min": 192.0266563607138,
+          "t_max": 198.0153096762519,
+          "diameter_t": 5.988653315538102
+        },
+        {
+          "rank": 7,
+          "color": "red",
+          "size": 3,
+          "node_indices": "44 46 47",
+          "t_min": 231.25018870049917,
+          "t_max": 236.52422966581622,
+          "diameter_t": 5.274040965317056
+        },
+        {
+          "rank": 8,
+          "color": "red",
+          "size": 3,
+          "node_indices": "57 59 60",
+          "t_min": 253.06998674799945,
+          "t_max": 258.61043949153134,
+          "diameter_t": 5.540452743531887
+        },
+        {
+          "rank": 9,
+          "color": "red",
+          "size": 3,
+          "node_indices": "65 66 67",
+          "t_min": 266.614973781501,
+          "t_max": 269.9704490239976,
+          "diameter_t": 3.3554752424965955
+        },
+        {
+          "rank": 10,
+          "color": "red",
+          "size": 3,
+          "node_indices": "70 71 73",
+          "t_min": 275.58749264934386,
+          "t_max": 279.22925092774517,
+          "diameter_t": 3.641758278401312
+        },
+        {
+          "rank": 11,
+          "color": "red",
+          "size": 3,
+          "node_indices": "71 73 74",
+          "t_min": 276.4520495031329,
+          "t_max": 282.465114765052,
+          "diameter_t": 6.01306526191911
+        },
+        {
+          "rank": 12,
+          "color": "red",
+          "size": 3,
+          "node_indices": "85 87 88",
+          "t_min": 299.84032605372136,
+          "t_max": 304.86437134085725,
+          "diameter_t": 5.024045287135891
+        },
+        {
+          "rank": 13,
+          "color": "red",
+          "size": 3,
+          "node_indices": "96 99 100",
+          "t_min": 317.73480594237014,
+          "t_max": 323.466969557512,
+          "diameter_t": 5.732163615141872
+        },
+        {
+          "rank": 14,
+          "color": "red",
+          "size": 3,
+          "node_indices": "97 98 101",
+          "t_min": 318.85310425631656,
+          "t_max": 324.8628660517396,
+          "diameter_t": 6.00976179542306
+        },
+        {
+          "rank": 15,
+          "color": "red",
+          "size": 3,
+          "node_indices": "108 110 112",
+          "t_min": 336.84185042839067,
+          "t_max": 342.05487751036355,
+          "diameter_t": 5.213027081972882
+        },
+        {
+          "rank": 16,
+          "color": "red",
+          "size": 3,
+          "node_indices": "109 110 113",
+          "t_min": 338.33999285080665,
+          "t_max": 344.6617029402523,
+          "diameter_t": 6.3217100894456735
+        },
+        {
+          "rank": 17,
+          "color": "red",
+          "size": 3,
+          "node_indices": "110 112 113",
+          "t_min": 339.8582167253635,
+          "t_max": 344.6617029402523,
+          "diameter_t": 4.803486214888835
+        },
+        {
+          "rank": 18,
+          "color": "red",
+          "size": 3,
+          "node_indices": "112 113 115",
+          "t_min": 342.05487751036355,
+          "t_max": 347.2726775844204,
+          "diameter_t": 5.217800074056868
+        },
+        {
+          "rank": 19,
+          "color": "red",
+          "size": 3,
+          "node_indices": "117 118 120",
+          "t_min": 350.40841934919206,
+          "t_max": 356.017574977265,
+          "diameter_t": 5.6091556280729264
+        },
+        {
+          "rank": 20,
+          "color": "red",
+          "size": 3,
+          "node_indices": "122 124 125",
+          "t_min": 357.95268510163226,
+          "t_max": 363.33133057897385,
+          "diameter_t": 5.378645477341593
+        }
+      ]
+    },
+    "blue": {
+      "edge_count": 274,
+      "max_clique_size": 4,
+      "triangles": 113,
+      "clustering_coefficient": 0.346381702287214,
+      "top_cliques": [
+        {
+          "rank": 1,
+          "color": "blue",
+          "size": 4,
+          "node_indices": "37 38 39 40",
+          "t_min": 219.06759634902136,
+          "t_max": 224.00700025460435,
+          "diameter_t": 4.939403905582992
+        },
+        {
+          "rank": 2,
+          "color": "blue",
+          "size": 4,
+          "node_indices": "37 38 39 41",
+          "t_min": 219.06759634902136,
+          "t_max": 224.98332466958226,
+          "diameter_t": 5.915728320560902
+        },
+        {
+          "rank": 3,
+          "color": "blue",
+          "size": 4,
+          "node_indices": "48 49 50 52",
+          "t_min": 237.7698204809252,
+          "t_max": 244.07089849707813,
+          "diameter_t": 6.301078016152928
+        },
+        {
+          "rank": 4,
+          "color": "blue",
+          "size": 4,
+          "node_indices": "58 60 61 62",
+          "t_min": 255.30625645491403,
+          "t_max": 260.80508450459683,
+          "diameter_t": 5.4988280496828
+        },
+        {
+          "rank": 5,
+          "color": "blue",
+          "size": 4,
+          "node_indices": "60 61 62 63",
+          "t_min": 258.61043949153134,
+          "t_max": 263.57389390487015,
+          "diameter_t": 4.963454413338809
+        },
+        {
+          "rank": 6,
+          "color": "blue",
+          "size": 4,
+          "node_indices": "61 62 63 64",
+          "t_min": 259.87440698967805,
+          "t_max": 265.55785183887633,
+          "diameter_t": 5.683444849198281
+        },
+        {
+          "rank": 7,
+          "color": "blue",
+          "size": 4,
+          "node_indices": "62 63 64 65",
+          "t_min": 260.80508450459683,
+          "t_max": 266.614973781501,
+          "diameter_t": 5.809889276904187
+        },
+        {
+          "rank": 8,
+          "color": "blue",
+          "size": 4,
+          "node_indices": "91 92 93 94",
+          "t_min": 310.10946314670184,
+          "t_max": 313.9852857311589,
+          "diameter_t": 3.875822584457069
+        },
+        {
+          "rank": 9,
+          "color": "blue",
+          "size": 4,
+          "node_indices": "94 95 96 97",
+          "t_min": 313.9852857311589,
+          "t_max": 318.85310425631656,
+          "diameter_t": 4.867818525157645
+        },
+        {
+          "rank": 10,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "11 12 13",
+          "t_min": 169.9119764794117,
+          "t_max": 174.7541915233657,
+          "diameter_t": 4.842215043954013
+        },
+        {
+          "rank": 11,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "13 14 16",
+          "t_min": 174.7541915233657,
+          "t_max": 179.91648402025697,
+          "diameter_t": 5.1622924968912685
+        },
+        {
+          "rank": 12,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "13 15 16",
+          "t_min": 174.7541915233657,
+          "t_max": 179.91648402025697,
+          "diameter_t": 5.1622924968912685
+        },
+        {
+          "rank": 13,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "15 16 17",
+          "t_min": 178.37740777609997,
+          "t_max": 182.2070784843665,
+          "diameter_t": 3.8296707082665193
+        },
+        {
+          "rank": 14,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "22 23 25",
+          "t_min": 192.0266563607138,
+          "t_max": 196.87648184095832,
+          "diameter_t": 4.849825480244533
+        },
+        {
+          "rank": 15,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "23 24 25",
+          "t_min": 193.0797266038457,
+          "t_max": 196.87648184095832,
+          "diameter_t": 3.7967552371126203
+        },
+        {
+          "rank": 16,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "24 25 27",
+          "t_min": 195.26539667952926,
+          "t_max": 201.2647519437038,
+          "diameter_t": 5.99935526417454
+        },
+        {
+          "rank": 17,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "25 26 27",
+          "t_min": 196.87648184095832,
+          "t_max": 201.2647519437038,
+          "diameter_t": 4.38827010274548
+        },
+        {
+          "rank": 18,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "25 27 28",
+          "t_min": 196.87648184095832,
+          "t_max": 202.4935945141405,
+          "diameter_t": 5.617112673182191
+        },
+        {
+          "rank": 19,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "29 30 32",
+          "t_min": 204.18967180310455,
+          "t_max": 209.57650971685626,
+          "diameter_t": 5.3868379137517195
+        },
+        {
+          "rank": 20,
+          "color": "blue",
+          "size": 3,
+          "node_indices": "30 32 33",
+          "t_min": 205.3946972021633,
+          "t_max": 211.69086259536533,
+          "diameter_t": 6.296165393202045
+        }
+      ]
+    },
+    "green": {
+      "edge_count": 107,
+      "max_clique_size": 9,
+      "triangles": 217,
+      "clustering_coefficient": 0.8584736251402918,
+      "top_cliques": [
+        {
+          "rank": 1,
+          "color": "green",
+          "size": 9,
+          "node_indices": "0 1 2 3 4 5 6 7 8",
+          "t_min": 150.05352042078488,
+          "t_max": 165.53706918790044,
+          "diameter_t": 15.483548767115565
+        },
+        {
+          "rank": 2,
+          "color": "green",
+          "size": 9,
+          "node_indices": "141 142 143 144 145 146 147 148 149",
+          "t_min": 387.22289022238795,
+          "t_max": 399.98511987619486,
+          "diameter_t": 12.762229653806912
+        },
+        {
+          "rank": 3,
+          "color": "green",
+          "size": 5,
+          "node_indices": "5 6 7 8 9",
+          "t_min": 158.84998817142048,
+          "t_max": 167.1844399781745,
+          "diameter_t": 8.334451806754032
+        },
+        {
+          "rank": 4,
+          "color": "green",
+          "size": 5,
+          "node_indices": "6 7 8 9 10",
+          "t_min": 161.18896413759603,
+          "t_max": 169.09451541556882,
+          "diameter_t": 7.905551277972791
+        },
+        {
+          "rank": 5,
+          "color": "green",
+          "size": 5,
+          "node_indices": "7 8 9 10 11",
+          "t_min": 163.03070968718197,
+          "t_max": 169.9119764794117,
+          "diameter_t": 6.881266792229724
+        },
+        {
+          "rank": 6,
+          "color": "green",
+          "size": 5,
+          "node_indices": "136 137 138 139 140",
+          "t_min": 379.87297534653237,
+          "t_max": 385.86130084597426,
+          "diameter_t": 5.988325499441885
+        },
+        {
+          "rank": 7,
+          "color": "green",
+          "size": 5,
+          "node_indices": "137 138 139 140 141",
+          "t_min": 381.4844686171865,
+          "t_max": 387.22289022238795,
+          "diameter_t": 5.738421605201438
+        },
+        {
+          "rank": 8,
+          "color": "green",
+          "size": 5,
+          "node_indices": "138 139 140 141 142",
+          "t_min": 383.4435294495365,
+          "t_max": 388.8461283542323,
+          "diameter_t": 5.402598904695765
+        },
+        {
+          "rank": 9,
+          "color": "green",
+          "size": 5,
+          "node_indices": "139 140 141 142 143",
+          "t_min": 384.95611681486366,
+          "t_max": 391.456083563638,
+          "diameter_t": 6.499966748774341
+        },
+        {
+          "rank": 10,
+          "color": "green",
+          "size": 5,
+          "node_indices": "140 141 142 143 144",
+          "t_min": 385.86130084597426,
+          "t_max": 392.24508333951906,
+          "diameter_t": 6.3837824935448
+        },
+        {
+          "rank": 11,
+          "color": "green",
+          "size": 3,
+          "node_indices": "135 138 139",
+          "t_min": 378.43668024996543,
+          "t_max": 384.95611681486366,
+          "diameter_t": 6.519436564898228
+        },
+        {
+          "rank": 12,
+          "color": "green",
+          "size": 2,
+          "node_indices": "8 12",
+          "t_min": 165.53706918790044,
+          "t_max": 173.41153651959155,
+          "diameter_t": 7.874467331691108
+        },
+        {
+          "rank": 13,
+          "color": "green",
+          "size": 1,
+          "node_indices": "13",
+          "t_min": 174.7541915233657,
+          "t_max": 174.7541915233657,
+          "diameter_t": 0.0
+        },
+        {
+          "rank": 14,
+          "color": "green",
+          "size": 1,
+          "node_indices": "14",
+          "t_min": 176.44143429771043,
+          "t_max": 176.44143429771043,
+          "diameter_t": 0.0
+        },
+        {
+          "rank": 15,
+          "color": "green",
+          "size": 1,
+          "node_indices": "15",
+          "t_min": 178.37740777609997,
+          "t_max": 178.37740777609997,
+          "diameter_t": 0.0
+        },
+        {
+          "rank": 16,
+          "color": "green",
+          "size": 1,
+          "node_indices": "16",
+          "t_min": 179.91648402025697,
+          "t_max": 179.91648402025697,
+          "diameter_t": 0.0
+        },
+        {
+          "rank": 17,
+          "color": "green",
+          "size": 1,
+          "node_indices": "17",
+          "t_min": 182.2070784843665,
+          "t_max": 182.2070784843665,
+          "diameter_t": 0.0
+        },
+        {
+          "rank": 18,
+          "color": "green",
+          "size": 1,
+          "node_indices": "18",
+          "t_min": 184.8744678483875,
+          "t_max": 184.8744678483875,
+          "diameter_t": 0.0
+        },
+        {
+          "rank": 19,
+          "color": "green",
+          "size": 1,
+          "node_indices": "19",
+          "t_min": 185.5987836777075,
+          "t_max": 185.5987836777075,
+          "diameter_t": 0.0
+        },
+        {
+          "rank": 20,
+          "color": "green",
+          "size": 1,
+          "node_indices": "20",
+          "t_min": 187.22892258350186,
+          "t_max": 187.22892258350186,
+          "diameter_t": 0.0
+        }
+      ]
+    },
+    "violet": {
+      "edge_count": 89,
+      "max_clique_size": 2,
+      "triangles": 0,
+      "clustering_coefficient": 0.0,
+      "top_cliques": [
+        {
+          "rank": 1,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "9 13",
+          "t_min": 167.1844399781745,
+          "t_max": 174.7541915233657,
+          "diameter_t": 7.569751545191195
+        },
+        {
+          "rank": 2,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "10 14",
+          "t_min": 169.09451541556882,
+          "t_max": 176.44143429771043,
+          "diameter_t": 7.346918882141608
+        },
+        {
+          "rank": 3,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "11 14",
+          "t_min": 169.9119764794117,
+          "t_max": 176.44143429771043,
+          "diameter_t": 6.529457818298738
+        },
+        {
+          "rank": 4,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "12 16",
+          "t_min": 173.41153651959155,
+          "t_max": 179.91648402025697,
+          "diameter_t": 6.504947500665423
+        },
+        {
+          "rank": 5,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "13 17",
+          "t_min": 174.7541915233657,
+          "t_max": 182.2070784843665,
+          "diameter_t": 7.452886961000786
+        },
+        {
+          "rank": 6,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "14 18",
+          "t_min": 176.44143429771043,
+          "t_max": 184.8744678483875,
+          "diameter_t": 8.433033550677067
+        },
+        {
+          "rank": 7,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "15 18",
+          "t_min": 178.37740777609997,
+          "t_max": 184.8744678483875,
+          "diameter_t": 6.497060072287525
+        },
+        {
+          "rank": 8,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "16 20",
+          "t_min": 179.91648402025697,
+          "t_max": 187.22892258350186,
+          "diameter_t": 7.312438563244882
+        },
+        {
+          "rank": 9,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "17 21",
+          "t_min": 182.2070784843665,
+          "t_max": 189.41615865601693,
+          "diameter_t": 7.209080171650442
+        },
+        {
+          "rank": 10,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "18 22",
+          "t_min": 184.8744678483875,
+          "t_max": 192.0266563607138,
+          "diameter_t": 7.1521885123262905
+        },
+        {
+          "rank": 11,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "18 23",
+          "t_min": 184.8744678483875,
+          "t_max": 193.0797266038457,
+          "diameter_t": 8.205258755458203
+        },
+        {
+          "rank": 12,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "19 23",
+          "t_min": 185.5987836777075,
+          "t_max": 193.0797266038457,
+          "diameter_t": 7.480942926138198
+        },
+        {
+          "rank": 13,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "20 24",
+          "t_min": 187.22892258350186,
+          "t_max": 195.26539667952926,
+          "diameter_t": 8.036474096027405
+        },
+        {
+          "rank": 14,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "23 27",
+          "t_min": 193.0797266038457,
+          "t_max": 201.2647519437038,
+          "diameter_t": 8.1850253398581
+        },
+        {
+          "rank": 15,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "24 28",
+          "t_min": 195.26539667952926,
+          "t_max": 202.4935945141405,
+          "diameter_t": 7.228197834611251
+        },
+        {
+          "rank": 16,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "25 29",
+          "t_min": 196.87648184095832,
+          "t_max": 204.18967180310455,
+          "diameter_t": 7.313189962146225
+        },
+        {
+          "rank": 17,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "26 30",
+          "t_min": 198.0153096762519,
+          "t_max": 205.3946972021633,
+          "diameter_t": 7.3793875259113975
+        },
+        {
+          "rank": 18,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "28 32",
+          "t_min": 202.4935945141405,
+          "t_max": 209.57650971685626,
+          "diameter_t": 7.082915202715753
+        },
+        {
+          "rank": 19,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "29 33",
+          "t_min": 204.18967180310455,
+          "t_max": 211.69086259536533,
+          "diameter_t": 7.501190792260786
+        },
+        {
+          "rank": 20,
+          "color": "violet",
+          "size": 2,
+          "node_indices": "30 34",
+          "t_min": 205.3946972021633,
+          "t_max": 213.34791935971265,
+          "diameter_t": 7.953222157549362
+        }
+      ]
+    }
+  },
+  "baseline": {
+    "n_perm": 500,
+    "mean_max_mono_clique": 4.062,
+    "std_max_mono_clique": 0.25720808696462094,
+    "p95_max_mono_clique": 5.0
+  }
+}

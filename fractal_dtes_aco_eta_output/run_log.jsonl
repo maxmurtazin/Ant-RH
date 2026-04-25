@@ -1,0 +1,98 @@
+{"time_s": 0.0025191307067871094, "stage": "START", "message": "Fractal-DTES-ACO-Zeta ETA run started"}
+{"time_s": 0.0026302337646484375, "stage": "STAGE", "message": "evaluate_grid started"}
+{"time_s": 1.133342981338501, "stage": "STAGE", "message": "evaluate_grid done", "stage_time": "1.1s"}
+{"time_s": 1.1335780620574951, "stage": "STAGE", "message": "compute_multiscale_features started"}
+{"time_s": 1.8330051898956299, "stage": "STAGE", "message": "compute_multiscale_features done", "stage_time": "0.7s"}
+{"time_s": 1.8332762718200684, "stage": "STAGE", "message": "build_dyadic_tree started"}
+{"time_s": 1.8361060619354248, "stage": "STAGE", "message": "build_dyadic_tree done", "stage_time": "0.0s"}
+{"time_s": 1.8362011909484863, "stage": "STAGE", "message": "aggregate_node_statistics started"}
+{"time_s": 1.852210283279419, "stage": "STAGE", "message": "aggregate_node_statistics done", "stage_time": "0.0s"}
+{"time_s": 1.8523492813110352, "stage": "STAGE", "message": "build_graph started"}
+{"time_s": 1.8529279232025146, "stage": "STAGE", "message": "build_graph done", "stage_time": "0.0s"}
+{"time_s": 1.8529860973358154, "stage": "STAGE", "message": "compute_node_stability started"}
+{"time_s": 1.8549330234527588, "stage": "STAGE", "message": "compute_node_stability done", "stage_time": "0.0s"}
+{"time_s": 1.8549821376800537, "stage": "STAGE", "message": "initialize_pheromones started"}
+{"time_s": 1.855978012084961, "stage": "STAGE", "message": "initialize_pheromones done", "stage_time": "0.0s"}
+{"time_s": 1.8560302257537842, "stage": "STAGE", "message": "run_aco started"}
+{"time_s": 1.8989651203155518, "stage": "ACO", "message": "iter 1/60", "iter_time": "0.0s", "eta": "2.5s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.292"}
+{"time_s": 1.9455909729003906, "stage": "ACO", "message": "iter 2/60", "iter_time": "0.0s", "eta": "2.5s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.208"}
+{"time_s": 1.9954781532287598, "stage": "ACO", "message": "iter 3/60", "iter_time": "0.0s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.250"}
+{"time_s": 2.045236349105835, "stage": "ACO", "message": "iter 4/60", "iter_time": "0.0s", "eta": "2.6s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.208"}
+{"time_s": 2.0974950790405273, "stage": "ACO", "message": "iter 5/60", "iter_time": "0.0s", "eta": "2.5s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.208"}
+{"time_s": 2.146726131439209, "stage": "ACO", "message": "iter 6/60", "iter_time": "0.0s", "eta": "2.5s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.250"}
+{"time_s": 2.1983790397644043, "stage": "ACO", "message": "iter 7/60", "iter_time": "0.0s", "eta": "2.5s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.188"}
+{"time_s": 2.2474710941314697, "stage": "ACO", "message": "iter 8/60", "iter_time": "0.0s", "eta": "2.5s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 2.29534912109375, "stage": "ACO", "message": "iter 9/60", "iter_time": "0.0s", "eta": "2.4s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.188"}
+{"time_s": 2.343317985534668, "stage": "ACO", "message": "iter 10/60", "iter_time": "0.0s", "eta": "2.4s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 2.388921022415161, "stage": "ACO", "message": "iter 11/60", "iter_time": "0.0s", "eta": "2.3s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.167"}
+{"time_s": 2.4368481636047363, "stage": "ACO", "message": "iter 12/60", "iter_time": "0.0s", "eta": "2.3s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 2.4878571033477783, "stage": "ACO", "message": "iter 13/60", "iter_time": "0.1s", "eta": "2.3s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 2.535630226135254, "stage": "ACO", "message": "iter 14/60", "iter_time": "0.0s", "eta": "2.2s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 2.581374168395996, "stage": "ACO", "message": "iter 15/60", "iter_time": "0.0s", "eta": "2.1s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 2.6252050399780273, "stage": "ACO", "message": "iter 16/60", "iter_time": "0.0s", "eta": "2.1s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 2.673143148422241, "stage": "ACO", "message": "iter 17/60", "iter_time": "0.0s", "eta": "2.0s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.167"}
+{"time_s": 2.7192161083221436, "stage": "ACO", "message": "iter 18/60", "iter_time": "0.0s", "eta": "2.0s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 2.764747142791748, "stage": "ACO", "message": "iter 19/60", "iter_time": "0.0s", "eta": "1.9s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 2.811690092086792, "stage": "ACO", "message": "iter 20/60", "iter_time": "0.0s", "eta": "1.9s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 2.8590641021728516, "stage": "ACO", "message": "iter 21/60", "iter_time": "0.0s", "eta": "1.8s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 2.9046273231506348, "stage": "ACO", "message": "iter 22/60", "iter_time": "0.0s", "eta": "1.8s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.167"}
+{"time_s": 2.949985980987549, "stage": "ACO", "message": "iter 23/60", "iter_time": "0.0s", "eta": "1.7s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 2.994729995727539, "stage": "ACO", "message": "iter 24/60", "iter_time": "0.0s", "eta": "1.6s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.062"}
+{"time_s": 3.038140296936035, "stage": "ACO", "message": "iter 25/60", "iter_time": "0.0s", "eta": "1.6s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 3.085402250289917, "stage": "ACO", "message": "iter 26/60", "iter_time": "0.0s", "eta": "1.6s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.062"}
+{"time_s": 3.129300355911255, "stage": "ACO", "message": "iter 27/60", "iter_time": "0.0s", "eta": "1.5s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 3.1734509468078613, "stage": "ACO", "message": "iter 28/60", "iter_time": "0.0s", "eta": "1.4s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 3.2189769744873047, "stage": "ACO", "message": "iter 29/60", "iter_time": "0.0s", "eta": "1.4s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 3.2629759311676025, "stage": "ACO", "message": "iter 30/60", "iter_time": "0.0s", "eta": "1.3s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 3.3078432083129883, "stage": "ACO", "message": "iter 31/60", "iter_time": "0.0s", "eta": "1.3s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 3.352006196975708, "stage": "ACO", "message": "iter 32/60", "iter_time": "0.0s", "eta": "1.2s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 3.3963570594787598, "stage": "ACO", "message": "iter 33/60", "iter_time": "0.0s", "eta": "1.2s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 3.4419729709625244, "stage": "ACO", "message": "iter 34/60", "iter_time": "0.0s", "eta": "1.2s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 3.4885470867156982, "stage": "ACO", "message": "iter 35/60", "iter_time": "0.0s", "eta": "1.1s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 3.5335333347320557, "stage": "ACO", "message": "iter 36/60", "iter_time": "0.0s", "eta": "1.1s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 3.5780112743377686, "stage": "ACO", "message": "iter 37/60", "iter_time": "0.0s", "eta": "1.0s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 3.6239092350006104, "stage": "ACO", "message": "iter 38/60", "iter_time": "0.0s", "eta": "1.0s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 3.669678211212158, "stage": "ACO", "message": "iter 39/60", "iter_time": "0.0s", "eta": "0.9s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 3.7156243324279785, "stage": "ACO", "message": "iter 40/60", "iter_time": "0.0s", "eta": "0.9s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.146"}
+{"time_s": 3.7605931758880615, "stage": "ACO", "message": "iter 41/60", "iter_time": "0.0s", "eta": "0.9s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 3.8058202266693115, "stage": "ACO", "message": "iter 42/60", "iter_time": "0.0s", "eta": "0.8s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 3.8483450412750244, "stage": "ACO", "message": "iter 43/60", "iter_time": "0.0s", "eta": "0.8s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 3.8953781127929688, "stage": "ACO", "message": "iter 44/60", "iter_time": "0.0s", "eta": "0.7s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 3.9386701583862305, "stage": "ACO", "message": "iter 45/60", "iter_time": "0.0s", "eta": "0.7s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 3.985443115234375, "stage": "ACO", "message": "iter 46/60", "iter_time": "0.0s", "eta": "0.6s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 4.032292127609253, "stage": "ACO", "message": "iter 47/60", "iter_time": "0.0s", "eta": "0.6s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 4.077348232269287, "stage": "ACO", "message": "iter 48/60", "iter_time": "0.0s", "eta": "0.5s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 4.122192144393921, "stage": "ACO", "message": "iter 49/60", "iter_time": "0.0s", "eta": "0.5s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 4.165572166442871, "stage": "ACO", "message": "iter 50/60", "iter_time": "0.0s", "eta": "0.4s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 4.208405017852783, "stage": "ACO", "message": "iter 51/60", "iter_time": "0.0s", "eta": "0.4s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 4.257503032684326, "stage": "ACO", "message": "iter 52/60", "iter_time": "0.0s", "eta": "0.4s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 4.302741050720215, "stage": "ACO", "message": "iter 53/60", "iter_time": "0.0s", "eta": "0.3s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 4.346954107284546, "stage": "ACO", "message": "iter 54/60", "iter_time": "0.0s", "eta": "0.3s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.125"}
+{"time_s": 4.391813278198242, "stage": "ACO", "message": "iter 55/60", "iter_time": "0.0s", "eta": "0.2s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 4.437335014343262, "stage": "ACO", "message": "iter 56/60", "iter_time": "0.0s", "eta": "0.2s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 4.482638120651245, "stage": "ACO", "message": "iter 57/60", "iter_time": "0.0s", "eta": "0.1s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 4.5263941287994385, "stage": "ACO", "message": "iter 58/60", "iter_time": "0.0s", "eta": "0.1s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.104"}
+{"time_s": 4.575440168380737, "stage": "ACO", "message": "iter 59/60", "iter_time": "0.0s", "eta": "0.0s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 4.620249032974243, "stage": "ACO", "message": "iter 60/60", "iter_time": "0.0s", "eta": "0.0s", "best_E": "-7.5236", "max_score": "1851.7", "diversity": "0.083"}
+{"time_s": 4.6204211711883545, "stage": "STAGE", "message": "run_aco done", "stage_time": "2.8s"}
+{"time_s": 4.620517253875732, "stage": "STAGE", "message": "rank_candidate_nodes started"}
+{"time_s": 4.620959997177124, "stage": "STAGE", "message": "rank_candidate_nodes done", "stage_time": "0.0s"}
+{"time_s": 4.62149715423584, "stage": "STAGE", "message": "refine_candidates started"}
+{"time_s": 4.725423097610474, "stage": "REFINE", "message": "candidate 1/16", "iter_time": "0.1s", "eta": "1.6s", "accepted": 0}
+{"time_s": 4.830169200897217, "stage": "REFINE", "message": "candidate 2/16", "iter_time": "0.1s", "eta": "1.5s", "accepted": 1}
+{"time_s": 4.945657014846802, "stage": "REFINE", "message": "candidate 3/16", "iter_time": "0.1s", "eta": "1.4s", "accepted": 1}
+{"time_s": 5.043403148651123, "stage": "REFINE", "message": "candidate 4/16", "iter_time": "0.1s", "eta": "1.3s", "accepted": 1}
+{"time_s": 5.14130711555481, "stage": "REFINE", "message": "candidate 5/16", "iter_time": "0.1s", "eta": "1.1s", "accepted": 1}
+{"time_s": 5.255017280578613, "stage": "REFINE", "message": "candidate 6/16", "iter_time": "0.1s", "eta": "1.1s", "accepted": 1}
+{"time_s": 5.36295223236084, "stage": "REFINE", "message": "candidate 7/16", "iter_time": "0.1s", "eta": "1.0s", "accepted": 1}
+{"time_s": 5.471388101577759, "stage": "REFINE", "message": "candidate 8/16", "iter_time": "0.1s", "eta": "0.8s", "accepted": 1}
+{"time_s": 5.585004091262817, "stage": "REFINE", "message": "candidate 9/16", "iter_time": "0.1s", "eta": "0.8s", "accepted": 1}
+{"time_s": 5.6979241371154785, "stage": "REFINE", "message": "candidate 10/16", "iter_time": "0.1s", "eta": "0.7s", "accepted": 1}
+{"time_s": 5.869449138641357, "stage": "REFINE", "message": "candidate 11/16", "iter_time": "0.2s", "eta": "0.6s", "accepted": 1}
+{"time_s": 5.986680030822754, "stage": "REFINE", "message": "candidate 12/16", "iter_time": "0.1s", "eta": "0.5s", "accepted": 1}
+{"time_s": 6.0918662548065186, "stage": "REFINE", "message": "candidate 13/16", "iter_time": "0.1s", "eta": "0.4s", "accepted": 1}
+{"time_s": 6.19700813293457, "stage": "REFINE", "message": "candidate 14/16", "iter_time": "0.1s", "eta": "0.2s", "accepted": 1}
+{"time_s": 6.306154012680054, "stage": "REFINE", "message": "candidate 15/16", "iter_time": "0.1s", "eta": "0.1s", "accepted": 1}
+{"time_s": 6.411300182342529, "stage": "REFINE", "message": "candidate 16/16", "iter_time": "0.1s", "eta": "0.0s", "accepted": 1}
+{"time_s": 6.4114532470703125, "stage": "STAGE", "message": "refine_candidates done", "stage_time": "1.8s"}
+{"time_s": 6.89850115776062, "stage": "DONE", "message": "run completed", "candidates": 1, "total_time": "6.9s"}
