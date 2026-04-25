@@ -1,362 +1,362 @@
 [
   {
     "iteration": 1,
-    "water_max": 0.9999999999999807,
-    "water_mean": 0.06868989021155239,
-    "wet_nodes_075": 9
+    "water_max": 0.9999999999928947,
+    "water_mean": 0.037316723935195174,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 2,
-    "water_max": 0.9999999999999835,
-    "water_mean": 0.06284705256053758,
-    "wet_nodes_075": 5
+    "water_max": 0.9999999999961594,
+    "water_mean": 0.037316723935317,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 3,
-    "water_max": 0.9999999999999858,
-    "water_mean": 0.05788064055717499,
-    "wet_nodes_075": 4
+    "water_max": 0.999999999997238,
+    "water_mean": 0.03731672393535726,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 4,
-    "water_max": 0.9999999999999878,
-    "water_mean": 0.053659190354316794,
+    "water_max": 0.9999999999977703,
+    "water_mean": 0.037316723935377126,
     "wet_nodes_075": 3
   },
   {
     "iteration": 5,
-    "water_max": 0.9999999999999896,
-    "water_mean": 0.05007095768188732,
+    "water_max": 0.9999999999980842,
+    "water_mean": 0.03731672393538884,
     "wet_nodes_075": 3
   },
   {
     "iteration": 6,
-    "water_max": 0.999999999999991,
-    "water_mean": 0.04702095991032227,
-    "wet_nodes_075": 2
+    "water_max": 0.9999999999982889,
+    "water_mean": 0.03731672393539647,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 7,
-    "water_max": 0.9999999999999968,
-    "water_mean": 0.13148015157137402,
-    "wet_nodes_075": 10
+    "water_max": 0.9999999999984314,
+    "water_mean": 0.037316723935401794,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 8,
-    "water_max": 0.9999999999999971,
-    "water_mean": 0.11621877471638596,
-    "wet_nodes_075": 9
+    "water_max": 0.9999999999985351,
+    "water_mean": 0.03731672393540566,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 9,
-    "water_max": 0.9999999999999989,
-    "water_mean": 0.26537033396649246,
-    "wet_nodes_075": 19
+    "water_max": 0.999999999998613,
+    "water_mean": 0.03731672393540857,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 10,
-    "water_max": 0.999999999999999,
-    "water_mean": 0.23002542975223664,
-    "wet_nodes_075": 11
+    "water_max": 0.999999999998673,
+    "water_mean": 0.03731672393541081,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 11,
-    "water_max": 0.9999999999999998,
-    "water_mean": 0.4817806382893754,
-    "wet_nodes_075": 24
+    "water_max": 0.99999999999872,
+    "water_mean": 0.03731672393541256,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 12,
-    "water_max": 0.9999999999999997,
-    "water_mean": 0.41397418842668715,
-    "wet_nodes_075": 19
+    "water_max": 0.9999999999987574,
+    "water_mean": 0.03731672393541396,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 13,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.3563387060434021,
-    "wet_nodes_075": 11
+    "water_max": 0.9999999999987876,
+    "water_mean": 0.03731672393541509,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 14,
-    "water_max": 0.9999999999999999,
-    "water_mean": 0.5693754041433903,
-    "wet_nodes_075": 24
+    "water_max": 0.9999999999988122,
+    "water_mean": 0.037316723935416,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 15,
-    "water_max": 0.9999999999999998,
-    "water_mean": 0.4884297394025998,
-    "wet_nodes_075": 19
+    "water_max": 0.9999999999988323,
+    "water_mean": 0.03731672393541675,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 16,
-    "water_max": 0.9999999999999997,
-    "water_mean": 0.41962592437292784,
-    "wet_nodes_075": 11
+    "water_max": 0.9999999999988487,
+    "water_mean": 0.03731672393541738,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 17,
-    "water_max": 0.9999999999999998,
-    "water_mean": 0.5459436255376129,
-    "wet_nodes_075": 24
+    "water_max": 0.9999999999988625,
+    "water_mean": 0.03731672393541788,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 18,
-    "water_max": 0.9999999999999997,
-    "water_mean": 0.46851272758768897,
-    "wet_nodes_075": 13
+    "water_max": 0.9999999999988738,
+    "water_mean": 0.0373167239354183,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 19,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.4026964643302537,
-    "wet_nodes_075": 10
+    "water_max": 0.9999999999988833,
+    "water_mean": 0.037316723935418655,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 20,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.3467526405614337,
-    "wet_nodes_075": 9
+    "water_max": 0.9999999999988912,
+    "water_mean": 0.03731672393541896,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 21,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.29920039035793666,
-    "wet_nodes_075": 6
+    "water_max": 0.9999999999988979,
+    "water_mean": 0.037316723935419197,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 22,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.2587809776849642,
-    "wet_nodes_075": 4
+    "water_max": 0.9999999999989035,
+    "water_mean": 0.037316723935419405,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 23,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.22442447691293763,
+    "water_max": 0.9999999999989082,
+    "water_mean": 0.037316723935419585,
     "wet_nodes_075": 3
   },
   {
     "iteration": 24,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.19522145125671503,
+    "water_max": 0.9999999999989122,
+    "water_mean": 0.03731672393541973,
     "wet_nodes_075": 3
   },
   {
     "iteration": 25,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.1703988794489258,
-    "wet_nodes_075": 2
+    "water_max": 0.9999999999989155,
+    "water_mean": 0.037316723935419856,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 26,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.14929969341230498,
-    "wet_nodes_075": 2
+    "water_max": 0.9999999999989184,
+    "water_mean": 0.03731672393541996,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 27,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.13136538528117725,
-    "wet_nodes_075": 2
+    "water_max": 0.9999999999989209,
+    "water_mean": 0.03731672393542005,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 28,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.11612122336971872,
-    "wet_nodes_075": 2
+    "water_max": 0.9999999999989229,
+    "water_mean": 0.037316723935420126,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 29,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.10316368574497897,
-    "wet_nodes_075": 2
+    "water_max": 0.9999999999989245,
+    "water_mean": 0.03731672393542019,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 30,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.09214977876395015,
-    "wet_nodes_075": 2
+    "water_max": 0.9999999999989261,
+    "water_mean": 0.03731672393542025,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 31,
-    "water_max": 0.9999999999999999,
-    "water_mean": 0.34285510930863666,
-    "wet_nodes_075": 15
+    "water_max": 0.9999999999989273,
+    "water_mean": 0.03731672393542029,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 32,
-    "water_max": 0.9999999999999998,
-    "water_mean": 0.2958874887930592,
-    "wet_nodes_075": 10
+    "water_max": 0.9999999999989283,
+    "water_mean": 0.037316723935420335,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 33,
-    "water_max": 0.9999999999999997,
-    "water_mean": 0.25596501135481836,
-    "wet_nodes_075": 10
+    "water_max": 0.9999999999989292,
+    "water_mean": 0.03731672393542036,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 34,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.22203090553231364,
-    "wet_nodes_075": 8
+    "water_max": 0.99999999999893,
+    "water_mean": 0.03731672393542039,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 35,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.19318691558318465,
-    "wet_nodes_075": 5
+    "water_max": 0.9999999999989306,
+    "water_mean": 0.03731672393542042,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 36,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.16866952412642497,
-    "wet_nodes_075": 4
+    "water_max": 0.9999999999989312,
+    "water_mean": 0.03731672393542044,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 37,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.14782974138817928,
+    "water_max": 0.9999999999989316,
+    "water_mean": 0.03731672393542045,
     "wet_nodes_075": 3
   },
   {
     "iteration": 38,
-    "water_max": 0.9999999999999998,
-    "water_mean": 0.3176545977177756,
-    "wet_nodes_075": 11
+    "water_max": 0.999999999998932,
+    "water_mean": 0.037316723935420466,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 39,
-    "water_max": 0.9999999999999997,
-    "water_mean": 0.2744670539408274,
-    "wet_nodes_075": 10
+    "water_max": 0.9999999999989323,
+    "water_mean": 0.03731672393542048,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 40,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.23775764173042127,
-    "wet_nodes_075": 9
+    "water_max": 0.9999999999989326,
+    "water_mean": 0.037316723935420494,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 41,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.2065546413515761,
-    "wet_nodes_075": 5
+    "water_max": 0.9999999999989329,
+    "water_mean": 0.037316723935420494,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 42,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.18003209102955778,
-    "wet_nodes_075": 4
+    "water_max": 0.9999999999989331,
+    "water_mean": 0.03731672393542051,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 43,
-    "water_max": 0.9999999999999998,
-    "water_mean": 0.3531273382513823,
-    "wet_nodes_075": 13
+    "water_max": 0.9999999999989333,
+    "water_mean": 0.037316723935420515,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 44,
-    "water_max": 0.9999999999999997,
-    "water_mean": 0.304618883394393,
-    "wet_nodes_075": 10
+    "water_max": 0.9999999999989334,
+    "water_mean": 0.03731672393542052,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 45,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.26338669676595217,
-    "wet_nodes_075": 9
+    "water_max": 0.9999999999989335,
+    "water_mean": 0.03731672393542052,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 46,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.22833933813177731,
-    "wet_nodes_075": 6
+    "water_max": 0.9999999999989336,
+    "water_mean": 0.03731672393542053,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 47,
-    "water_max": 0.9999999999999998,
-    "water_mean": 0.4001133952472338,
-    "wet_nodes_075": 13
+    "water_max": 0.9999999999989337,
+    "water_mean": 0.03731672393542053,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 48,
-    "water_max": 0.9999999999999997,
-    "water_mean": 0.3445570318408668,
-    "wet_nodes_075": 10
+    "water_max": 0.9999999999989337,
+    "water_mean": 0.037316723935420536,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 49,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.29733412294545475,
-    "wet_nodes_075": 9
+    "water_max": 0.9999999999989339,
+    "water_mean": 0.03731672393542054,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 50,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.25719465038435463,
-    "wet_nodes_075": 8
+    "water_max": 0.999999999998934,
+    "water_mean": 0.03731672393542054,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 51,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.22307609870741946,
-    "wet_nodes_075": 5
+    "water_max": 0.999999999998934,
+    "water_mean": 0.03731672393542054,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 52,
-    "water_max": 0.9999999999999999,
-    "water_mean": 0.48212076087808703,
-    "wet_nodes_075": 23
+    "water_max": 0.999999999998934,
+    "water_mean": 0.03731672393542054,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 53,
-    "water_max": 0.9999999999999998,
-    "water_mean": 0.414263292627092,
-    "wet_nodes_075": 13
+    "water_max": 0.9999999999989341,
+    "water_mean": 0.03731672393542055,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 54,
-    "water_max": 0.9999999999999997,
-    "water_mean": 0.3565844446137463,
-    "wet_nodes_075": 10
+    "water_max": 0.9999999999989341,
+    "water_mean": 0.03731672393542054,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 55,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.30755742380240236,
-    "wet_nodes_075": 9
+    "water_max": 0.9999999999989341,
+    "water_mean": 0.03731672393542054,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 56,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.26588445611276,
-    "wet_nodes_075": 7
+    "water_max": 0.9999999999989341,
+    "water_mean": 0.03731672393542054,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 57,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.23046243357656407,
-    "wet_nodes_075": 4
+    "water_max": 0.9999999999989341,
+    "water_mean": 0.03731672393542056,
+    "wet_nodes_075": 3
   },
   {
     "iteration": 58,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.20035371442079752,
+    "water_max": 0.9999999999989342,
+    "water_mean": 0.03731672393542055,
     "wet_nodes_075": 3
   },
   {
     "iteration": 59,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.1747613031383959,
+    "water_max": 0.9999999999989342,
+    "water_mean": 0.03731672393542056,
     "wet_nodes_075": 3
   },
   {
     "iteration": 60,
-    "water_max": 0.9999999999999996,
-    "water_mean": 0.15300775354835458,
-    "wet_nodes_075": 2
+    "water_max": 0.9999999999989342,
+    "water_mean": 0.03731672393542055,
+    "wet_nodes_075": 3
   }
 ]

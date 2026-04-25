@@ -50,6 +50,9 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         self.water_by_node: Dict[int, float] = {}
         self.water_history: List[dict] = []
         self.water_diag_history = []
+        self.water_mod = None
+        self.water_curv = None
+        self.water_phase = None
         self.rl_actions = [
             {"mix": 0.15, "gamma": 1.0, "alpha": 1.5},
             {"mix": 0.30, "gamma": 0.5, "alpha": 2.0},
@@ -100,20 +103,55 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         if not self.water_by_node:
             return
 
-        # Evaporation + rain.
         water_node_ids = list(self.water_by_node.keys())
-        energy_rain = np.exp(
-            -np.array([self._node_energy(nid) for nid in water_node_ids], dtype=float)
+        energy_grid = np.array(
+            [self._node_energy(nid) for nid in water_node_ids], dtype=float
         )
-        energy_rain = energy_rain / (energy_rain.max() + 1e-12)
-        w = {
-            nid: (1.0 - mix) * float(self.water_by_node[nid]) + mix * float(rain)
-            for nid, rain in zip(water_node_ids, energy_rain)
-        }
-        w = {
-            nid: float(np.power(np.clip(float(val), 0.0, 1.0), gamma))
-            for nid, val in w.items()
-        }
+        if self.water_mod is None or np.shape(self.water_mod) != np.shape(energy_grid):
+            self.water_mod = np.zeros_like(energy_grid)
+            self.water_curv = np.zeros_like(energy_grid)
+        if self.water_phase is None or np.shape(self.water_phase) != np.shape(energy_grid):
+            self.water_phase = np.zeros_like(energy_grid)
+
+        # --- colored rain: modulus ---
+        rain_mod = np.exp(-energy_grid)
+        rain_mod = rain_mod / (rain_mod.max() + 1e-12)
+
+        # --- colored rain: curvature ---
+        grad1 = np.gradient(energy_grid)
+        grad2 = np.gradient(grad1)
+        rain_curv = np.abs(grad2)
+        rain_curv = rain_curv / (rain_curv.max() + 1e-12)
+
+        # --- phase rain ---
+        phase_vals = np.angle(
+            [
+                complex(self.zeta_on_critical_line(float(self.nodes[nid].center())))
+                for nid in water_node_ids
+            ]
+        )
+        phase_grad = np.abs(np.gradient(phase_vals))
+        rain_phase = phase_grad / (phase_grad.max() + 1e-12)
+
+        # --- update channels ---
+        self.water_mod = 0.85 * self.water_mod + 0.15 * rain_mod
+        self.water_curv = 0.85 * self.water_curv + 0.15 * rain_curv
+        self.water_phase = 0.85 * self.water_phase + 0.15 * rain_phase
+
+        # --- combine (weighted geometric mean) ---
+        w_mod = 0.4
+        w_curv = 0.3
+        w_phase = 0.6
+
+        self.water = (
+            np.clip(self.water_mod, 0.0, 1.0) ** w_mod
+            * np.clip(self.water_curv, 0.0, 1.0) ** w_curv
+            * np.clip(self.water_phase, 0.0, 1.0) ** w_phase
+        )
+        self.water = self.water ** (1.0 / (w_mod + w_curv + w_phase))
+        self.water = self.water / (self.water.max() + 1e-12)
+
+        w = {nid: float(val) for nid, val in zip(water_node_ids, self.water)}
         w_new = dict(w)
 
         # Flow down the energy landscape. Prefer children if available,
@@ -501,7 +539,7 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             "refine_candidates", self.refine_candidates, candidate_nodes
         )
 
-        water_k = 12
+        water_k = 40
         water_node_ids = list(self.water_by_node.keys())
         water_vals = np.array(
             [self.water_by_node[nid] for nid in water_node_ids], dtype=float
@@ -573,7 +611,7 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         except NameError:
             candidates = water_candidate_ts
 
-        candidates = dedup_ts_by_zeta(candidates, tol=0.1)
+        candidates = dedup_ts_by_zeta(candidates, tol=0.06)
 
         def local_refine(t0, f, steps=5, grid=25, window=0.1):
             t_best = float(t0)
@@ -594,9 +632,9 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
                     t1 = local_refine(
                         float(t0),
                         lambda x: self.zeta_on_critical_line(float(x)),
-                        steps=8,
-                        grid=41,
-                        window=0.08,
+                        steps=9,
+                        grid=51,
+                        window=0.09,
                     )
                     refined.append(float(t1))
                 except Exception:
