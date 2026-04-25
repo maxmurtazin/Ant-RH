@@ -54,6 +54,22 @@ def smoothness_loss(V):
     return torch.mean((V[1:] - V[:-1]) ** 2)
 
 
+def curvature_loss(V):
+    if V.numel() < 3:
+        return V.new_tensor(0.0)
+    return torch.mean((V[2:] - 2.0 * V[1:-1] + V[:-2]) ** 2)
+
+
+def total_variation_loss(V):
+    if V.numel() < 2:
+        return V.new_tensor(0.0)
+    return torch.mean(torch.abs(V[1:] - V[:-1]))
+
+
+def amplitude_loss(V):
+    return torch.mean(V ** 2)
+
+
 def locality_penalty(H):
     off_band = H.clone()
     for i in range(H.shape[0]):
@@ -91,6 +107,9 @@ def train_physics_operator(
     k=50,
     prime_weight=0.0,
     smooth_weight=0.01,
+    curvature_weight=0.1,
+    tv_weight=0.01,
+    amplitude_weight=0.001,
     device="cpu",
 ):
     import numpy as np
@@ -130,6 +149,9 @@ def train_physics_operator(
         loss_spec, loss_spacing = _spectral_losses(eigvals_k, zeta_zeros_k)
         V = model.V()
         loss_smooth = smoothness_loss(V)
+        loss_curvature = curvature_loss(V)
+        loss_tv = total_variation_loss(V)
+        loss_amp = amplitude_loss(V)
         loss_prime = torch.tensor(0.0, device=device)
 
         if prime_weight > 0:
@@ -154,6 +176,9 @@ def train_physics_operator(
             loss_spec
             + 0.5 * loss_spacing
             + float(smooth_weight) * loss_smooth
+            + float(curvature_weight) * loss_curvature
+            + float(tv_weight) * loss_tv
+            + float(amplitude_weight) * loss_amp
             + float(prime_weight) * loss_prime
         )
         if not torch.isfinite(loss):
@@ -168,16 +193,19 @@ def train_physics_operator(
             "spectral_loss": float(loss_spec.detach().cpu()),
             "spacing_loss": float(loss_spacing.detach().cpu()),
             "smoothness_loss": float(loss_smooth.detach().cpu()),
+            "curvature_loss": float(loss_curvature.detach().cpu()),
+            "tv_loss": float(loss_tv.detach().cpu()),
+            "amplitude_loss": float(loss_amp.detach().cpu()),
             "prime_loss": float(loss_prime.detach().cpu()),
         }
         history.append(row)
 
         if step % 50 == 0 or step == int(steps) - 1:
             print(
-                f"[V8] step={step} loss={row['loss']:.6f} "
+                f"[V8.1] step={step} loss={row['loss']:.6f} "
                 f"spec={row['spectral_loss']:.6f} "
                 f"spacing={row['spacing_loss']:.6f} "
-                f"smooth={row['smoothness_loss']:.6f}"
+                f"curv={row['curvature_loss']:.6f}"
             )
 
     return model, history

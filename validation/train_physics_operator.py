@@ -79,6 +79,9 @@ def _write_loss_curve(path: Path, history):
                 "spectral_loss",
                 "spacing_loss",
                 "smoothness_loss",
+                "curvature_loss",
+                "tv_loss",
+                "amplitude_loss",
                 "prime_loss",
             ],
         )
@@ -105,8 +108,8 @@ def _maybe_write_plots(out_dir: Path, t_grid, potential, eigvals, zeta_zeros, hi
     plt.plot(steps, losses)
     plt.xlabel("step")
     plt.ylabel("loss")
-    plt.title("V8 Physics Operator Loss")
-    path = out_dir / "physics_operator_loss.png"
+    plt.title("V8.1 Physics Operator Loss")
+    path = out_dir / "loss_v81.png"
     plt.tight_layout()
     plt.savefig(path)
     plt.close()
@@ -116,8 +119,8 @@ def _maybe_write_plots(out_dir: Path, t_grid, potential, eigvals, zeta_zeros, hi
     plt.plot(t_grid, potential)
     plt.xlabel("t")
     plt.ylabel("V(t)")
-    plt.title("Learned Schrödinger Potential")
-    path = out_dir / "physics_potential_vs_t_grid.png"
+    plt.title("V8.1 Learned Schrödinger Potential")
+    path = out_dir / "potential_v81.png"
     plt.tight_layout()
     plt.savefig(path)
     plt.close()
@@ -129,9 +132,9 @@ def _maybe_write_plots(out_dir: Path, t_grid, potential, eigvals, zeta_zeros, hi
     plt.plot(range(k), np.sort(zeta_zeros)[:k], label="zeta zeros")
     plt.xlabel("rank")
     plt.ylabel("value")
-    plt.title("Physics Spectrum vs Zeta Zeros")
+    plt.title("V8.1 Physics Spectrum vs Zeta Zeros")
     plt.legend()
-    path = out_dir / "physics_spectrum_vs_zeta_zeros.png"
+    path = out_dir / "spectrum_v81.png"
     plt.tight_layout()
     plt.savefig(path)
     plt.close()
@@ -150,6 +153,9 @@ def parse_args(argv=None):
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--k", type=int, default=50)
     parser.add_argument("--smooth-weight", type=float, default=0.01)
+    parser.add_argument("--curvature-weight", type=float, default=0.1)
+    parser.add_argument("--tv-weight", type=float, default=0.01)
+    parser.add_argument("--amplitude-weight", type=float, default=0.001)
     parser.add_argument("--prime-weight", type=float, default=0.0)
     parser.add_argument("--device", default="cpu")
     return parser.parse_args(argv)
@@ -171,6 +177,9 @@ def main(argv=None):
         k=args.k,
         prime_weight=args.prime_weight,
         smooth_weight=args.smooth_weight,
+        curvature_weight=args.curvature_weight,
+        tv_weight=args.tv_weight,
+        amplitude_weight=args.amplitude_weight,
         device=args.device,
     )
 
@@ -197,6 +206,9 @@ def main(argv=None):
         "lr": float(args.lr),
         "k": int(args.k),
         "smooth_weight": float(args.smooth_weight),
+        "curvature_weight": float(args.curvature_weight),
+        "tv_weight": float(args.tv_weight),
+        "amplitude_weight": float(args.amplitude_weight),
         "prime_weight": float(args.prime_weight),
         "grid_size": int(len(t_grid)),
         "dx": float(t_grid[1] - t_grid[0]),
@@ -206,6 +218,9 @@ def main(argv=None):
         "final_spectral_loss": history[-1]["spectral_loss"] if history else None,
         "final_spacing_loss": history[-1]["spacing_loss"] if history else None,
         "final_smoothness_loss": history[-1]["smoothness_loss"] if history else None,
+        "final_curvature_loss": history[-1]["curvature_loss"] if history else None,
+        "final_tv_loss": history[-1]["tv_loss"] if history else None,
+        "final_amplitude_loss": history[-1]["amplitude_loss"] if history else None,
         "locality_penalty": band_penalty,
         "potential": str(potential_path),
         "eigenvalues": str(eigenvalues_path),
@@ -213,8 +228,8 @@ def main(argv=None):
         "plots": plots,
         "history": history,
         "note": (
-            "Physics-constrained spectral fitting experiment; not a proof of "
-            "the Riemann hypothesis."
+            "V8.1 anti-overfitting physics-constrained operator. Numerical "
+            "experiment, not proof of RH."
         ),
     }
     with out_path.open("w", encoding="utf-8") as f:
