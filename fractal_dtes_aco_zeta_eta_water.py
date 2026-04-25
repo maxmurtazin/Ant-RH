@@ -151,6 +151,9 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         k = 10 if len(water_vals) >= 10 else len(water_vals)
         top_w_idx = np.argsort(water_vals)[-k:]
         low_e_idx = np.argsort(energy_vals)[:k]
+        overlap_at_k = len(
+            set(map(int, top_w_idx)).intersection(set(map(int, low_e_idx)))
+        ) / max(1, k)
 
         top_w_t = [float(self.nodes[water_node_ids[i]].center()) for i in top_w_idx]
         low_e_t = [float(self.nodes[water_node_ids[i]].center()) for i in low_e_idx]
@@ -162,6 +165,7 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
                 "water_mean": float(water_vals.mean()),
                 "water_max": float(water_vals.max()),
                 "wet_nodes_075": int(np.sum(water_vals >= 0.75)),
+                "overlap_at_k": float(overlap_at_k),
                 "top_water": top_w_t,
                 "low_energy": low_e_t,
             }
