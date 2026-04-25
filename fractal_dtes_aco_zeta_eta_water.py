@@ -22,8 +22,10 @@ so stable wells should accumulate water, and ants should be attracted to water.
 """
 
 import math
+import json
 import os
 import time
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -45,6 +47,7 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         super().__init__(cfg)
         self.water_by_node: Dict[int, float] = {}
         self.water_history: List[dict] = []
+        self.water_diag_history = []
 
         # Safe defaults. Override by setting cfg.water_* after creating cfg.
         self.water_rain_rate = float(getattr(cfg, "water_rain_rate", 0.012))
@@ -129,6 +132,41 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             nid: float(np.clip(float(v), 0.0, 1.0)) for nid, v in w_new.items()
         }
 
+    def record_water_diagnostics(self, iteration: int) -> None:
+        water_node_ids = list(self.water_by_node.keys())
+        if not water_node_ids:
+            return
+
+        water_vals = np.array(
+            [self.water_by_node[nid] for nid in water_node_ids], dtype=float
+        )
+        energy_vals = np.array(
+            [self._node_energy(nid) for nid in water_node_ids], dtype=float
+        )
+        try:
+            corr = float(np.corrcoef(water_vals, -energy_vals)[0, 1])
+        except Exception:
+            corr = float("nan")
+
+        k = 10 if len(water_vals) >= 10 else len(water_vals)
+        top_w_idx = np.argsort(water_vals)[-k:]
+        low_e_idx = np.argsort(energy_vals)[:k]
+
+        top_w_t = [float(self.nodes[water_node_ids[i]].center()) for i in top_w_idx]
+        low_e_t = [float(self.nodes[water_node_ids[i]].center()) for i in low_e_idx]
+
+        self.water_diag_history.append(
+            {
+                "iteration": int(iteration),
+                "corr_water_neg_energy": corr,
+                "water_mean": float(water_vals.mean()),
+                "water_max": float(water_vals.max()),
+                "wet_nodes_075": int(np.sum(water_vals >= 0.75)),
+                "top_water": top_w_t,
+                "low_energy": low_e_t,
+            }
+        )
+
     def water_score(self, path_nodes: List[int]) -> float:
         if not path_nodes or not self.water_by_node:
             return 0.0
@@ -197,6 +235,7 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
 
             # Rain before sampling: ants see water accumulated from previous iterations.
             self.update_water()
+            self.record_water_diagnostics(it + 1)
             self.inject_water_pheromone_bias()
 
             paths: List[AntPath] = []
@@ -236,27 +275,6 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             water_max = float(np.max(water_vals)) if water_vals.size else 0.0
             water_mean = float(np.mean(water_vals)) if water_vals.size else 0.0
             wet_nodes = int(np.sum(water_vals > 0.75)) if water_vals.size else 0
-
-            # --- diagnostics: water vs energy ---
-            water_node_ids = list(self.water_by_node.keys())
-            energy_vals = np.array(
-                [self._node_energy(nid) for nid in water_node_ids], dtype=float
-            )
-            try:
-                corr = float(np.corrcoef(water_vals, -energy_vals)[0, 1])
-            except Exception:
-                corr = float("nan")
-
-            # top-k indices for water and low energy
-            k = 10 if len(water_vals) >= 10 else len(water_vals)
-            top_w_idx = np.argsort(water_vals)[-k:]
-            low_e_idx = np.argsort(energy_vals)[:k]
-
-            top_w_t = [float(self.nodes[water_node_ids[i]].center()) for i in top_w_idx]
-            low_e_t = [float(self.nodes[water_node_ids[i]].center()) for i in low_e_idx]
-
-            print(f"[DIAG] corr(W, -E)={corr:.4f} | water_mean={water_vals.mean():.4f}")
-            print(f"[DIAG] topW={top_w_t[:5]} | lowE={low_e_t[:5]}")
 
             rec = {
                 "iteration": done,
@@ -328,6 +346,10 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             save_metrics_json(
                 os.path.join(self.out_dir, "water_history.json"), self.water_history
             )
+            out_dir = Path("fractal_dtes_aco_eta_water_output")
+            out_dir.mkdir(parents=True, exist_ok=True)
+            with open(out_dir / "water_diag_history.json", "w", encoding="utf-8") as f:
+                json.dump(self.water_diag_history, f, indent=2)
             save_metrics_json(
                 os.path.join(self.out_dir, "metrics_summary_water.json"), self.metrics
             )
