@@ -90,9 +90,14 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             return
 
         # Evaporation + rain.
+        water_node_ids = list(self.water_by_node.keys())
+        energy_rain = np.exp(
+            -np.array([self._node_energy(nid) for nid in water_node_ids], dtype=float)
+        )
+        energy_rain = energy_rain / (energy_rain.max() + 1e-12)
         w = {
-            nid: 0.94 * float(val) + 0.001 * np.exp(-self._node_energy(nid))
-            for nid, val in self.water_by_node.items()
+            nid: 0.85 * float(self.water_by_node[nid]) + 0.15 * float(rain)
+            for nid, rain in zip(water_node_ids, energy_rain)
         }
         w_new = dict(w)
 
@@ -123,7 +128,7 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
 
             # Send water to the lowest-energy reachable neighbor.
             j = min(downhill, key=self._node_energy)
-            q = 0.05 * val
+            q = 0.0 * val
             w_new[nid] = w_new.get(nid, 0.0) - q
             w_new[j] = w_new.get(j, 0.0) + q
 
