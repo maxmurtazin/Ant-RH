@@ -237,6 +237,27 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             water_mean = float(np.mean(water_vals)) if water_vals.size else 0.0
             wet_nodes = int(np.sum(water_vals > 0.75)) if water_vals.size else 0
 
+            # --- diagnostics: water vs energy ---
+            water_node_ids = list(self.water_by_node.keys())
+            energy_vals = np.array(
+                [self._node_energy(nid) for nid in water_node_ids], dtype=float
+            )
+            try:
+                corr = float(np.corrcoef(water_vals, -energy_vals)[0, 1])
+            except Exception:
+                corr = float("nan")
+
+            # top-k indices for water and low energy
+            k = 10 if len(water_vals) >= 10 else len(water_vals)
+            top_w_idx = np.argsort(water_vals)[-k:]
+            low_e_idx = np.argsort(energy_vals)[:k]
+
+            top_w_t = [float(self.nodes[water_node_ids[i]].center()) for i in top_w_idx]
+            low_e_t = [float(self.nodes[water_node_ids[i]].center()) for i in low_e_idx]
+
+            print(f"[DIAG] corr(W, -E)={corr:.4f} | water_mean={water_vals.mean():.4f}")
+            print(f"[DIAG] topW={top_w_t[:5]} | lowE={low_e_t[:5]}")
+
             rec = {
                 "iteration": done,
                 "n_iterations": self.cfg.n_iterations,
