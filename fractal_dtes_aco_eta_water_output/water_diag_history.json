@@ -193,10 +193,10 @@
   },
   {
     "iteration": 7,
-    "corr_water_neg_energy": 0.8177783375481276,
-    "water_mean": 0.044428461804491975,
-    "water_max": 0.9999999999999922,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.9187462497011316,
+    "water_mean": 0.13148015157137402,
+    "water_max": 0.9999999999999968,
+    "wet_nodes_075": 10,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -225,10 +225,10 @@
   },
   {
     "iteration": 8,
-    "corr_water_neg_energy": 0.8097155385895672,
-    "water_mean": 0.042224838414536225,
-    "water_max": 0.9999999999999933,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.9050538541805818,
+    "water_mean": 0.11621877471638596,
+    "water_max": 0.9999999999999971,
+    "wet_nodes_075": 9,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -257,10 +257,10 @@
   },
   {
     "iteration": 9,
-    "corr_water_neg_energy": 0.8024832966067033,
-    "water_mean": 0.04035175853307384,
-    "water_max": 0.9999999999999942,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.9455399046843848,
+    "water_mean": 0.26537033396649246,
+    "water_max": 0.9999999999999989,
+    "wet_nodes_075": 19,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -289,10 +289,10 @@
   },
   {
     "iteration": 10,
-    "corr_water_neg_energy": 0.7960489936352325,
-    "water_mean": 0.03875964063383081,
-    "water_max": 0.999999999999995,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.9296190139692754,
+    "water_mean": 0.23002542975223664,
+    "water_max": 0.999999999999999,
+    "wet_nodes_075": 11,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -321,10 +321,10 @@
   },
   {
     "iteration": 11,
-    "corr_water_neg_energy": 0.7903642504581382,
-    "water_mean": 0.03740634041947423,
-    "water_max": 0.9999999999999957,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.9423376122873758,
+    "water_mean": 0.4817806382893754,
+    "water_max": 0.9999999999999998,
+    "wet_nodes_075": 24,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -353,10 +353,10 @@
   },
   {
     "iteration": 12,
-    "corr_water_neg_energy": 0.7853712566151138,
-    "water_mean": 0.03625603523727115,
-    "water_max": 0.9999999999999962,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.9194989908285913,
+    "water_mean": 0.41397418842668715,
+    "water_max": 0.9999999999999997,
+    "wet_nodes_075": 19,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -385,10 +385,10 @@
   },
   {
     "iteration": 13,
-    "corr_water_neg_energy": 0.7810076737005379,
-    "water_mean": 0.03527827583239852,
-    "water_max": 0.9999999999999967,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8976725884595833,
+    "water_mean": 0.3563387060434021,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 11,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -417,10 +417,10 @@
   },
   {
     "iteration": 14,
-    "corr_water_neg_energy": 0.7772102475194015,
-    "water_mean": 0.0344471803382568,
-    "water_max": 0.9999999999999971,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8911874490415757,
+    "water_mean": 0.5693754041433903,
+    "water_max": 0.9999999999999999,
+    "wet_nodes_075": 24,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -449,10 +449,10 @@
   },
   {
     "iteration": 15,
-    "corr_water_neg_energy": 0.7739173325213512,
-    "water_mean": 0.03374074916823632,
-    "water_max": 0.9999999999999974,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8656493503843123,
+    "water_mean": 0.4884297394025998,
+    "water_max": 0.9999999999999998,
+    "wet_nodes_075": 19,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -481,10 +481,10 @@
   },
   {
     "iteration": 16,
-    "corr_water_neg_energy": 0.7710705469062313,
-    "water_mean": 0.03314028267371892,
-    "water_max": 0.9999999999999977,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.845156189718731,
+    "water_mean": 0.41962592437292784,
+    "water_max": 0.9999999999999997,
+    "wet_nodes_075": 11,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -513,10 +513,10 @@
   },
   {
     "iteration": 17,
-    "corr_water_neg_energy": 0.7686157621227504,
-    "water_mean": 0.03262988615337913,
-    "water_max": 0.9999999999999979,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.843608523611507,
+    "water_mean": 0.5459436255376129,
+    "water_max": 0.9999999999999998,
+    "wet_nodes_075": 24,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -545,10 +545,10 @@
   },
   {
     "iteration": 18,
-    "corr_water_neg_energy": 0.7665036020162105,
-    "water_mean": 0.03219604911109031,
-    "water_max": 0.9999999999999981,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8248983741043568,
+    "water_mean": 0.46851272758768897,
+    "water_max": 0.9999999999999997,
+    "wet_nodes_075": 13,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -577,10 +577,10 @@
   },
   {
     "iteration": 19,
-    "corr_water_neg_energy": 0.7646895943891702,
-    "water_mean": 0.031827287625144814,
-    "water_max": 0.9999999999999983,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.810806652227076,
+    "water_mean": 0.4026964643302537,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 10,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -609,10 +609,10 @@
   },
   {
     "iteration": 20,
-    "corr_water_neg_energy": 0.7631340866163799,
-    "water_mean": 0.031513840362091136,
-    "water_max": 0.9999999999999984,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7999977956785181,
+    "water_mean": 0.3467526405614337,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 9,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -641,10 +641,10 @@
   },
   {
     "iteration": 21,
-    "corr_water_neg_energy": 0.7618020097473044,
-    "water_mean": 0.031247410188495514,
-    "water_max": 0.9999999999999986,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7915676057049962,
+    "water_mean": 0.29920039035793666,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 6,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -673,10 +673,10 @@
   },
   {
     "iteration": 22,
-    "corr_water_neg_energy": 0.7606625530736041,
-    "water_mean": 0.031020944540939236,
-    "water_max": 0.9999999999999987,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7848983680148497,
+    "water_mean": 0.2587809776849642,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 4,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -705,10 +705,10 @@
   },
   {
     "iteration": 23,
-    "corr_water_neg_energy": 0.7596887933428929,
-    "water_mean": 0.0308284487405164,
-    "water_max": 0.9999999999999988,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7795591923804605,
+    "water_mean": 0.22442447691293763,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 3,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -737,10 +737,10 @@
   },
   {
     "iteration": 24,
-    "corr_water_neg_energy": 0.7588573091310047,
-    "water_mean": 0.030664827310156986,
-    "water_max": 0.9999999999999989,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7752425288087493,
+    "water_mean": 0.19522145125671503,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 3,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -769,9 +769,9 @@
   },
   {
     "iteration": 25,
-    "corr_water_neg_energy": 0.7581478006550605,
-    "water_mean": 0.03052574909435149,
-    "water_max": 0.999999999999999,
+    "corr_water_neg_energy": 0.7717239887309097,
+    "water_mean": 0.1703988794489258,
+    "water_max": 0.9999999999999996,
     "wet_nodes_075": 2,
     "overlap_at_k": 1.0,
     "top_water": [
@@ -801,9 +801,9 @@
   },
   {
     "iteration": 26,
-    "corr_water_neg_energy": 0.7575427278302258,
-    "water_mean": 0.03040753261091681,
-    "water_max": 0.999999999999999,
+    "corr_water_neg_energy": 0.7688365546031406,
+    "water_mean": 0.14929969341230498,
+    "water_max": 0.9999999999999996,
     "wet_nodes_075": 2,
     "overlap_at_k": 1.0,
     "top_water": [
@@ -833,9 +833,9 @@
   },
   {
     "iteration": 27,
-    "corr_water_neg_energy": 0.7570269740276725,
-    "water_mean": 0.030307048599997336,
-    "water_max": 0.999999999999999,
+    "corr_water_neg_energy": 0.7664536811820105,
+    "water_mean": 0.13136538528117725,
+    "water_max": 0.9999999999999996,
     "wet_nodes_075": 2,
     "overlap_at_k": 1.0,
     "top_water": [
@@ -865,9 +865,9 @@
   },
   {
     "iteration": 28,
-    "corr_water_neg_energy": 0.7565875392623731,
-    "water_mean": 0.030221637190715786,
-    "water_max": 0.999999999999999,
+    "corr_water_neg_energy": 0.7644779756797843,
+    "water_mean": 0.11612122336971872,
+    "water_max": 0.9999999999999996,
     "wet_nodes_075": 2,
     "overlap_at_k": 1.0,
     "top_water": [
@@ -897,9 +897,9 @@
   },
   {
     "iteration": 29,
-    "corr_water_neg_energy": 0.7562132640102293,
-    "water_mean": 0.030149037492826464,
-    "water_max": 0.999999999999999,
+    "corr_water_neg_energy": 0.7628334487275527,
+    "water_mean": 0.10316368574497897,
+    "water_max": 0.9999999999999996,
     "wet_nodes_075": 2,
     "overlap_at_k": 1.0,
     "top_water": [
@@ -929,9 +929,9 @@
   },
   {
     "iteration": 30,
-    "corr_water_neg_energy": 0.7558945831991639,
-    "water_mean": 0.030087327749620543,
-    "water_max": 0.999999999999999,
+    "corr_water_neg_energy": 0.7614600994925089,
+    "water_mean": 0.09214977876395015,
+    "water_max": 0.9999999999999996,
     "wet_nodes_075": 2,
     "overlap_at_k": 1.0,
     "top_water": [
@@ -961,10 +961,10 @@
   },
   {
     "iteration": 31,
-    "corr_water_neg_energy": 0.7556233088895205,
-    "water_mean": 0.03003487446789551,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8467538199285507,
+    "water_mean": 0.34285510930863666,
+    "water_max": 0.9999999999999999,
+    "wet_nodes_075": 15,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -993,10 +993,10 @@
   },
   {
     "iteration": 32,
-    "corr_water_neg_energy": 0.7553924395692102,
-    "water_mean": 0.029990289178429226,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8350278734078906,
+    "water_mean": 0.2958874887930592,
+    "water_max": 0.9999999999999998,
+    "wet_nodes_075": 10,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1025,10 +1025,10 @@
   },
   {
     "iteration": 33,
-    "corr_water_neg_energy": 0.7551959937009873,
-    "water_mean": 0.029952391682382895,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8243386749798092,
+    "water_mean": 0.25596501135481836,
+    "water_max": 0.9999999999999997,
+    "wet_nodes_075": 10,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1057,10 +1057,10 @@
   },
   {
     "iteration": 34,
-    "corr_water_neg_energy": 0.7550288650732812,
-    "water_mean": 0.029920178810743506,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8147749317859571,
+    "water_mean": 0.22203090553231364,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 8,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1089,10 +1089,10 @@
   },
   {
     "iteration": 35,
-    "corr_water_neg_energy": 0.754886697550566,
-    "water_mean": 0.02989279786985003,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8063286440617796,
+    "water_mean": 0.19318691558318465,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 5,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1121,10 +1121,10 @@
   },
   {
     "iteration": 36,
-    "corr_water_neg_energy": 0.7547657769438507,
-    "water_mean": 0.02986952407009057,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7989379635550912,
+    "water_mean": 0.16866952412642497,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 4,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1153,10 +1153,10 @@
   },
   {
     "iteration": 37,
-    "corr_water_neg_energy": 0.7546629378915901,
-    "water_mean": 0.029849741340295034,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7925142578542407,
+    "water_mean": 0.14782974138817928,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 3,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1185,10 +1185,10 @@
   },
   {
     "iteration": 38,
-    "corr_water_neg_energy": 0.7545754838322605,
-    "water_mean": 0.029832926019968828,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.832788304355164,
+    "water_mean": 0.3176545977177756,
+    "water_max": 0.9999999999999998,
+    "wet_nodes_075": 11,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1217,10 +1217,10 @@
   },
   {
     "iteration": 39,
-    "corr_water_neg_energy": 0.7545011183463403,
-    "water_mean": 0.029818632997691552,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8220983640851182,
+    "water_mean": 0.2744670539408274,
+    "water_max": 0.9999999999999997,
+    "wet_nodes_075": 10,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1249,10 +1249,10 @@
   },
   {
     "iteration": 40,
-    "corr_water_neg_energy": 0.754437886337411,
-    "water_mean": 0.02980648392875587,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8126123835635277,
+    "water_mean": 0.23775764173042127,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 9,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1281,10 +1281,10 @@
   },
   {
     "iteration": 41,
-    "corr_water_neg_energy": 0.7543841237034149,
-    "water_mean": 0.029796157220160532,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8042965189050654,
+    "water_mean": 0.2065546413515761,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 5,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1313,10 +1313,10 @@
   },
   {
     "iteration": 42,
-    "corr_water_neg_energy": 0.754338414316486,
-    "water_mean": 0.0297873795178545,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.797066973601397,
+    "water_mean": 0.18003209102955778,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 4,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1345,10 +1345,10 @@
   },
   {
     "iteration": 43,
-    "corr_water_neg_energy": 0.7542995532816363,
-    "water_mean": 0.02977991847089437,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.830480318955117,
+    "water_mean": 0.3531273382513823,
+    "water_max": 0.9999999999999998,
+    "wet_nodes_075": 13,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1377,10 +1377,10 @@
   },
   {
     "iteration": 44,
-    "corr_water_neg_energy": 0.7542665155806576,
-    "water_mean": 0.029773576580978265,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8195338538459881,
+    "water_mean": 0.304618883394393,
+    "water_max": 0.9999999999999997,
+    "wet_nodes_075": 10,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1409,10 +1409,10 @@
   },
   {
     "iteration": 45,
-    "corr_water_neg_energy": 0.7542384293283273,
-    "water_mean": 0.029768185974549576,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8099788234077921,
+    "water_mean": 0.26338669676595217,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 9,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1441,10 +1441,10 @@
   },
   {
     "iteration": 46,
-    "corr_water_neg_energy": 0.7542145529743024,
-    "water_mean": 0.029763603959085182,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8017231540285895,
+    "water_mean": 0.22833933813177731,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 6,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1473,10 +1473,10 @@
   },
   {
     "iteration": 47,
-    "corr_water_neg_energy": 0.7541942558770962,
-    "water_mean": 0.029759709245940458,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8272785279857194,
+    "water_mean": 0.4001133952472338,
+    "water_max": 0.9999999999999998,
+    "wet_nodes_075": 13,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1505,10 +1505,10 @@
   },
   {
     "iteration": 48,
-    "corr_water_neg_energy": 0.7541770017575233,
-    "water_mean": 0.02975639873976743,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8159377023807578,
+    "water_mean": 0.3445570318408668,
+    "water_max": 0.9999999999999997,
+    "wet_nodes_075": 10,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1537,10 +1537,10 @@
   },
   {
     "iteration": 49,
-    "corr_water_neg_energy": 0.7541623346092361,
-    "water_mean": 0.02975358480952037,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8062920226700905,
+    "water_mean": 0.29733412294545475,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 9,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1569,10 +1569,10 @@
   },
   {
     "iteration": 50,
-    "corr_water_neg_energy": 0.7541498667046872,
-    "water_mean": 0.029751192968810358,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.798141700017673,
+    "water_mean": 0.25719465038435463,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 8,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1601,10 +1601,10 @@
   },
   {
     "iteration": 51,
-    "corr_water_neg_energy": 0.7541392683871956,
-    "water_mean": 0.029749159904206852,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.791274933473359,
+    "water_mean": 0.22307609870741946,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 5,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1633,10 +1633,10 @@
   },
   {
     "iteration": 52,
-    "corr_water_neg_energy": 0.7541302593848024,
-    "water_mean": 0.029747431799293872,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8321515930427718,
+    "water_mean": 0.48212076087808703,
+    "water_max": 0.9999999999999999,
+    "wet_nodes_075": 23,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1665,10 +1665,10 @@
   },
   {
     "iteration": 53,
-    "corr_water_neg_energy": 0.7541226014202574,
-    "water_mean": 0.02974596291011784,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.819187978823402,
+    "water_mean": 0.414263292627092,
+    "water_max": 0.9999999999999998,
+    "wet_nodes_075": 13,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1697,10 +1697,10 @@
   },
   {
     "iteration": 54,
-    "corr_water_neg_energy": 0.7541160919245978,
-    "water_mean": 0.02974471435431821,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.8083840357615435,
+    "water_mean": 0.3565844446137463,
+    "water_max": 0.9999999999999997,
+    "wet_nodes_075": 10,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1729,10 +1729,10 @@
   },
   {
     "iteration": 55,
-    "corr_water_neg_energy": 0.7541105586901448,
-    "water_mean": 0.02974365308188853,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7994358910112681,
+    "water_mean": 0.30755742380240236,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 9,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1761,10 +1761,10 @@
   },
   {
     "iteration": 56,
-    "corr_water_neg_energy": 0.7541058553229867,
-    "water_mean": 0.029742751000323298,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7920317187284007,
+    "water_mean": 0.26588445611276,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 7,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1793,10 +1793,10 @@
   },
   {
     "iteration": 57,
-    "corr_water_neg_energy": 0.7541018573757379,
-    "water_mean": 0.02974198423099285,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.785896759347578,
+    "water_mean": 0.23046243357656407,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 4,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1825,10 +1825,10 @@
   },
   {
     "iteration": 58,
-    "corr_water_neg_energy": 0.7540984590590437,
-    "water_mean": 0.02974133247706197,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7808017765707892,
+    "water_mean": 0.20035371442079752,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 3,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1857,10 +1857,10 @@
   },
   {
     "iteration": 59,
-    "corr_water_neg_energy": 0.7540955704453957,
-    "water_mean": 0.029740778486220726,
-    "water_max": 0.999999999999999,
-    "wet_nodes_075": 2,
+    "corr_water_neg_energy": 0.7765595744613545,
+    "water_mean": 0.1747613031383959,
+    "water_max": 0.9999999999999996,
+    "wet_nodes_075": 3,
     "overlap_at_k": 1.0,
     "top_water": [
       20.78125,
@@ -1889,9 +1889,9 @@
   },
   {
     "iteration": 60,
-    "corr_water_neg_energy": 0.7540931150916739,
-    "water_mean": 0.029740307594005665,
-    "water_max": 0.999999999999999,
+    "corr_water_neg_energy": 0.7730184221311777,
+    "water_mean": 0.15300775354835458,
+    "water_max": 0.9999999999999996,
     "wet_nodes_075": 2,
     "overlap_at_k": 1.0,
     "top_water": [

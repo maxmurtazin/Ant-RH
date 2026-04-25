@@ -29,6 +29,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import mpmath as mp
 import numpy as np
 
 from fractal_dtes_aco_zeta_eta import ETAFractalDTESACOZeta, _format_seconds
@@ -200,6 +201,9 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         mean = float(np.mean(vals))
         return (terminal + mean) * 0.5
 
+    def zeta_on_critical_line(self, t: float):
+        return mp.zeta(mp.mpf("0.5") + 1j * mp.mpf(str(float(t))))
+
     def evaluate_path(
         self, path_nodes: List[int], agent_type: str = "default"
     ) -> float:
@@ -207,6 +211,99 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         w = self.water_score(path_nodes)
         # Multiplicative-ish but safe for arbitrary score signs.
         return base_score + self.water_score_weight * (w**self.water_alpha)
+
+    def sample_ant_path(self, start_node_id: int, ant) -> List[int]:
+        path = [start_node_id]
+        current = start_node_id
+        target_level = self.cfg.target_level or self.cfg.tree_depth
+
+        for _step in range(self.cfg.max_ant_steps):
+            if self.nodes[current].level >= target_level:
+                break
+
+            nbrs = self.neighbors.get(current, [])
+            if not nbrs:
+                break
+
+            weights = []
+            for nxt in nbrs:
+                barrier = self.compute_barrier(current, nxt)
+                tau = self.mixed_pheromone(ant.agent_type, current, nxt)
+                pheromone = self.node_pheromone_mass(nxt)
+                energy = self.nodes[nxt].energy
+                effective_energy = energy - 0.3 * np.log(pheromone + 1e-12)
+                barrier += self.cfg.lambda_energy * (effective_energy - energy)
+                agent_score = self.compute_agent_value(ant, current, nxt)
+                log_w = (
+                    self.cfg.alpha * math.log(max(tau, self.cfg.tau_min))
+                    - self.cfg.beta * barrier
+                    + self.cfg.agent_gamma * agent_score
+                )
+                w = math.exp(min(700.0, max(-700.0, log_w)))
+                weights.append(max(w, 1e-300))
+
+            total = sum(weights)
+            if total <= 0:
+                break
+
+            r = self.rng.random() * total
+            cumsum = 0.0
+            chosen = nbrs[-1]
+            for nxt, w in zip(nbrs, weights):
+                cumsum += w
+                if r <= cumsum:
+                    chosen = nxt
+                    break
+
+            path.append(chosen)
+            current = chosen
+
+        return path
+
+    def reinforce_pheromones(self, paths: List[AntPath]) -> None:
+        for ant_path in paths:
+            ids = ant_path.node_ids
+            channel_scale = self.agent_type_channel_scale(ant_path.agent_type)
+            deposit = ant_path.score * channel_scale
+            deposit = getattr(ant_path, "mass", 1.0) * deposit
+            agent_channel = self.pheromone_channels[ant_path.agent_type]
+            cross_weights = (
+                self.channel_agreement_weights(ant_path.agent_type)
+                if self.cfg.enable_cross_channel_agreement
+                else {}
+            )
+
+            for a, b in zip(ids[:-1], ids[1:]):
+                # Shared memory: global colony consensus.
+                self.pheromones[(a, b)] = min(
+                    self.cfg.tau_max, self.pheromones[(a, b)] + deposit
+                )
+                self.pheromones[(b, a)] = min(
+                    self.cfg.tau_max, self.pheromones[(b, a)] + deposit
+                )
+
+                # Own channel: preserves specialization.
+                agent_channel[(a, b)] = min(
+                    self.cfg.tau_max, agent_channel[(a, b)] + 1.25 * deposit
+                )
+                agent_channel[(b, a)] = min(
+                    self.cfg.tau_max, agent_channel[(b, a)] + 1.25 * deposit
+                )
+
+                # Cross-channel agreement: weakly reinforce related channels.
+                for channel_name, weight in cross_weights.items():
+                    channel = self.pheromone_channels.get(channel_name)
+                    if channel is None:
+                        continue
+                    cross_deposit = (
+                        self.cfg.cross_reinforcement_strength * weight * deposit
+                    )
+                    channel[(a, b)] = min(
+                        self.cfg.tau_max, channel[(a, b)] + cross_deposit
+                    )
+                    channel[(b, a)] = min(
+                        self.cfg.tau_max, channel[(b, a)] + cross_deposit
+                    )
 
     def inject_water_pheromone_bias(self) -> None:
         """Light pre-bias: edges into wet nodes get a tiny pheromone lift.
@@ -275,9 +372,16 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             for ant in ants:
                 path_nodes = self.sample_ant_path(self.root_id, ant)
                 score = self.evaluate_path(path_nodes, ant.agent_type)
-                paths.append(
-                    AntPath(node_ids=path_nodes, score=score, agent_type=ant.agent_type)
+                terminal_t = self.nodes[path_nodes[-1]].center()
+                ant.zeta_value = complex(
+                    mp.zeta(mp.mpf("0.5") + 1j * mp.mpf(str(float(terminal_t))))
                 )
+                ant.mass = 1.0 / (abs(ant.zeta_value) + 1e-8)
+                ant_path = AntPath(
+                    node_ids=path_nodes, score=score, agent_type=ant.agent_type
+                )
+                ant_path.mass = ant.mass
+                paths.append(ant_path)
                 self.update_ant_memory(ant, path_nodes)
                 for nid in path_nodes:
                     self.nodes[nid].visit_count += 1
@@ -377,10 +481,144 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
                 break
 
     def run(self) -> List[float]:
-        candidates = super().run()
-        try:
-            from fractal_dtes_aco_zeta_visual import save_metrics_json
+        from fractal_dtes_aco_zeta_visual import save_metrics_json
 
+        self.logger.emit("START", "Fractal-DTES-ACO-Zeta ETA run started")
+        self._time_stage("evaluate_grid", self.evaluate_grid)
+        self._time_stage(
+            "compute_multiscale_features", self.compute_multiscale_features
+        )
+        self._time_stage("build_dyadic_tree", self.build_dyadic_tree)
+        self._time_stage("aggregate_node_statistics", self.aggregate_node_statistics)
+        self._time_stage("build_graph", self.build_graph)
+        self._time_stage("compute_node_stability", self.compute_node_stability)
+        self._time_stage("initialize_pheromones", self.initialize_pheromones)
+        self._time_stage("run_aco", self.run_aco)
+        candidate_nodes = self._time_stage(
+            "rank_candidate_nodes", self.rank_candidate_nodes
+        )
+        candidates = self._time_stage(
+            "refine_candidates", self.refine_candidates, candidate_nodes
+        )
+
+        water_k = 12
+        water_node_ids = list(self.water_by_node.keys())
+        water_vals = np.array(
+            [self.water_by_node[nid] for nid in water_node_ids], dtype=float
+        )
+        top_water_idx = np.argsort(water_vals)[-water_k:] if water_vals.size else []
+        water_candidate_ts = [
+            float(self.nodes[water_node_ids[i]].center()) for i in top_water_idx
+        ]
+        try:
+            refined_water_ts = []
+            for i, t0 in zip(top_water_idx, water_candidate_ts):
+                try:
+                    node = self.nodes[water_node_ids[i]]
+                    refined = self.local_refinement(node.interval)
+                    refined_water_ts.append(
+                        float(refined) if refined is not None else float(t0)
+                    )
+                except Exception:
+                    refined_water_ts.append(float(t0))
+            water_candidate_ts = refined_water_ts
+        except Exception:
+            pass
+
+        def dedup_ts(ts, tol=1e-3):
+            out = []
+            for t in sorted(ts):
+                if not out or abs(t - out[-1]) > tol:
+                    out.append(float(t))
+            return out
+
+        def dedup_ts_by_zeta(ts, tol=0.1):
+            cleaned = []
+            for t in sorted(float(x) for x in ts):
+                if not cleaned or abs(t - cleaned[-1]) > tol:
+                    cleaned.append(t)
+                else:
+                    old = cleaned[-1]
+                    try:
+                        old_val = abs(complex(self.zeta_on_critical_line(old)))
+                        new_val = abs(complex(self.zeta_on_critical_line(t)))
+                    except Exception:
+                        try:
+                            old_val = self.eval_abs_zeta(old)
+                            new_val = self.eval_abs_zeta(t)
+                        except Exception:
+                            old_val = abs(
+                                complex(
+                                    mp.zeta(
+                                        mp.mpf("0.5") + 1j * mp.mpf(str(float(old)))
+                                    )
+                                )
+                            )
+                            new_val = abs(
+                                complex(
+                                    mp.zeta(
+                                        mp.mpf("0.5") + 1j * mp.mpf(str(float(t)))
+                                    )
+                                )
+                            )
+
+                    if new_val < old_val:
+                        cleaned[-1] = t
+            return cleaned
+
+        water_candidate_ts = dedup_ts(water_candidate_ts, tol=1e-4)
+
+        try:
+            candidates = list(candidates) + water_candidate_ts
+        except NameError:
+            candidates = water_candidate_ts
+
+        candidates = dedup_ts_by_zeta(candidates, tol=0.1)
+
+        def local_refine(t0, f, steps=5, grid=25, window=0.1):
+            t_best = float(t0)
+
+            for _ in range(steps):
+                ts = np.linspace(t_best - window, t_best + window, grid)
+                vals = [abs(complex(f(float(t)))) for t in ts]
+                idx = int(np.argmin(vals))
+                t_best = float(ts[idx])
+                window *= 0.3
+
+            return t_best
+
+        try:
+            refined = []
+            for t0 in candidates:
+                try:
+                    t1 = local_refine(
+                        float(t0),
+                        lambda x: self.zeta_on_critical_line(float(x)),
+                        steps=8,
+                        grid=41,
+                        window=0.08,
+                    )
+                    refined.append(float(t1))
+                except Exception:
+                    refined.append(float(t0))
+
+            candidates = dedup_ts_by_zeta(refined, tol=0.1)
+
+        except Exception as e:
+            print(f"[WARN] local refine failed: {e}")
+
+        out_dir = Path(self.out_dir)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        with open(out_dir / "water_candidates.json", "w", encoding="utf-8") as f:
+            json.dump(water_candidate_ts, f, indent=2)
+
+        candidates = self.merge_close_candidates(candidates)
+        self.metrics = self.compute_metrics(candidate_nodes, candidates)
+        self.metrics["stage_timings_s"] = self.stage_timings
+        self.metrics["aco_history"] = self.aco_history
+        self.metrics["config"] = self._safe_config_dict()
+
+        try:
             self.metrics["water_history"] = self.water_history
             self.metrics["water_config"] = {
                 "rain_rate": self.water_rain_rate,
@@ -391,10 +629,14 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
                 "pheromone_bias": self.water_pheromone_bias,
             }
             save_metrics_json(
+                os.path.join(self.out_dir, "metrics_summary.json"), self.metrics
+            )
+            save_metrics_json(
+                os.path.join(self.out_dir, "aco_history.json"), self.aco_history
+            )
+            save_metrics_json(
                 os.path.join(self.out_dir, "water_history.json"), self.water_history
             )
-            out_dir = Path("fractal_dtes_aco_eta_water_output")
-            out_dir.mkdir(parents=True, exist_ok=True)
             with open(out_dir / "water_diag_history.json", "w", encoding="utf-8") as f:
                 json.dump(self.water_diag_history, f, indent=2)
             save_metrics_json(
@@ -402,6 +644,14 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             )
         except Exception as exc:
             self.logger.emit("WATER", "failed to save water metrics", error=str(exc))
+
+        self.plot_all(candidates, self.out_dir)
+        self.logger.emit(
+            "DONE",
+            "run completed",
+            candidates=len(candidates),
+            total_time=_format_seconds(time.time() - self.logger.global_start),
+        )
         return candidates
 
 

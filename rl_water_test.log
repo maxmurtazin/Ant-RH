@@ -1,0 +1,164 @@
+[START] Fractal-DTES-ACO-Zeta ETA run started | elapsed=0.00s
+[STAGE] evaluate_grid started | elapsed=0.00s
+[STAGE] evaluate_grid done | elapsed=1.22s | stage_time=1.2s
+[STAGE] compute_multiscale_features started | elapsed=1.22s
+[STAGE] compute_multiscale_features done | elapsed=1.95s | stage_time=0.7s
+[STAGE] build_dyadic_tree started | elapsed=1.95s
+[STAGE] build_dyadic_tree done | elapsed=1.95s | stage_time=0.0s
+[STAGE] aggregate_node_statistics started | elapsed=1.95s
+[STAGE] aggregate_node_statistics done | elapsed=1.97s | stage_time=0.0s
+[STAGE] build_graph started | elapsed=1.97s
+[STAGE] build_graph done | elapsed=1.97s | stage_time=0.0s
+[STAGE] compute_node_stability started | elapsed=1.97s
+[STAGE] compute_node_stability done | elapsed=1.97s | stage_time=0.0s
+[STAGE] initialize_pheromones started | elapsed=1.97s
+[STAGE] initialize_pheromones done | elapsed=1.97s | stage_time=0.0s
+[STAGE] run_aco started | elapsed=1.97s
+[WATER] water field initialized | elapsed=1.98s | rain=0.012 evap=0.985 flow=0.35 alpha=2.0
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.2593
+[ACO+WATER] iter 1/60 | elapsed=2.03s | iter_time=0.0s eta=2.8s best_E=-7.5236 max_score=1852 diversity=0.292 water_mean=0.185 wet_nodes=19
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.3511
+[ACO+WATER] iter 2/60 | elapsed=2.08s | iter_time=0.1s eta=2.8s best_E=-7.5236 max_score=1852 diversity=0.208 water_mean=0.346 wet_nodes=24
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.4006
+[ACO+WATER] iter 3/60 | elapsed=2.14s | iter_time=0.1s eta=2.9s best_E=-7.5236 max_score=1852 diversity=0.250 water_mean=0.491 wet_nodes=25
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.4323
+[ACO+WATER] iter 4/60 | elapsed=2.19s | iter_time=0.1s eta=2.9s best_E=-7.5236 max_score=1852 diversity=0.208 water_mean=0.590 wet_nodes=26
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.4543
+[ACO+WATER] iter 5/60 | elapsed=2.25s | iter_time=0.1s eta=2.9s best_E=-7.5236 max_score=1852 diversity=0.188 water_mean=0.647 wet_nodes=28
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.4705
+[ACO+WATER] iter 6/60 | elapsed=2.30s | iter_time=0.1s eta=2.8s best_E=-7.5236 max_score=1852 diversity=0.250 water_mean=0.678 wet_nodes=29
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.4829
+[ACO+WATER] iter 7/60 | elapsed=2.36s | iter_time=0.1s eta=2.8s best_E=-7.5236 max_score=1852 diversity=0.188 water_mean=0.694 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.4926
+[ACO+WATER] iter 8/60 | elapsed=2.42s | iter_time=0.1s eta=2.8s best_E=-7.5236 max_score=1852 diversity=0.188 water_mean=0.702 wet_nodes=30
+[RL] action={'mix': 0.15, 'gamma': 1.0, 'alpha': 1.5} value=0.2801
+[ACO+WATER] iter 9/60 | elapsed=2.47s | iter_time=0.1s eta=2.8s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.601 wet_nodes=23
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.4999
+[ACO+WATER] iter 10/60 | elapsed=2.53s | iter_time=0.1s eta=2.7s best_E=-7.5236 max_score=1852 diversity=0.188 water_mean=0.654 wet_nodes=25
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5061
+[ACO+WATER] iter 11/60 | elapsed=2.58s | iter_time=0.0s eta=2.6s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.682 wet_nodes=26
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5114
+[ACO+WATER] iter 12/60 | elapsed=2.63s | iter_time=0.1s eta=2.5s best_E=-7.5236 max_score=1852 diversity=0.208 water_mean=0.696 wet_nodes=28
+[RL] action={'mix': 0.45, 'gamma': 0.35, 'alpha': 2.5} value=0.2861
+[ACO+WATER] iter 13/60 | elapsed=2.68s | iter_time=0.1s eta=2.5s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.721 wet_nodes=36
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5160
+[ACO+WATER] iter 14/60 | elapsed=2.73s | iter_time=0.1s eta=2.4s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.716 wet_nodes=32
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5200
+[ACO+WATER] iter 15/60 | elapsed=2.78s | iter_time=0.0s eta=2.3s best_E=-7.5236 max_score=1852 diversity=0.208 water_mean=0.713 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5234
+[ACO+WATER] iter 16/60 | elapsed=2.84s | iter_time=0.1s eta=2.3s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.712 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5264
+[ACO+WATER] iter 17/60 | elapsed=2.89s | iter_time=0.1s eta=2.2s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.711 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5290
+[ACO+WATER] iter 18/60 | elapsed=2.94s | iter_time=0.1s eta=2.2s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.711 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5313
+[ACO+WATER] iter 19/60 | elapsed=3.00s | iter_time=0.1s eta=2.1s best_E=-7.5236 max_score=1852 diversity=0.188 water_mean=0.711 wet_nodes=30
+[RL] action={'mix': 0.15, 'gamma': 1.0, 'alpha': 1.5} value=0.3737
+[ACO+WATER] iter 20/60 | elapsed=3.04s | iter_time=0.0s eta=2.1s best_E=-7.5236 max_score=1852 diversity=0.188 water_mean=0.608 wet_nodes=23
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5331
+[ACO+WATER] iter 21/60 | elapsed=3.09s | iter_time=0.0s eta=2.0s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.658 wet_nodes=25
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5349
+[ACO+WATER] iter 22/60 | elapsed=3.14s | iter_time=0.1s eta=1.9s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.684 wet_nodes=26
+[RL] action={'mix': 0.15, 'gamma': 1.0, 'alpha': 1.5} value=0.4199
+[ACO+WATER] iter 23/60 | elapsed=3.20s | iter_time=0.1s eta=1.9s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.586 wet_nodes=19
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5363
+[ACO+WATER] iter 24/60 | elapsed=3.24s | iter_time=0.0s eta=1.8s best_E=-7.5236 max_score=1852 diversity=0.188 water_mean=0.645 wet_nodes=24
+[RL] action={'mix': 0.15, 'gamma': 1.0, 'alpha': 1.5} value=0.4470
+[ACO+WATER] iter 25/60 | elapsed=3.29s | iter_time=0.1s eta=1.8s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.553 wet_nodes=18
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5375
+[ACO+WATER] iter 26/60 | elapsed=3.34s | iter_time=0.0s eta=1.7s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.627 wet_nodes=24
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5388
+[ACO+WATER] iter 27/60 | elapsed=3.39s | iter_time=0.0s eta=1.6s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.668 wet_nodes=26
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5400
+[ACO+WATER] iter 28/60 | elapsed=3.44s | iter_time=0.0s eta=1.6s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.689 wet_nodes=27
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5412
+[ACO+WATER] iter 29/60 | elapsed=3.48s | iter_time=0.0s eta=1.5s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.700 wet_nodes=29
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5424
+[ACO+WATER] iter 30/60 | elapsed=3.53s | iter_time=0.0s eta=1.5s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.705 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5434
+[ACO+WATER] iter 31/60 | elapsed=3.58s | iter_time=0.1s eta=1.4s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.708 wet_nodes=30
+[RL] action={'mix': 0.45, 'gamma': 0.35, 'alpha': 2.5} value=0.3815
+[ACO+WATER] iter 32/60 | elapsed=3.63s | iter_time=0.1s eta=1.4s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.725 wet_nodes=39
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5444
+[ACO+WATER] iter 33/60 | elapsed=3.68s | iter_time=0.0s eta=1.3s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.718 wet_nodes=32
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5454
+[ACO+WATER] iter 34/60 | elapsed=3.73s | iter_time=0.0s eta=1.3s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.714 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5462
+[ACO+WATER] iter 35/60 | elapsed=3.78s | iter_time=0.1s eta=1.2s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.712 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5470
+[ACO+WATER] iter 36/60 | elapsed=3.83s | iter_time=0.0s eta=1.2s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.711 wet_nodes=30
+[RL] action={'mix': 0.45, 'gamma': 0.35, 'alpha': 2.5} value=0.4293
+[ACO+WATER] iter 37/60 | elapsed=3.88s | iter_time=0.0s eta=1.1s best_E=-7.5236 max_score=1852 diversity=0.083 water_mean=0.727 wet_nodes=40
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5478
+[ACO+WATER] iter 38/60 | elapsed=3.93s | iter_time=0.0s eta=1.1s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.718 wet_nodes=32
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5485
+[ACO+WATER] iter 39/60 | elapsed=3.98s | iter_time=0.1s eta=1.0s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.714 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5492
+[ACO+WATER] iter 40/60 | elapsed=4.03s | iter_time=0.1s eta=1.0s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.712 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5498
+[ACO+WATER] iter 41/60 | elapsed=4.08s | iter_time=0.0s eta=0.9s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.711 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5504
+[ACO+WATER] iter 42/60 | elapsed=4.13s | iter_time=0.0s eta=0.9s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.711 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5510
+[ACO+WATER] iter 43/60 | elapsed=4.18s | iter_time=0.0s eta=0.8s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.711 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5515
+[ACO+WATER] iter 44/60 | elapsed=4.23s | iter_time=0.1s eta=0.8s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.711 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5520
+[ACO+WATER] iter 45/60 | elapsed=4.28s | iter_time=0.0s eta=0.7s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5525
+[ACO+WATER] iter 46/60 | elapsed=4.33s | iter_time=0.0s eta=0.7s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5529
+[ACO+WATER] iter 47/60 | elapsed=4.38s | iter_time=0.0s eta=0.6s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5533
+[ACO+WATER] iter 48/60 | elapsed=4.42s | iter_time=0.0s eta=0.6s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5538
+[ACO+WATER] iter 49/60 | elapsed=4.47s | iter_time=0.0s eta=0.5s best_E=-7.5236 max_score=1852 diversity=0.083 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5542
+[ACO+WATER] iter 50/60 | elapsed=4.59s | iter_time=0.1s eta=0.6s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5545
+[ACO+WATER] iter 51/60 | elapsed=4.65s | iter_time=0.1s eta=0.6s best_E=-7.5236 max_score=1852 diversity=0.104 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5549
+[ACO+WATER] iter 52/60 | elapsed=4.70s | iter_time=0.0s eta=0.5s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5552
+[ACO+WATER] iter 53/60 | elapsed=4.75s | iter_time=0.1s eta=0.4s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5556
+[ACO+WATER] iter 54/60 | elapsed=4.80s | iter_time=0.1s eta=0.3s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5559
+[ACO+WATER] iter 55/60 | elapsed=4.85s | iter_time=0.0s eta=0.3s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5562
+[ACO+WATER] iter 56/60 | elapsed=4.90s | iter_time=0.0s eta=0.2s best_E=-7.5236 max_score=1852 diversity=0.125 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5565
+[ACO+WATER] iter 57/60 | elapsed=4.95s | iter_time=0.0s eta=0.2s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.710 wet_nodes=30
+[RL] action={'mix': 0.15, 'gamma': 1.0, 'alpha': 1.5} value=0.4659
+[ACO+WATER] iter 58/60 | elapsed=5.00s | iter_time=0.1s eta=0.1s best_E=-7.5236 max_score=1852 diversity=0.167 water_mean=0.608 wet_nodes=23
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5566
+[ACO+WATER] iter 59/60 | elapsed=5.05s | iter_time=0.0s eta=0.1s best_E=-7.5236 max_score=1852 diversity=0.146 water_mean=0.658 wet_nodes=25
+[RL] action={'mix': 0.3, 'gamma': 0.5, 'alpha': 2.0} value=0.5569
+[ACO+WATER] iter 60/60 | elapsed=5.10s | iter_time=0.0s eta=0.0s best_E=-7.5236 max_score=1852 diversity=0.188 water_mean=0.684 wet_nodes=26
+[STAGE] run_aco done | elapsed=5.10s | stage_time=3.1s
+[STAGE] rank_candidate_nodes started | elapsed=5.10s
+[STAGE] rank_candidate_nodes done | elapsed=5.10s | stage_time=0.0s
+[STAGE] refine_candidates started | elapsed=5.10s
+[REFINE] candidate 1/16 | elapsed=5.21s | iter_time=0.1s eta=1.6s accepted=0
+[REFINE] candidate 2/16 | elapsed=5.32s | iter_time=0.1s eta=1.5s accepted=1
+[REFINE] candidate 3/16 | elapsed=5.44s | iter_time=0.1s eta=1.4s accepted=1
+[REFINE] candidate 4/16 | elapsed=5.54s | iter_time=0.1s eta=1.3s accepted=1
+[REFINE] candidate 5/16 | elapsed=5.66s | iter_time=0.1s eta=1.2s accepted=1
+[REFINE] candidate 6/16 | elapsed=5.75s | iter_time=0.1s eta=1.1s accepted=1
+[REFINE] candidate 7/16 | elapsed=5.86s | iter_time=0.1s eta=1.0s accepted=1
+[REFINE] candidate 8/16 | elapsed=5.97s | iter_time=0.1s eta=0.9s accepted=1
+[REFINE] candidate 9/16 | elapsed=6.09s | iter_time=0.1s eta=0.8s accepted=1
+[REFINE] candidate 10/16 | elapsed=6.20s | iter_time=0.1s eta=0.7s accepted=1
+[REFINE] candidate 11/16 | elapsed=6.33s | iter_time=0.1s eta=0.6s accepted=1
+[REFINE] candidate 12/16 | elapsed=6.45s | iter_time=0.1s eta=0.5s accepted=1
+[REFINE] candidate 13/16 | elapsed=6.56s | iter_time=0.1s eta=0.3s accepted=1
+[REFINE] candidate 14/16 | elapsed=6.66s | iter_time=0.1s eta=0.2s accepted=1
+[REFINE] candidate 15/16 | elapsed=6.77s | iter_time=0.1s eta=0.1s accepted=1
+[REFINE] candidate 16/16 | elapsed=6.89s | iter_time=0.1s eta=0.0s accepted=1
+[STAGE] refine_candidates done | elapsed=6.89s | stage_time=1.8s
+[DONE] run completed | elapsed=7.40s | candidates=1 total_time=7.4s
+
+Candidates:
+t = 21.022040213723 |zeta| = 6.536e-07
+
+Outputs: fractal_dtes_aco_eta_water_output
