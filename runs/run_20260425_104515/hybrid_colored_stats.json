@@ -1,0 +1,31 @@
+{
+  "config": {
+    "dtes": "runs/run_20260425_104515/colored_candidates.json",
+    "t_min": 100.0,
+    "t_max": 400.0,
+    "window": 0.065,
+    "top_k": null,
+    "step": 0.01,
+    "dps": 80,
+    "zero_value_tol": 1e-30,
+    "verify_abs_zeta": 1e-08,
+    "max_bisect_iter": 120,
+    "merge_tol": 1e-07,
+    "progress_every": 1,
+    "out": "runs/run_20260425_104515/hybrid_colored"
+  },
+  "runtime_s": 51.49620008468628,
+  "dtes_candidates_in_range": 72,
+  "windows_after_merge": 72,
+  "full_length": 300.0,
+  "hybrid_length": 9.359999999999673,
+  "scanned_fraction": 0.03119999999999891,
+  "estimated_speedup_by_length": 32.051282051283174,
+  "full_points_est": 30001,
+  "hybrid_points_est": 1008,
+  "estimated_speedup_by_points": 29.762896825396826,
+  "found_zeros": 72,
+  "verified_zeros": 72,
+  "min_abs_zeta": 1.9604891353351778e-16,
+  "max_abs_zeta": 2.291203277061262e-13
+}
