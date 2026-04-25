@@ -88,7 +88,7 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
 
         # Evaporation + rain.
         w = {
-            nid: self.water_evap_rate * float(val) + self.water_rain_rate
+            nid: 0.97 * float(val) + 0.002 * np.exp(-self._node_energy(nid))
             for nid, val in self.water_by_node.items()
         }
         w_new = dict(w)
@@ -124,11 +124,9 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             w_new[nid] = w_new.get(nid, 0.0) - q
             w_new[j] = w_new.get(j, 0.0) + q
 
-        # Normalize to [0, 1].
-        vals = np.array([max(0.0, float(v)) for v in w_new.values()], dtype=float)
-        mx = float(np.max(vals)) if vals.size else 1.0
+        # Clip to [0, 1].
         self.water_by_node = {
-            nid: max(0.0, float(v)) / (mx + 1e-12) for nid, v in w_new.items()
+            nid: float(np.clip(float(v), 0.0, 1.0)) for nid, v in w_new.items()
         }
 
     def water_score(self, path_nodes: List[int]) -> float:
