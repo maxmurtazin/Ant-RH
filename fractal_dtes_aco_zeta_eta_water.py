@@ -24,6 +24,7 @@ so stable wells should accumulate water, and ants should be attracted to water.
 import math
 import json
 import os
+import random
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -48,6 +49,15 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         self.water_by_node: Dict[int, float] = {}
         self.water_history: List[dict] = []
         self.water_diag_history = []
+        self.rl_actions = [
+            {"mix": 0.15, "gamma": 1.0, "alpha": 1.5},
+            {"mix": 0.30, "gamma": 0.5, "alpha": 2.0},
+            {"mix": 0.45, "gamma": 0.35, "alpha": 2.5},
+        ]
+        self.rl_values = [0.0 for _ in self.rl_actions]
+        self.rl_counts = [1 for _ in self.rl_actions]
+        self.rl_epsilon = 0.2
+        self.current_action_idx = 0
 
         # Safe defaults. Override by setting cfg.water_* after creating cfg.
         self.water_rain_rate = float(getattr(cfg, "water_rain_rate", 0.012))
@@ -82,7 +92,7 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         init = init / (float(np.max(init)) + 1e-12)
         self.water_by_node = {nid: float(w) for nid, w in zip(ids, init)}
 
-    def update_water(self) -> None:
+    def update_water(self, mix: float = 0.15, gamma: float = 1.0) -> None:
         """One rain/evap/flow step on the existing dyadic tree graph."""
         if not self.water_by_node:
             self.initialize_water()
@@ -96,8 +106,12 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         )
         energy_rain = energy_rain / (energy_rain.max() + 1e-12)
         w = {
-            nid: 0.85 * float(self.water_by_node[nid]) + 0.15 * float(rain)
+            nid: (1.0 - mix) * float(self.water_by_node[nid]) + mix * float(rain)
             for nid, rain in zip(water_node_ids, energy_rain)
+        }
+        w = {
+            nid: float(np.power(np.clip(float(val), 0.0, 1.0), gamma))
+            for nid, val in w.items()
         }
         w_new = dict(w)
 
@@ -242,8 +256,18 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
         for it in range(self.cfg.n_iterations):
             iter_start = time.time()
 
+            if random.random() < self.rl_epsilon:
+                self.current_action_idx = random.randint(0, len(self.rl_actions) - 1)
+            else:
+                self.current_action_idx = int(np.argmax(self.rl_values))
+
+            action = self.rl_actions[self.current_action_idx]
+            mix = action["mix"]
+            gamma = action["gamma"]
+            self.water_alpha = action["alpha"]
+
             # Rain before sampling: ants see water accumulated from previous iterations.
-            self.update_water()
+            self.update_water(mix=mix, gamma=gamma)
             self.record_water_diagnostics(it + 1)
             self.inject_water_pheromone_bias()
 
@@ -309,6 +333,20 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
                     "water_mean": water_mean,
                     "wet_nodes_075": wet_nodes,
                 }
+            )
+
+            reward = 0.0
+            if "best_val" in locals():
+                reward += -np.log(best_val + 1e-12)
+            reward += 0.1 * float(water_vals.mean()) if water_vals.size else 0.0
+            if hasattr(self, "water_diag_history") and len(self.water_diag_history) > 0:
+                reward += 0.5 * self.water_diag_history[-1].get("overlap_at_k", 0.0)
+
+            idx = self.current_action_idx
+            self.rl_counts[idx] += 1
+            self.rl_values[idx] += (reward - self.rl_values[idx]) / self.rl_counts[idx]
+            print(
+                f"[RL] action={action} value={self.rl_values[self.current_action_idx]:.4f}"
             )
 
             if done % max(1, log_every) == 0 or done == self.cfg.n_iterations:
