@@ -56,6 +56,40 @@ import numpy as np
 import mpmath as mp
 
 
+KNOWN_ZETA_ZEROS: Tuple[float, ...] = (
+    14.134725141734693,
+    21.022039638771554,
+    25.010857580145688,
+    30.424876125859513,
+    32.935061587739189,
+    37.586178158825671,
+    40.918719012147495,
+    43.327073280914999,
+    48.005150881167159,
+    49.773832477672302,
+    52.970321477714460,
+    56.446247697063394,
+    59.347044002602353,
+    60.831778524609809,
+    65.112544048081606,
+    67.079810529494173,
+    69.546401711173979,
+    72.067157674481907,
+    75.704690699083933,
+    77.144840068874805,
+    79.337375020249367,
+    82.910380854086030,
+    84.735492980517050,
+    87.425274613125229,
+    88.809111207634465,
+    92.491899270558484,
+    94.651344040519886,
+    95.870634228245309,
+    98.831194218193692,
+    101.31785100573139,
+)
+
+
 # ------------------------------------------------------------
 # Fractal-DTES-ACO-Zeta: research skeleton / MVP
 # ------------------------------------------------------------
@@ -152,6 +186,13 @@ class ZetaSearchConfig:
     verification_abs_tol: float = 1e-8
     refinement_subgrid: int = 128
 
+    # Experimental spectral-learning feedback
+    spectral_learning: bool = False
+    spectral_weight: float = 0.1
+    spectral_k: int = 30
+    spectral_max_points: int = 256
+    zeta_zeros: Tuple[float, ...] = KNOWN_ZETA_ZEROS
+
     def __post_init__(self) -> None:
         if self.target_level is None:
             self.target_level = self.tree_depth
@@ -226,6 +267,9 @@ class FractalDTESACOZeta:
     # ------------------------------
     # Public API
     # ------------------------------
+    def zeta(self, s):
+        return mp.zeta(s)
+
     def run(self) -> List[float]:
         self.evaluate_grid()
         self.compute_multiscale_features()
@@ -462,6 +506,114 @@ class FractalDTESACOZeta:
 
             self.evaporate_pheromones()
             self.reinforce_pheromones(paths)
+            if self.cfg.spectral_learning:
+                self.run_spectral_learning_step(_it)
+
+    def spectral_learning_inputs(self) -> Tuple[np.ndarray, np.ndarray, List[Optional[int]]]:
+        max_points = max(2, int(self.cfg.spectral_max_points))
+        stride = max(1, int(math.ceil(len(self.t_grid) / max_points)))
+        sample_indices = np.arange(0, len(self.t_grid), stride, dtype=int)
+        t_grid = np.asarray(self.t_grid[sample_indices], dtype=float)
+        zeta_abs = np.asarray(self.abs_values[sample_indices], dtype=float)
+
+        target_level = self.cfg.target_level or self.cfg.tree_depth
+        point_to_node: Dict[int, int] = {}
+        for node_id in self.nodes_by_level.get(target_level, []):
+            for point_id in self.nodes[node_id].point_ids:
+                point_to_node[point_id] = node_id
+
+        node_ids: List[Optional[int]] = [
+            point_to_node.get(int(point_id)) for point_id in sample_indices
+        ]
+        return t_grid, zeta_abs, node_ids
+
+    def build_spectral_pheromone_matrix(
+        self,
+        t_grid: np.ndarray,
+        zeta_abs: np.ndarray,
+        node_ids: List[Optional[int]],
+    ) -> np.ndarray:
+        N = len(t_grid)
+        pheromone_matrix = np.zeros((N, N), dtype=np.float64)
+
+        for i, ti in enumerate(t_grid):
+            for j, tj in enumerate(t_grid):
+                if i == j:
+                    continue
+
+                dt = abs(float(ti) - float(tj))
+                if dt > 20:
+                    continue
+
+                local_weight = math.exp(-dt / 5.0)
+                zi = max(float(zeta_abs[i]), 1e-12)
+                zj = max(float(zeta_abs[j]), 1e-12)
+                energy_weight = 1.0 / (1.0 + zi + zj)
+                weight = local_weight * energy_weight
+
+                node_i = node_ids[i]
+                node_j = node_ids[j]
+                if node_i is not None and node_j is not None and node_i != node_j:
+                    tau = self.mixed_pheromone("modulus", node_i, node_j)
+                    weight *= max(float(tau), 1e-6)
+
+                pheromone_matrix[i, j] = weight
+
+        pheromone_matrix = 0.5 * (pheromone_matrix + pheromone_matrix.T)
+        row_sums = pheromone_matrix.sum(axis=1)
+        for i in range(N):
+            if row_sums[i] < 1e-12:
+                pheromone_matrix[i, i] = 1.0
+        return np.nan_to_num(pheromone_matrix, nan=0.0, posinf=0.0, neginf=0.0)
+
+    def apply_spectral_feedback(self, loss: float) -> None:
+        decay = math.exp(-max(0.0, float(self.cfg.spectral_weight)) * min(float(loss), 100.0))
+        for edge in list(self.pheromones):
+            self.pheromones[edge] = min(
+                self.cfg.tau_max,
+                max(self.cfg.tau_min, self.pheromones[edge] * decay),
+            )
+        for channel in self.pheromone_channels.values():
+            for edge in list(channel):
+                channel[edge] = min(
+                    self.cfg.tau_max,
+                    max(self.cfg.tau_min, channel[edge] * decay),
+                )
+
+    def run_spectral_learning_step(self, iteration: int) -> None:
+        from core.dtes_spectral_learning import (
+            build_operator,
+            compute_spectrum,
+            spectral_diagnostics,
+        )
+        from core.dtes_trace_tools import v5_loss_components
+
+        t_grid, zeta_abs, node_ids = self.spectral_learning_inputs()
+        zeta_zeros = np.asarray(self.cfg.zeta_zeros, dtype=float)
+        pheromone_matrix = self.build_spectral_pheromone_matrix(t_grid, zeta_abs, node_ids)
+        H = build_operator(t_grid, zeta_abs, pheromone_matrix)
+        eigvals = compute_spectrum(H, k=min(max(1, int(self.cfg.spectral_k)), 100))
+        losses = v5_loss_components(eigvals, zeta_zeros, t_grid, self.zeta)
+        loss = losses["total"]
+
+        if np.isnan(loss) or np.isinf(loss):
+            print("[WARN] invalid spectral loss, skipping update")
+            return
+
+        diagnostics = spectral_diagnostics(eigvals, zeta_zeros)
+        corr = diagnostics["correlation"]
+        corr_text = "nan" if corr is None else f"{corr:.6f}"
+        align = diagnostics["best_alignment"]
+        align_text = "nan" if align is None else f"{align:.6f}"
+        print(
+            f"[SPECTRAL LOSS] iter={iteration + 1} "
+            f"spectral={losses['spectral']:.6f} "
+            f"counting={losses['counting']:.6f} "
+            f"determinant={losses['determinant']:.6f} "
+            f"total={loss:.6f} "
+            f"best_alignment={align_text} correlation={corr_text}"
+        )
+        self.apply_spectral_feedback(loss)
 
     def sample_ant_path(self, start_node_id: int, ant: DTESAnt) -> List[int]:
         path = [start_node_id]
@@ -482,10 +634,10 @@ class FractalDTESACOZeta:
                 tau = self.mixed_pheromone(ant.agent_type, current, nxt)
                 agent_score = self.compute_agent_value(ant, current, nxt)
 
-            # --- DTES exploration boost ---
-            visit_bonus = 1.0 / (1.0 + self.nodes[nxt].visit_count) ** 0.5
-            level_bonus = 0.15 * (self.nodes[nxt].level / max(1, self.cfg.tree_depth))
-            agent_score += 0.75 * visit_bonus + level_bonus
+                # --- DTES exploration boost ---
+                visit_bonus = 1.0 / (1.0 + self.nodes[nxt].visit_count) ** 0.5
+                level_bonus = 0.15 * (self.nodes[nxt].level / max(1, self.cfg.tree_depth))
+                agent_score += 0.75 * visit_bonus + level_bonus
                 log_w = (
                     self.cfg.alpha * math.log(max(tau, self.cfg.tau_min))
                     - self.cfg.beta * barrier
@@ -859,7 +1011,30 @@ class FractalDTESACOZeta:
             )
         return filtered
 
-def default_demo() -> None:
+def parse_args(argv=None):
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Run the experimental Fractal-DTES-ACO zeta search."
+    )
+    parser.add_argument(
+        "--spectral-learning",
+        action="store_true",
+        help="Enable experimental DTES spectral-loss feedback into ACO pheromones.",
+    )
+    parser.add_argument(
+        "--spectral-weight",
+        type=float,
+        default=0.1,
+        help="Feedback strength for spectral-learning pheromone decay.",
+    )
+    args, _unknown = parser.parse_known_args(argv)
+    return args
+
+
+def default_demo(argv=None) -> None:
+    args = parse_args(argv)
+
     # First ten nontrivial zeros are near:
     # 14.1347, 21.0220, 25.0108, 30.4248, 32.9351, ...
     cfg = ZetaSearchConfig(
@@ -876,6 +1051,8 @@ def default_demo() -> None:
         refinement_subgrid=128,
         r0=6.0,
         mp_dps=50,
+        spectral_learning=args.spectral_learning,
+        spectral_weight=args.spectral_weight,
     )
 
     searcher = FractalDTESACOZeta(cfg)
@@ -885,6 +1062,102 @@ def default_demo() -> None:
     for t in candidates:
         z = mp.zeta(mp.mpf('0.5') + 1j * mp.mpf(str(float(t))))
         print(f"t = {t:.12f} |zeta| = {abs(complex(z)):.3e}")
+
+    # === DTES spectral export (SAFE PATCH) ===
+    try:
+        import json
+        import os
+        import numpy as np
+
+        run_dir = "runs"
+        os.makedirs(run_dir, exist_ok=True)
+
+        # --- t_grid ---
+        if hasattr(searcher, "t_grid"):
+            t_grid = list(map(float, searcher.t_grid))
+        else:
+            t_grid = []
+            if hasattr(searcher, "nodes"):
+                for n in searcher.nodes.values():
+                    if hasattr(n, "t"):
+                        t_grid.append(float(n.t))
+
+        if len(t_grid) > 1500:
+            t_grid = t_grid[:1500]
+
+        # --- zeta_abs ---
+        zeta_abs = []
+        for t in t_grid:
+            try:
+                val = abs(mp.zeta(mp.mpf('0.5') + 1j * mp.mpf(str(float(t)))))
+            except Exception:
+                val = 0.0
+            zeta_abs.append(float(val))
+
+        # --- pheromone_matrix ---
+        N = len(t_grid)
+        pheromone_matrix = np.zeros((N, N), dtype=float)
+
+        for i, ti in enumerate(t_grid):
+            for j, tj in enumerate(t_grid):
+                if i == j:
+                    continue
+
+                dt = abs(ti - tj)
+
+                # locality kernel (critical for structure)
+                local_weight = np.exp(-dt / 5.0)
+
+                # cutoff to sparsify graph
+                if dt > 20:
+                    continue
+
+                zi = zeta_abs[i]
+                zj = zeta_abs[j]
+
+                # avoid division issues
+                zi = max(zi, 1e-12)
+                zj = max(zj, 1e-12)
+
+                # energy-based weighting (enhances near zeros)
+                energy_weight = 1.0 / (1.0 + zi + zj)
+
+                # combine
+                pheromone_matrix[i, j] = local_weight * energy_weight
+
+        # enforce symmetry (CRITICAL for self-adjoint operator)
+        pheromone_matrix = 0.5 * (pheromone_matrix + pheromone_matrix.T)
+
+        # ensure no empty rows (fallback safety)
+        row_sums = pheromone_matrix.sum(axis=1)
+        for i in range(N):
+            if row_sums[i] < 1e-12:
+                pheromone_matrix[i, i] = 1.0
+
+        # --- optional zeros ---
+        zeros = []
+        if hasattr(searcher, "zeros"):
+            zeros = [float(z) for z in searcher.zeros]
+        if not zeros and hasattr(searcher.cfg, "zeta_zeros"):
+            zeros = [float(z) for z in searcher.cfg.zeta_zeros]
+
+        spectral_data = {
+            "t_grid": t_grid,
+            "zeta_abs": zeta_abs,
+            "pheromone_matrix": pheromone_matrix.tolist(),
+            "zeta_zeros": zeros,
+            "spectral_ready": True
+        }
+
+        out_file = os.path.join(run_dir, "dtes_spectral_input.json")
+
+        with open(out_file, "w") as f:
+            json.dump(spectral_data, f)
+
+        print(f"[OK] DTES spectral input saved -> {out_file}")
+
+    except Exception as e:
+        print(f"[WARN] DTES spectral export failed: {e}")
 
 
 if __name__ == "__main__":

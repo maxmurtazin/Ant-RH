@@ -150,6 +150,38 @@ Distance / recall analysis
 
 ---
 
+## V6 Direct Operator Learning
+
+V6 adds an experimental direct operator learning path. Given exported DTES
+spectral input, it initializes a self-adjoint operator from the DTES graph and
+then learns a symmetric operator \(H_\theta\) whose eigenvalues are compared
+against supplied zeta-zero ordinates.
+
+```bash
+python3 validation/train_dtes_operator.py \
+  --input runs/dtes_spectral_input.json \
+  --out runs/operator_learning_report.json \
+  --steps 2000 \
+  --lr 1e-3 \
+  --k 50
+```
+
+The run writes:
+
+- `runs/operator_learning_report.json`
+- `runs/learned_eigenvalues.csv`
+- `runs/learned_operator.npy`
+- `runs/loss_curve.csv`
+
+If `matplotlib` is available, it also writes optional diagnostic plots for the
+loss curve, learned spectrum, and spacing distribution.
+
+This is a numerical Hilbert-Polya-inspired diagnostic and fitting experiment.
+It does not constitute, and should not be interpreted as, a proof of the
+Riemann hypothesis.
+
+---
+
 ## Documentation
 
 Extended guides (setup, repo layout, CLI flags, JSON formats): [Docs/README.md](Docs/README.md).

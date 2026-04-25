@@ -34,6 +34,7 @@ GROUPS="${GROUPS:-4}"
 ANTS_PER_GROUP="${ANTS_PER_GROUP:-24}"
 ITERATIONS_PER_GROUP="${ITERATIONS_PER_GROUP:-20}"
 TARGET_COUNT="${TARGET_COUNT:-180}"
+PRIME_X_MAX="${PRIME_X_MAX:-1000}"
 
 RUN_ID="$(date +%Y%m%d_%H%M%S)"
 RUN_DIR="runs/run_${RUN_ID}"
@@ -65,6 +66,7 @@ require_file "core/fractal_dtes_crosschannel_explore_eta_clean.py"
 require_file "refinement/colored_ants_engine.py"
 require_file "refinement/gap_detector.py"
 require_file "validation/distance_analysis.py"
+require_file "validation/prime_reconstruction_accuracy.py"
 require_file "hybrid/hybrid_dtes_guided_scan.py"
 
 echo "[OK] Preflight passed"
@@ -192,6 +194,29 @@ python3 validation/distance_analysis.py \
   --out "$RUN_DIR/distance_hybrid"
 
 # -------------------------
+# STEP 8: Optional DTES spectral validation
+# -------------------------
+echo
+echo "=== STEP 8: DTES spectral validation ==="
+
+SPECTRAL_INPUT="${SPECTRAL_INPUT:-$RUN_DIR/spectral_ready_result.json}"
+if [ -f "$SPECTRAL_INPUT" ]; then
+  python3 validation/dtes_spectral_validation.py \
+    --input "$SPECTRAL_INPUT" \
+    --out "$RUN_DIR/spectral_report.json" \
+    --k 50 \
+    --potential-mode neglog
+
+  python3 validation/prime_reconstruction_accuracy.py \
+    --spectral-report "$RUN_DIR/spectral_report.json" \
+    --x-max "$PRIME_X_MAX" \
+    --out "$RUN_DIR/prime_reconstruction_report.json"
+else
+  echo "[WARN] Spectral input missing: $SPECTRAL_INPUT"
+  echo "[WARN] Skipping DTES spectral validation and prime reconstruction. Export spectral_ready_result.json from an ACO run to enable them."
+fi
+
+# -------------------------
 # Summary
 # -------------------------
 SUMMARY="$RUN_DIR/RUN_SUMMARY.md"
@@ -215,6 +240,8 @@ SUMMARY="$RUN_DIR/RUN_SUMMARY.md"
   echo "- \`hybrid_colored.json\`"
   echo "- \`hybrid_colored_stats.json\`"
   echo "- \`distance_hybrid_summary.md\`"
+  echo "- \`spectral_report.json\` (when \`spectral_ready_result.json\` is present)"
+  echo "- \`prime_reconstruction_report.json\` (when \`spectral_report.json\` is generated)"
   echo
   echo "## Quick inspect"
   echo

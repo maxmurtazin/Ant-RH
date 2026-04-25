@@ -26,6 +26,15 @@ def main() -> None:
     ap.add_argument('--n-ants', type=int, default=48)
     ap.add_argument('--n-iterations', type=int, default=60)
     ap.add_argument('--early-stop-patience', type=int, default=0)
+    ap.add_argument('--spectral-validation', action='store_true')
+    ap.add_argument('--spectral-k', type=int, default=50)
+    ap.add_argument(
+        '--spectral-potential-mode',
+        default='neglog',
+        choices=('neglog', 'log', 'inverse'),
+    )
+    ap.add_argument('--spectral-normalized-laplacian', action='store_true')
+    ap.add_argument('--export-pheromone-max-n', type=int, default=2000)
     args = ap.parse_args()
 
     os.makedirs(args.out, exist_ok=True)
@@ -51,6 +60,11 @@ def main() -> None:
     cfg.early_stop_patience = args.early_stop_patience
     cfg.early_stop_min_delta = 1e-9
     cfg.metrics_out_path = os.path.join(args.out, 'metrics_summary.json')
+    cfg.spectral_validation = args.spectral_validation
+    cfg.spectral_k = args.spectral_k
+    cfg.spectral_potential_mode = args.spectral_potential_mode
+    cfg.spectral_normalized_laplacian = args.spectral_normalized_laplacian
+    cfg.export_pheromone_max_n = args.export_pheromone_max_n
 
     searcher = ETAFractalDTESACOZeta(cfg)
     candidates = searcher.run()

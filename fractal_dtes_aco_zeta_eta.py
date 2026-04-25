@@ -17,7 +17,11 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-from fractal_dtes_aco_zeta_metrics import AntPath, ZetaSearchConfig
+from fractal_dtes_aco_zeta_metrics import (
+    _DEFAULT_KNOWN_ZEROS,
+    AntPath,
+    ZetaSearchConfig,
+)
 from fractal_dtes_aco_zeta_visual import VisualFractalDTESACOZeta, save_metrics_json
 
 
@@ -103,12 +107,16 @@ class ETAFractalDTESACOZeta(VisualFractalDTESACOZeta):
         self.metrics["stage_timings_s"] = self.stage_timings
         self.metrics["aco_history"] = self.aco_history
         self.metrics["config"] = self._safe_config_dict()
+        spectral_payload = self.export_spectral_ready_result(candidates)
+        self.metrics.update(spectral_payload)
         save_metrics_json(
             os.path.join(self.out_dir, "metrics_summary.json"), self.metrics
         )
         save_metrics_json(
             os.path.join(self.out_dir, "aco_history.json"), self.aco_history
         )
+        if getattr(self.cfg, "spectral_validation", False):
+            self.run_spectral_validation(spectral_payload)
         self.plot_all(candidates, self.out_dir)
         self.logger.emit(
             "DONE",
@@ -127,6 +135,106 @@ class ETAFractalDTESACOZeta(VisualFractalDTESACOZeta):
             if k not in base:
                 base[k] = v
         return base
+
+    def export_spectral_ready_result(self, candidates: List[float]) -> dict:
+        max_n = int(getattr(self.cfg, "export_pheromone_max_n", 2000))
+        target_level = self.cfg.target_level or self.cfg.tree_depth
+        node_ids = sorted(
+            self.nodes_by_level.get(target_level, []),
+            key=lambda nid: self.nodes[nid].center(),
+        )
+        original_n = len(node_ids)
+        downsampled = False
+        if max_n > 0 and original_n > max_n:
+            idx = np.linspace(0, original_n - 1, max_n, dtype=int)
+            node_ids = [node_ids[int(i)] for i in np.unique(idx)]
+            downsampled = True
+
+        centers = np.array([self.nodes[nid].center() for nid in node_ids], dtype=float)
+        if centers.size and getattr(self, "abs_values", None) is not None and len(self.abs_values):
+            zeta_abs = np.interp(centers, self.t_grid, self.abs_values)
+        else:
+            zeta_abs = np.array([], dtype=float)
+
+        node_index = {nid: i for i, nid in enumerate(node_ids)}
+        pheromone_matrix = np.zeros((len(node_ids), len(node_ids)), dtype=float)
+        for (a, b), value in self.pheromones.items():
+            ia = node_index.get(a)
+            ib = node_index.get(b)
+            if ia is not None and ib is not None:
+                pheromone_matrix[ia, ib] = float(value)
+
+        true_zeros = [
+            float(z)
+            for z in getattr(self.cfg, "known_zeros", _DEFAULT_KNOWN_ZEROS)
+            if self.cfg.t_min <= float(z) <= self.cfg.t_max
+        ]
+        payload = {
+            "t_grid": centers.tolist(),
+            "zeta_abs": zeta_abs.tolist(),
+            "pheromone_matrix": pheromone_matrix.tolist(),
+            "true_zeros": true_zeros,
+            "spectral_ready": True,
+            "pheromone_downsampled": downsampled,
+            "pheromone_original_n": int(original_n),
+            "candidates": [float(c) for c in candidates],
+        }
+        save_metrics_json(
+            os.path.join(self.out_dir, "spectral_ready_result.json"), payload
+        )
+        return payload
+
+    def run_spectral_validation(self, spectral_payload: dict) -> None:
+        try:
+            from core.dtes_spectral_operator import (
+                build_dtes_operator,
+                compare_spectral_statistics,
+                compute_spectrum,
+                save_spectral_report,
+            )
+
+            H = build_dtes_operator(
+                spectral_payload["t_grid"],
+                spectral_payload["zeta_abs"],
+                spectral_payload["pheromone_matrix"],
+                potential_mode=getattr(self.cfg, "spectral_potential_mode", "neglog"),
+                normalize_laplacian=bool(
+                    getattr(self.cfg, "spectral_normalized_laplacian", False)
+                ),
+            )
+            eigvals = compute_spectrum(H, k=int(getattr(self.cfg, "spectral_k", 50)))
+            zeros = np.array(spectral_payload["true_zeros"], dtype=float)
+            if eigvals.size:
+                zeros = np.sort(zeros)[: eigvals.size]
+            report = compare_spectral_statistics(eigvals, zeros)
+            report.update(
+                {
+                    "operator_shape": list(H.shape),
+                    "operator_symmetry_error": float(np.max(np.abs(H - H.T))),
+                    "potential_mode": getattr(
+                        self.cfg, "spectral_potential_mode", "neglog"
+                    ),
+                    "normalized_laplacian": bool(
+                        getattr(self.cfg, "spectral_normalized_laplacian", False)
+                    ),
+                    "spectral_ready": True,
+                }
+            )
+            save_spectral_report(
+                report, os.path.join(self.out_dir, "spectral_report.json")
+            )
+            save_metrics_json(
+                os.path.join(self.out_dir, "spectral_eigenvalues.json"),
+                [float(x) for x in eigvals],
+            )
+            self.logger.emit(
+                "SPECTRAL",
+                "spectral validation completed",
+                symmetry_error=f"{report['operator_symmetry_error']:.3e}",
+                n_compared=report.get("n_compared"),
+            )
+        except Exception as exc:
+            self.logger.emit("SPECTRAL", "spectral validation failed", error=str(exc))
 
     def run_aco(self) -> None:
         if self.root_id is None:
