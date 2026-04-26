@@ -21,17 +21,20 @@ class DTESGeometry(nn.Module):
         Z_init = torch.zeros(n, dim)
         Z_init[:, 0] = t
         if dim > 1:
-            Z_init[:, 1:] = 0.01 * torch.randn(n, dim - 1)
+            Z_init[:, 1] = 0.1 * torch.sin(10 * t)
+        if dim > 2:
+            Z_init[:, 2] = 0.1 * torch.cos(10 * t)
         self.Z = nn.Parameter(Z_init)
 
     def forward(self):
         return self.Z
 
 
-def build_graph_from_embedding(Z, sigma=1.0, k_neighbors=12, valid_mask=None):
+def build_graph_from_embedding(Z, sigma=1.0, k_neighbors=8, valid_mask=None):
     dists = torch.cdist(Z, Z)
+    dists = dists**1.5
 
-    W = torch.exp(-(dists**2) / (2 * sigma**2))
+    W = torch.exp(-dists / sigma)
     W = W * (1 - torch.eye(W.shape[0], device=W.device, dtype=W.dtype))
     if valid_mask is not None:
         mask = valid_mask.to(device=W.device, dtype=W.dtype)
@@ -47,7 +50,6 @@ def build_graph_from_embedding(Z, sigma=1.0, k_neighbors=12, valid_mask=None):
         else:
             W = torch.zeros_like(W)
 
-    W = W / (W.sum(dim=1, keepdim=True) + 1e-6)
     W = 0.5 * (W + W.T)
     if valid_mask is not None:
         mask = valid_mask.to(device=W.device, dtype=W.dtype)
@@ -88,7 +90,9 @@ class DTESGraphOperator(nn.Module):
     def __init__(self, n, dim=2, valid_mask=None):
         super().__init__()
         self.geometry = DTESGeometry(n, dim)
-        self.V = nn.Parameter(torch.zeros(n))
+        self.V = nn.Parameter(0.01 * torch.randn(n))
+        self.edge_logits = nn.Parameter(0.01 * torch.randn(n, n))
+        self.log_edge_scale = nn.Parameter(torch.zeros(1))
         if valid_mask is None:
             self.valid_mask = None
         else:
@@ -100,10 +104,16 @@ class DTESGraphOperator(nn.Module):
     def forward(self):
         Z = self.geometry()
         W = build_graph_from_embedding(Z, valid_mask=self.valid_mask)
+        E = torch.sigmoid(0.5 * (self.edge_logits + self.edge_logits.T))
+        W = W * (0.5 + E)
+        W = W * (1 - torch.eye(W.shape[0], device=W.device, dtype=W.dtype))
+        if self.valid_mask is not None:
+            mask = self.valid_mask.to(device=W.device, dtype=W.dtype)
+            W = W * mask[:, None] * mask[None, :]
         L = graph_laplacian_torch(W)
 
-        edge_scale = 1.0
-        H = L + torch.diag(self.V)
+        edge_scale = torch.exp(self.log_edge_scale).clamp(0.1, 100.0)
+        H = edge_scale * L + torch.diag(self.V)
         H = 0.5 * (H + H.T)
 
         return H, W, Z, edge_scale
@@ -132,6 +142,23 @@ def spacing_loss(eig, zeta, k):
     if m <= 1:
         return eig.new_tensor(0.0)
     return torch.mean(torch.abs(normalize(e[:m]) - normalize(z[:m])))
+
+
+def spectral_spread_loss(eig, k=50, min_std=0.3):
+    vals = eig[:k]
+    std = torch.std(vals)
+    return torch.relu(torch.tensor(min_std, device=eig.device) - std) ** 2
+
+
+def normalize_range(x):
+    return (x - x[0]) / (x[-1] - x[0] + 1e-8)
+
+
+def spectral_growth_loss(eig, zeta_zeros, k=50):
+    k = min(k, eig.numel(), zeta_zeros.numel())
+    e = normalize_range(torch.sort(eig[:k]).values)
+    z = normalize_range(torch.sort(zeta_zeros[:k]).values)
+    return torch.mean((e - z) ** 2)
 
 
 def _as_finite_1d(name, values):
@@ -193,6 +220,8 @@ def train_dtes_geometry(
     base_weights = {
         "spectral": 5.0,
         "spacing": 1.0,
+        "growth": 3.0,
+        "spread": 10.0,
         "geom": 0.01,
         "repulsion": 0.001,
         "amplitude": 0.001,
@@ -219,17 +248,23 @@ def train_dtes_geometry(
 
         loss_spec = spectral_loss(eig, zeta, k)
         loss_spacing = spacing_loss(eig, zeta, k)
+        loss_spread = spectral_spread_loss(eig, k=k, min_std=0.3)
+        loss_growth = spectral_growth_loss(eig, zeta, k=k)
 
         geom_reg = torch.mean(Z**2)
         d = torch.cdist(Z, Z) + 1e-3
         repulsion = torch.mean(1.0 / d)
         amp = torch.mean(model.V**2)
-        spread = torch.std(Z)
+        embedding_spread = torch.std(Z)
         loss_pauli = torch.tensor(0.0, device=device)
+        eig_window = eig[: min(int(k), eig.numel())]
+        eig_std = torch.std(eig_window)
 
         loss_dict = {
             "spectral": loss_spec.detach().item(),
             "spacing": loss_spacing.detach().item(),
+            "growth": loss_growth.detach().item(),
+            "spread": loss_spread.detach().item(),
             "geom": geom_reg.detach().item(),
             "repulsion": repulsion.detach().item(),
             "amplitude": amp.detach().item(),
@@ -244,13 +279,14 @@ def train_dtes_geometry(
         loss = (
             weights["spectral"] * loss_spec
             + weights["spacing"] * loss_spacing
+            + weights["growth"] * loss_growth
+            + weights["spread"] * loss_spread
             + weights["geom"] * geom_reg
             + weights["repulsion"] * repulsion
             + weights["amplitude"] * amp
         )
         if pauli_loss_available:
             loss = loss + weights["pauli"] * loss_pauli
-        loss += 0.1 * (1.0 / (spread + 1e-6))
         if not torch.isfinite(loss):
             raise FloatingPointError("DTES geometry loss became NaN or inf")
 
@@ -258,7 +294,6 @@ def train_dtes_geometry(
         opt.step()
 
         if step % 50 == 0:
-            eig_mean = torch.mean(eig)
             if controller is not None:
                 print(
                     f"[V10-AUTO] step={step} loss={loss.item():.6f} "
@@ -268,8 +303,9 @@ def train_dtes_geometry(
                 )
             else:
                 print(
-                    f"[V10-FIX] step={step} loss={loss.item():.6f} "
-                    f"spread={spread.item():.4f} eig_mean={eig_mean.item():.6f}"
+                    f"[V10-GRAPH-FIX] step={step} "
+                    f"loss={loss.item():.6f} "
+                    f"eig_std={eig_std.item():.4f} "
                 )
 
         history.append(
@@ -278,12 +314,17 @@ def train_dtes_geometry(
                 "loss": float(loss.detach().cpu()),
                 "spectral_loss": float(loss_spec.detach().cpu()),
                 "spacing_loss": float(loss_spacing.detach().cpu()),
+                "spread_loss": float(loss_spread.detach().cpu()),
+                "growth_loss": float(loss_growth.detach().cpu()),
                 "geom_loss": float(geom_reg.detach().cpu()),
                 "repulsion_loss": float(repulsion.detach().cpu()),
                 "amplitude_loss": float(amp.detach().cpu()),
                 "pauli_loss": float(loss_pauli.detach().cpu()),
-                "spread": float(spread.detach().cpu()),
+                "spread": float(embedding_spread.detach().cpu()),
                 "eig_mean": float(eig.detach().mean().cpu()),
+                "eig_std": float(eig_std.detach().cpu()),
+                "eig_min": float(eig_window.min().detach().cpu()),
+                "eig_max": float(eig_window.max().detach().cpu()),
                 "weights": {k: float(v) for k, v in weights.items()},
             }
         )
@@ -299,5 +340,5 @@ def train_dtes_geometry(
         "eig": eig.detach().cpu().numpy(),
         "history": history,
         "final_weights": history[-1]["weights"] if history else dict(base_weights),
-        "edge_scale": float(edge_scale),
+        "edge_scale": float(edge_scale.detach().cpu().reshape(-1)[0]),
     }

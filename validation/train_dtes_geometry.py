@@ -253,6 +253,7 @@ def parse_args(argv=None):
     parser.add_argument("--pauli-weight", type=float, default=1.0)
     parser.add_argument("--adaptive-weights", action="store_true")
     parser.add_argument("--adaptive-lr", type=float, default=0.05)
+    parser.add_argument("--wavefunction-aware", action="store_true")
     return parser.parse_args(argv)
 
 
@@ -317,6 +318,7 @@ def main(argv=None):
         "pauli_weight": float(args.pauli_weight),
         "adaptive_weights": bool(args.adaptive_weights),
         "adaptive_lr": float(args.adaptive_lr),
+        "wavefunction_aware": bool(args.wavefunction_aware),
         "final_weights": result.get("final_weights", {}),
         "n_input": n_input,
         "n_nodes": n_nodes,
