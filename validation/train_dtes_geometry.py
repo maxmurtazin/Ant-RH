@@ -330,6 +330,11 @@ def parse_args(argv=None):
     parser.add_argument("--phase-activity-weight", type=float, default=1.0)
     parser.add_argument("--phase-target-std", type=float, default=0.5)
     parser.add_argument("--phase-curvature-weight", type=float, default=0.05)
+    parser.add_argument("--phase-coupled-operator", action="store_true")
+    parser.add_argument("--phase-coupling", type=float, default=1.0)
+    parser.add_argument("--phase-coupling-positive", action="store_true")
+    parser.add_argument("--magnetic-operator", action="store_true")
+    parser.add_argument("--magnetic-beta", type=float, default=1.0)
     return parser.parse_args(argv)
 
 
@@ -381,6 +386,11 @@ def main(argv=None):
         phase_activity_weight=args.phase_activity_weight,
         phase_target_std=args.phase_target_std,
         phase_curvature_weight=args.phase_curvature_weight,
+        phase_coupled_operator=args.phase_coupled_operator,
+        phase_coupling=args.phase_coupling,
+        phase_coupling_positive=args.phase_coupling_positive,
+        magnetic_operator=args.magnetic_operator,
+        magnetic_beta=args.magnetic_beta,
     )
 
     embedding_path = out_path.parent / "dtes_v10_embedding.npy"
@@ -392,6 +402,8 @@ def main(argv=None):
     phase_path = out_path.parent / "dtes_v10_6_phase.npy"
     psi_real_path = out_path.parent / "dtes_v10_6_psi_real.npy"
     psi_imag_path = out_path.parent / "dtes_v10_6_psi_imag.npy"
+    operator_real_path = out_path.parent / "dtes_v10_8_operator_real.npy"
+    operator_imag_path = out_path.parent / "dtes_v10_8_operator_imag.npy"
 
     np.save(embedding_path, result["Z"])
     np.save(adjacency_path, result["W"])
@@ -401,6 +413,10 @@ def main(argv=None):
         np.save(phase_path, result["phase"])
         np.save(psi_real_path, result["psi_real"])
         np.save(psi_imag_path, result["psi_imag"])
+    if args.magnetic_operator:
+        H = np.asarray(result["H"])
+        np.save(operator_real_path, H.real)
+        np.save(operator_imag_path, H.imag)
     _write_eigenvalues(eigenvalues_path, result["eig"])
     _write_weights(weights_path, result["history"])
     plots = _maybe_write_plots(out_path.parent, zeta_zeros, result)
@@ -459,6 +475,16 @@ def main(argv=None):
         "phase_activity_weight": float(args.phase_activity_weight),
         "phase_target_std": float(args.phase_target_std),
         "phase_curvature_weight": float(args.phase_curvature_weight),
+        "phase_coupled_operator": bool(args.phase_coupled_operator),
+        "phase_coupling": float(args.phase_coupling),
+        "phase_coupling_positive": bool(args.phase_coupling_positive),
+        "magnetic_operator": bool(args.magnetic_operator),
+        "magnetic_beta": float(args.magnetic_beta),
+        "operator_type": (
+            "complex_hermitian_magnetic_dtes"
+            if args.magnetic_operator
+            else "real_dtes"
+        ),
         "final_anchor_loss": final_history.get("anchor_loss"),
         "final_spacing_anchor_loss": final_history.get("spacing_anchor_loss"),
         "final_line_spacing_loss": final_history.get("line_spacing_loss"),
@@ -479,6 +505,11 @@ def main(argv=None):
         ),
         "final_phase_curvature_loss": final_history.get("phase_curvature_loss"),
         "final_phase_grad_std": final_history.get("phase_grad_std"),
+        "final_phase_weight_min": final_history.get("phase_weight_min"),
+        "final_phase_weight_max": final_history.get("phase_weight_max"),
+        "final_hermitian_error": final_history.get(
+            "hermitian_error", result.get("hermitian_error")
+        ),
         "final_nodal_loss": final_history.get("nodal_loss"),
         "final_amplitude_collapse_loss": final_history.get("amplitude_collapse_loss"),
         "final_amplitude_min": final_history.get("amplitude_min"),
@@ -509,6 +540,8 @@ def main(argv=None):
             "phase": str(phase_path) if args.wavefunction_topology else None,
             "psi_real": str(psi_real_path) if args.wavefunction_topology else None,
             "psi_imag": str(psi_imag_path) if args.wavefunction_topology else None,
+            "operator_real": str(operator_real_path) if args.magnetic_operator else None,
+            "operator_imag": str(operator_imag_path) if args.magnetic_operator else None,
             "plots": plots,
         },
         "history": history,

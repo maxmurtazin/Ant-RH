@@ -182,6 +182,58 @@ def safe_eigvalsh(H):
         return torch.linalg.eigvalsh(H)
 
 
+def build_magnetic_hermitian_operator(W, phase, beta=1.0, diagonal_potential=None):
+    """
+    Build complex Hermitian magnetic graph operator.
+
+    Off-diagonal:
+        H_ij = - W_ij * exp(i beta (S_i - S_j))
+
+    Diagonal:
+        H_ii = sum_j W_ij + V_i
+    """
+    dphi = phase[:, None] - phase[None, :]
+    U = torch.exp(1j * float(beta) * dphi)
+
+    Wc = W.to(torch.complex64)
+    H = -Wc * U
+
+    degree = W.sum(dim=1)
+
+    if diagonal_potential is None:
+        diag = degree
+    else:
+        diag = degree + diagonal_potential
+
+    H = H + torch.diag(diag.to(torch.complex64))
+
+    # enforce Hermitian symmetry
+    H = 0.5 * (H + H.conj().T)
+
+    return H
+
+
+def safe_eigvalsh_complex(H, jitter=1e-6, max_tries=6):
+    n = H.shape[0]
+    eye = torch.eye(n, dtype=H.dtype, device=H.device)
+
+    H = 0.5 * (H + H.conj().T)
+    real = torch.nan_to_num(H.real, nan=0.0, posinf=1e6, neginf=-1e6)
+    imag = torch.nan_to_num(H.imag, nan=0.0, posinf=1e6, neginf=-1e6)
+    H = torch.complex(real, imag)
+
+    last_err = None
+
+    for i in range(max_tries):
+        try:
+            jj = jitter * (10.0**i)
+            return torch.linalg.eigvalsh(H + jj * eye)
+        except RuntimeError as e:
+            last_err = e
+
+    raise RuntimeError(f"complex eigvalsh failed: {last_err}")
+
+
 def wavefunction_fields(log_amplitude, phase):
     A = torch.exp(log_amplitude)
     psi_real = A * torch.cos(phase)
@@ -205,6 +257,23 @@ def phase_flow_loss(phase, W):
     return torch.sum(W * diff**2) / (torch.sum(W) + 1e-8)
 
 
+def phase_coupled_weights(W, phase, coupling=1.0):
+    dphi = phase[:, None] - phase[None, :]
+    phase_factor = torch.cos(coupling * dphi)
+    Wp = W * phase_factor
+    Wp = torch.nan_to_num(Wp, nan=0.0, posinf=1e6, neginf=-1e6)
+    Wp = 0.5 * (Wp + Wp.T)
+    return Wp
+
+
+def phase_coupled_weights_positive(W, phase, coupling=1.0):
+    dphi = phase[:, None] - phase[None, :]
+    phase_factor = 0.5 * (1.0 + torch.cos(coupling * dphi))
+    Wp = W * phase_factor
+    Wp = 0.5 * (Wp + Wp.T)
+    return Wp
+
+
 def phase_activity_loss(phase, min_std=0.02):
     return torch.relu(phase.new_tensor(min_std) - torch.std(phase)) ** 2
 
@@ -221,6 +290,17 @@ def phase_curvature_loss(phase):
     if phase.numel() < 3:
         return phase.new_tensor(0.0)
     return torch.mean((phase[2:] - 2.0 * phase[1:-1] + phase[:-2]) ** 2)
+
+
+def project_phase_gradient_std_(phase, target_std=0.5):
+    if phase.numel() < 2:
+        return
+    dphi = phase[1:] - phase[:-1]
+    std = torch.std(dphi)
+    if not torch.isfinite(std) or std <= 1e-8:
+        return
+    center = phase.mean()
+    phase.sub_(center).mul_(float(target_std) / (std + 1e-8)).add_(center)
 
 
 def nodal_sparsity_loss(log_amplitude, target_fraction=0.05):
@@ -260,11 +340,21 @@ class DTESGraphOperator(nn.Module):
         valid_mask=None,
         multiscale_geometry=False,
         nested_geometry=False,
+        phase_coupled_operator=False,
+        phase_coupling=1.0,
+        phase_coupling_positive=False,
+        magnetic_operator=False,
+        magnetic_beta=1.0,
     ):
         super().__init__()
         self.geometry = DTESGeometry(n, dim)
         self.multiscale_geometry = bool(multiscale_geometry)
         self.nested_geometry = bool(nested_geometry)
+        self.phase_coupled_operator = bool(phase_coupled_operator)
+        self.phase_coupling = float(phase_coupling)
+        self.phase_coupling_positive = bool(phase_coupling_positive)
+        self.magnetic_operator = bool(magnetic_operator)
+        self.magnetic_beta = float(magnetic_beta)
         self.V = nn.Parameter(0.01 * torch.randn(n))
         self.edge_logits = nn.Parameter(0.01 * torch.randn(n, n))
         self.multiscale_logits = nn.Parameter(torch.zeros(3))
@@ -286,12 +376,27 @@ class DTESGraphOperator(nn.Module):
         W = W * (1.0 - barrier)
         return 0.5 * (W + W.T)
 
+    def _apply_phase_coupling(self, W):
+        if self.phase_coupling_positive:
+            return phase_coupled_weights_positive(
+                W,
+                self.phase,
+                coupling=self.phase_coupling,
+            )
+        return phase_coupled_weights(
+            W,
+            self.phase,
+            coupling=self.phase_coupling,
+        )
+
     def forward(self, wavefunction_topology=False):
         Z = self.geometry()
         if self.nested_geometry:
             Ws = build_nested_graphs(Z, valid_mask=self.valid_mask)
             if wavefunction_topology:
                 Ws = [self._apply_nodal_barrier(W_level) for W_level in Ws]
+            if self.phase_coupled_operator:
+                Ws = [self._apply_phase_coupling(W_level) for W_level in Ws]
             levels = []
             for W_level in Ws:
                 L_level = graph_laplacian_torch(W_level, normalize_trace=False)
@@ -310,6 +415,13 @@ class DTESGraphOperator(nn.Module):
             H = H + torch.diag(self.V)
             H = 0.5 * (H + H.T)
             W = 0.5 * (W + W.T)
+            if self.magnetic_operator:
+                H = build_magnetic_hermitian_operator(
+                    W,
+                    self.phase,
+                    beta=self.magnetic_beta,
+                    diagonal_potential=self.V,
+                )
 
             return H, W, Z, edge_scale, ms_weights
 
@@ -324,12 +436,23 @@ class DTESGraphOperator(nn.Module):
             ms_weights = torch.softmax(self.multiscale_logits.detach(), dim=0)
         if wavefunction_topology:
             W = self._apply_nodal_barrier(W)
+        if self.phase_coupled_operator:
+            W = self._apply_phase_coupling(W)
         E = torch.sigmoid(0.5 * (self.edge_logits + self.edge_logits.T))
         W = W * (0.5 + E)
         W = W * (1 - torch.eye(W.shape[0], device=W.device, dtype=W.dtype))
         if self.valid_mask is not None:
             mask = self.valid_mask.to(device=W.device, dtype=W.dtype)
             W = W * mask[:, None] * mask[None, :]
+        if self.magnetic_operator:
+            edge_scale = 1.0
+            H = build_magnetic_hermitian_operator(
+                W,
+                self.phase,
+                beta=self.magnetic_beta,
+                diagonal_potential=self.V,
+            )
+            return H, W, Z, edge_scale, ms_weights
         L = graph_laplacian_torch(W, normalize_trace=not self.multiscale_geometry)
 
         edge_scale = 1.0
@@ -529,6 +652,11 @@ def train_dtes_geometry(
     phase_activity_weight=1.0,
     phase_target_std=0.5,
     phase_curvature_weight=0.05,
+    phase_coupled_operator=False,
+    phase_coupling=1.0,
+    phase_coupling_positive=False,
+    magnetic_operator=False,
+    magnetic_beta=1.0,
 ):
     t_grid = _as_finite_1d("t_grid", t_grid)
     zeta_zeros = np.sort(np.abs(_as_finite_1d("zeta_zeros", zeta_zeros)))
@@ -556,6 +684,11 @@ def train_dtes_geometry(
         valid_mask=valid_mask_arr,
         multiscale_geometry=multiscale_geometry,
         nested_geometry=nested_geometry,
+        phase_coupled_operator=phase_coupled_operator,
+        phase_coupling=phase_coupling,
+        phase_coupling_positive=phase_coupling_positive,
+        magnetic_operator=magnetic_operator,
+        magnetic_beta=magnetic_beta,
     ).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -602,7 +735,8 @@ def train_dtes_geometry(
         H, W, Z, edge_scale, ms_weights = model(
             wavefunction_topology=wavefunction_topology
         )
-        eig = safe_eigvalsh(H)
+        eig = safe_eigvalsh_complex(H).real if magnetic_operator else safe_eigvalsh(H)
+        hermitian_error = torch.mean(torch.abs(H - H.conj().T))
 
         if no_scaling and train_idx is not None:
             eig_train = eig[train_idx]
@@ -669,6 +803,15 @@ def train_dtes_geometry(
         phase_grad_std = (
             torch.std(phase_grad) if phase_grad.numel() > 1 else model.phase.new_tensor(0.0)
         )
+        phase_pair_diff = model.phase[:, None] - model.phase[None, :]
+        if phase_coupling_positive:
+            phase_weight_factor = 0.5 * (
+                1.0 + torch.cos(float(phase_coupling) * phase_pair_diff)
+            )
+        else:
+            phase_weight_factor = torch.cos(float(phase_coupling) * phase_pair_diff)
+        phase_weight_min = phase_weight_factor.min()
+        phase_weight_max = phase_weight_factor.max()
         loss_line_spacing = torch.tensor(0.0, device=device)
         loss_ordering = torch.tensor(0.0, device=device)
         loss_center = torch.tensor(0.0, device=device)
@@ -801,9 +944,45 @@ def train_dtes_geometry(
 
         loss.backward()
         opt.step()
+        if wavefunction_topology and (phase_coupled_operator or magnetic_operator):
+            with torch.no_grad():
+                project_phase_gradient_std_(
+                    model.phase,
+                    target_std=phase_target_std,
+                )
+                phase_grad = model.phase[1:] - model.phase[:-1]
+                phase_grad_std = (
+                    torch.std(phase_grad)
+                    if phase_grad.numel() > 1
+                    else model.phase.new_tensor(0.0)
+                )
+                phase_pair_diff = model.phase[:, None] - model.phase[None, :]
+                if phase_coupling_positive:
+                    phase_weight_factor = 0.5 * (
+                        1.0 + torch.cos(float(phase_coupling) * phase_pair_diff)
+                    )
+                else:
+                    phase_weight_factor = torch.cos(
+                        float(phase_coupling) * phase_pair_diff
+                    )
+                phase_weight_min = phase_weight_factor.min()
+                phase_weight_max = phase_weight_factor.max()
 
         if step % 50 == 0:
-            if wavefunction_topology:
+            if phase_coupled_operator:
+                print(
+                    f"[V10.7-PHASE-COUPLED] "
+                    f"eig_range={eig_range.item():.2f} "
+                    f"phase_coupling={float(phase_coupling):.2f}"
+                )
+            elif magnetic_operator:
+                print(
+                    f"[V10.8-MAGNETIC] step={step} "
+                    f"eig_range={eig_range.item():.2f} "
+                    f"herm={hermitian_error.detach().cpu().item():.2e} "
+                    f"beta={float(magnetic_beta):.2f}"
+                )
+            elif wavefunction_topology:
                 print(
                     f"[V10.6-PHASE] step={step} "
                     f"phase_grad_std={phase_grad_std.item():.4f} "
@@ -881,6 +1060,13 @@ def train_dtes_geometry(
                 ),
                 "phase_curvature_loss": float(loss_phase_curvature.detach().cpu()),
                 "phase_grad_std": float(phase_grad_std.detach().cpu()),
+                "phase_coupled_operator": bool(phase_coupled_operator),
+                "phase_coupling": float(phase_coupling),
+                "phase_weight_min": float(phase_weight_min.detach().cpu()),
+                "phase_weight_max": float(phase_weight_max.detach().cpu()),
+                "magnetic_operator": bool(magnetic_operator),
+                "magnetic_beta": float(magnetic_beta),
+                "hermitian_error": float(hermitian_error.detach().cpu()),
                 "nodal_loss": float(loss_nodal.detach().cpu()),
                 "amplitude_collapse_loss": float(loss_amp_collapse.detach().cpu()),
                 "amplitude_min": float(A.min().detach().cpu()),
@@ -924,7 +1110,8 @@ def train_dtes_geometry(
         H, W, Z, edge_scale, ms_weights = model(
             wavefunction_topology=wavefunction_topology
         )
-        eig = safe_eigvalsh(H)
+        eig = safe_eigvalsh_complex(H).real if magnetic_operator else safe_eigvalsh(H)
+        final_hermitian_error = torch.mean(torch.abs(H - H.conj().T))
         A, psi_real, psi_imag, psi_abs = wavefunction_fields(
             model.log_amplitude,
             model.phase,
@@ -949,6 +1136,7 @@ def train_dtes_geometry(
     return {
         "Z": Z.detach().cpu().numpy(),
         "W": W.detach().cpu().numpy(),
+        "H": H.detach().cpu().numpy(),
         "V": model.V.detach().cpu().numpy(),
         "eig": eig.detach().cpu().numpy(),
         "amplitude": A.detach().cpu().numpy(),
@@ -963,6 +1151,7 @@ def train_dtes_geometry(
         "test_error": float(final_test_error.detach().cpu()),
         "affine_penalty": float(final_affine_penalty.detach().cpu()),
         "edge_scale": float(edge_scale),
+        "hermitian_error": float(final_hermitian_error.detach().cpu()),
         "multiscale_weights": [float(x) for x in ms_weights.detach().cpu()],
         "nested_weights": [float(x) for x in ms_weights.detach().cpu()]
         if nested_geometry
