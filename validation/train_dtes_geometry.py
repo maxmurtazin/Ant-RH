@@ -170,6 +170,9 @@ def _maybe_write_plots(out_dir: Path, zeta_zeros, result):
     Z = np.asarray(result["Z"], dtype=float)
     W = np.asarray(result["W"], dtype=float)
     history = result["history"]
+    amplitude = np.asarray(result.get("amplitude", []), dtype=float)
+    phase = np.asarray(result.get("phase", []), dtype=float)
+    nodal = np.asarray(result.get("nodal_score", []), dtype=float)
 
     k = min(eig.size, zeta_zeros.size)
     if k > 0:
@@ -220,6 +223,42 @@ def _maybe_write_plots(out_dir: Path, zeta_zeros, result):
         plt.ylabel("loss")
         plt.title("DTES V10 Loss")
         path = out_dir / "dtes_v10_loss.png"
+        plt.tight_layout()
+        plt.savefig(path)
+        plt.close()
+        plots.append(str(path))
+
+    if amplitude.size:
+        plt.figure()
+        plt.plot(np.arange(amplitude.size), amplitude)
+        plt.xlabel("node")
+        plt.ylabel("amplitude")
+        plt.title("DTES V10.6 Wavefunction Amplitude")
+        path = out_dir / "dtes_v10_6_amplitude.png"
+        plt.tight_layout()
+        plt.savefig(path)
+        plt.close()
+        plots.append(str(path))
+
+    if phase.size:
+        plt.figure()
+        plt.plot(np.arange(phase.size), phase)
+        plt.xlabel("node")
+        plt.ylabel("phase")
+        plt.title("DTES V10.6 Wavefunction Phase")
+        path = out_dir / "dtes_v10_6_phase.png"
+        plt.tight_layout()
+        plt.savefig(path)
+        plt.close()
+        plots.append(str(path))
+
+    if nodal.size:
+        plt.figure()
+        plt.plot(np.arange(nodal.size), nodal)
+        plt.xlabel("node")
+        plt.ylabel("nodal score")
+        plt.title("DTES V10.6 Nodal Score")
+        path = out_dir / "dtes_v10_6_nodal_score.png"
         plt.tight_layout()
         plt.savefig(path)
         plt.close()
@@ -280,6 +319,17 @@ def parse_args(argv=None):
     parser.add_argument("--parametric-line", action="store_true")
     parser.add_argument("--curve-smooth-weight", type=float, default=1.0)
     parser.add_argument("--curve-amp-weight", type=float, default=0.1)
+    parser.add_argument("--multiscale-geometry", action="store_true")
+    parser.add_argument("--range-weight", type=float, default=10.0)
+    parser.add_argument("--nested-geometry", action="store_true")
+    parser.add_argument("--wavefunction-topology", action="store_true")
+    parser.add_argument("--wave-amp-weight", type=float, default=0.2)
+    parser.add_argument("--phase-weight", type=float, default=0.05)
+    parser.add_argument("--nodal-weight", type=float, default=0.1)
+    parser.add_argument("--amplitude-collapse-weight", type=float, default=0.1)
+    parser.add_argument("--phase-activity-weight", type=float, default=1.0)
+    parser.add_argument("--phase-target-std", type=float, default=0.5)
+    parser.add_argument("--phase-curvature-weight", type=float, default=0.05)
     return parser.parse_args(argv)
 
 
@@ -320,6 +370,17 @@ def main(argv=None):
         parametric_line=args.parametric_line,
         curve_smooth_weight=args.curve_smooth_weight,
         curve_amp_weight=args.curve_amp_weight,
+        multiscale_geometry=args.multiscale_geometry,
+        range_weight=args.range_weight,
+        nested_geometry=args.nested_geometry,
+        wavefunction_topology=args.wavefunction_topology,
+        wave_amp_weight=args.wave_amp_weight,
+        phase_weight=args.phase_weight,
+        nodal_weight=args.nodal_weight,
+        amplitude_collapse_weight=args.amplitude_collapse_weight,
+        phase_activity_weight=args.phase_activity_weight,
+        phase_target_std=args.phase_target_std,
+        phase_curvature_weight=args.phase_curvature_weight,
     )
 
     embedding_path = out_path.parent / "dtes_v10_embedding.npy"
@@ -327,10 +388,19 @@ def main(argv=None):
     potential_path = out_path.parent / "dtes_v10_potential.npy"
     eigenvalues_path = out_path.parent / "dtes_v10_eigenvalues.csv"
     weights_path = out_path.parent / "dtes_v10_weights.csv"
+    amplitude_path = out_path.parent / "dtes_v10_6_amplitude.npy"
+    phase_path = out_path.parent / "dtes_v10_6_phase.npy"
+    psi_real_path = out_path.parent / "dtes_v10_6_psi_real.npy"
+    psi_imag_path = out_path.parent / "dtes_v10_6_psi_imag.npy"
 
     np.save(embedding_path, result["Z"])
     np.save(adjacency_path, result["W"])
     np.save(potential_path, result["V"])
+    if args.wavefunction_topology:
+        np.save(amplitude_path, result["amplitude"])
+        np.save(phase_path, result["phase"])
+        np.save(psi_real_path, result["psi_real"])
+        np.save(psi_imag_path, result["psi_imag"])
     _write_eigenvalues(eigenvalues_path, result["eig"])
     _write_weights(weights_path, result["history"])
     plots = _maybe_write_plots(out_path.parent, zeta_zeros, result)
@@ -378,6 +448,17 @@ def main(argv=None):
         "parametric_line": bool(args.parametric_line),
         "curve_smooth_weight": float(args.curve_smooth_weight),
         "curve_amp_weight": float(args.curve_amp_weight),
+        "multiscale_geometry": bool(args.multiscale_geometry),
+        "range_weight": float(args.range_weight),
+        "nested_geometry": bool(args.nested_geometry),
+        "wavefunction_topology": bool(args.wavefunction_topology),
+        "wave_amp_weight": float(args.wave_amp_weight),
+        "phase_weight": float(args.phase_weight),
+        "nodal_weight": float(args.nodal_weight),
+        "amplitude_collapse_weight": float(args.amplitude_collapse_weight),
+        "phase_activity_weight": float(args.phase_activity_weight),
+        "phase_target_std": float(args.phase_target_std),
+        "phase_curvature_weight": float(args.phase_curvature_weight),
         "final_anchor_loss": final_history.get("anchor_loss"),
         "final_spacing_anchor_loss": final_history.get("spacing_anchor_loss"),
         "final_line_spacing_loss": final_history.get("line_spacing_loss"),
@@ -385,6 +466,24 @@ def main(argv=None):
         "final_center_loss": final_history.get("center_loss"),
         "final_curve_smoothness_loss": final_history.get("curve_smoothness_loss"),
         "final_curve_amplitude_loss": final_history.get("curve_amplitude_loss"),
+        "final_range_loss": final_history.get("range_loss"),
+        "final_multiscale_weights": result.get("multiscale_weights"),
+        "final_nested_weights": result.get("nested_weights"),
+        "final_eig_range": final_history.get("eig_range"),
+        "final_zeta_range": final_history.get("zeta_range"),
+        "final_wave_amp_loss": final_history.get("wave_amp_loss"),
+        "final_phase_loss": final_history.get("phase_loss"),
+        "final_phase_activity_loss": final_history.get("phase_activity_loss"),
+        "final_phase_activity_target_loss": final_history.get(
+            "phase_activity_target_loss"
+        ),
+        "final_phase_curvature_loss": final_history.get("phase_curvature_loss"),
+        "final_phase_grad_std": final_history.get("phase_grad_std"),
+        "final_nodal_loss": final_history.get("nodal_loss"),
+        "final_amplitude_collapse_loss": final_history.get("amplitude_collapse_loss"),
+        "final_amplitude_min": final_history.get("amplitude_min"),
+        "final_amplitude_max": final_history.get("amplitude_max"),
+        "final_amplitude_std": final_history.get("amplitude_std"),
         "final_weights": result.get("final_weights", {}),
         "train_error": result.get("train_error"),
         "test_error": result.get("test_error"),
@@ -406,6 +505,10 @@ def main(argv=None):
             "potential": str(potential_path),
             "eigenvalues": str(eigenvalues_path),
             "weights": str(weights_path),
+            "amplitude": str(amplitude_path) if args.wavefunction_topology else None,
+            "phase": str(phase_path) if args.wavefunction_topology else None,
+            "psi_real": str(psi_real_path) if args.wavefunction_topology else None,
+            "psi_imag": str(psi_imag_path) if args.wavefunction_topology else None,
             "plots": plots,
         },
         "history": history,

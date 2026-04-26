@@ -73,12 +73,102 @@ def build_graph_from_embedding(Z, sigma=1.0, k_neighbors=8, valid_mask=None):
     return W
 
 
-def graph_laplacian_torch(W, eps=1e-5):
+def build_multiscale_graph_from_embedding(
+    Z,
+    sigmas=(0.02, 0.10, 0.35),
+    k_neighbors=(4, 16, 64),
+    scale_logits=None,
+    valid_mask=None,
+):
+    dists = torch.cdist(Z, Z)
+    n = Z.shape[0]
+    eye = torch.eye(n, device=Z.device, dtype=Z.dtype)
+
+    Ws = []
+
+    for sigma, k in zip(sigmas, k_neighbors):
+        W = torch.exp(-dists / sigma)
+        W = W * (1.0 - eye)
+
+        if valid_mask is not None:
+            mask = valid_mask.to(device=W.device, dtype=W.dtype)
+            W = W * mask[:, None] * mask[None, :]
+
+        if k is not None and k > 0:
+            kk = min(int(k), max(n - 1, 0))
+            if kk > 0:
+                vals, idx = torch.topk(W, k=kk, dim=1)
+                W_sparse = torch.zeros_like(W)
+                W_sparse.scatter_(1, idx, vals)
+                W = 0.5 * (W_sparse + W_sparse.T)
+            else:
+                W = torch.zeros_like(W)
+
+        Ws.append(W)
+
+    if scale_logits is None:
+        weights = torch.ones(len(Ws), device=Z.device, dtype=Z.dtype) / len(Ws)
+    else:
+        weights = torch.softmax(scale_logits, dim=0)
+
+    W_total = torch.zeros_like(Ws[0])
+    for w, W in zip(weights, Ws):
+        W_total = W_total + w * W
+
+    W_total = 0.5 * (W_total + W_total.T)
+    if valid_mask is not None:
+        mask = valid_mask.to(device=W_total.device, dtype=W_total.dtype)
+        W_total = W_total * mask[:, None] * mask[None, :]
+
+    return W_total, weights
+
+
+def build_nested_graphs(Z, valid_mask=None):
+    dists = torch.cdist(Z, Z)
+    n = Z.shape[0]
+    eye = torch.eye(n, device=Z.device, dtype=Z.dtype)
+
+    configs = [
+        (0.02, 4),  # local
+        (0.10, 16),  # medium
+        (0.35, 64),  # global
+    ]
+
+    Ws = []
+
+    for sigma, k in configs:
+        W = torch.exp(-dists / sigma)
+        W = W * (1.0 - eye)
+
+        if valid_mask is not None:
+            mask = valid_mask.to(device=W.device, dtype=W.dtype)
+            W = W * mask[:, None] * mask[None, :]
+
+        kk = min(int(k), max(n - 1, 0))
+        if kk > 0:
+            vals, idx = torch.topk(W, k=kk, dim=1)
+            W_sparse = torch.zeros_like(W)
+            W_sparse.scatter_(1, idx, vals)
+            W = 0.5 * (W_sparse + W_sparse.T)
+        else:
+            W = torch.zeros_like(W)
+
+        if valid_mask is not None:
+            mask = valid_mask.to(device=W.device, dtype=W.dtype)
+            W = W * mask[:, None] * mask[None, :]
+
+        Ws.append(W)
+
+    return Ws
+
+
+def graph_laplacian_torch(W, eps=1e-5, normalize_trace=True):
     D = torch.diag(W.sum(dim=1))
     L = D - W
     L = 0.5 * (L + L.T)
-    trace = torch.trace(L)
-    L = L / (trace / L.shape[0] + 1e-8)
+    if normalize_trace:
+        trace = torch.trace(L)
+        L = L / (trace / L.shape[0] + 1e-8)
     L = L + eps * torch.eye(L.shape[0], device=W.device, dtype=W.dtype)
     return L
 
@@ -90,6 +180,65 @@ def safe_eigvalsh(H):
         H = 0.5 * (H + H.T)
         H = H + 1e-5 * torch.eye(H.shape[0], device=H.device, dtype=H.dtype)
         return torch.linalg.eigvalsh(H)
+
+
+def wavefunction_fields(log_amplitude, phase):
+    A = torch.exp(log_amplitude)
+    psi_real = A * torch.cos(phase)
+    psi_imag = A * torch.sin(phase)
+    psi_abs = torch.sqrt(psi_real**2 + psi_imag**2 + 1e-12)
+    return A, psi_real, psi_imag, psi_abs
+
+
+def amplitude_energy_loss(log_amplitude, V):
+    pred = log_amplitude
+    target = -V.detach()
+
+    pred = (pred - pred.mean()) / (pred.std() + 1e-8)
+    target = (target - target.mean()) / (target.std() + 1e-8)
+
+    return torch.mean((pred - target) ** 2)
+
+
+def phase_flow_loss(phase, W):
+    diff = phase[:, None] - phase[None, :]
+    return torch.sum(W * diff**2) / (torch.sum(W) + 1e-8)
+
+
+def phase_activity_loss(phase, min_std=0.02):
+    return torch.relu(phase.new_tensor(min_std) - torch.std(phase)) ** 2
+
+
+def phase_activity_target_loss(phase, target_std=1.0):
+    if phase.numel() < 2:
+        return phase.new_tensor(0.0)
+    dphi = phase[1:] - phase[:-1]
+    std = torch.std(dphi)
+    return (std - target_std) ** 2
+
+
+def phase_curvature_loss(phase):
+    if phase.numel() < 3:
+        return phase.new_tensor(0.0)
+    return torch.mean((phase[2:] - 2.0 * phase[1:-1] + phase[:-2]) ** 2)
+
+
+def nodal_sparsity_loss(log_amplitude, target_fraction=0.05):
+    A = torch.exp(log_amplitude)
+    threshold = torch.quantile(A.detach(), target_fraction)
+    node_score = torch.sigmoid(20.0 * (threshold - A))
+    return torch.mean((node_score.mean() - target_fraction) ** 2)
+
+
+def amplitude_collapse_loss(log_amplitude):
+    A = torch.exp(log_amplitude)
+    return torch.relu(0.1 - torch.std(A)) ** 2
+
+
+def nodal_score(log_amplitude, target_fraction=0.05):
+    A = torch.exp(log_amplitude)
+    threshold = torch.quantile(A.detach(), target_fraction)
+    return torch.sigmoid(20.0 * (threshold - A))
 
 
 def pauli_hole_loss(Z_valid, Z_invalid, margin=0.1):
@@ -104,11 +253,25 @@ def pauli_hole_loss(Z_valid, Z_invalid, margin=0.1):
 
 
 class DTESGraphOperator(nn.Module):
-    def __init__(self, n, dim=2, valid_mask=None):
+    def __init__(
+        self,
+        n,
+        dim=2,
+        valid_mask=None,
+        multiscale_geometry=False,
+        nested_geometry=False,
+    ):
         super().__init__()
         self.geometry = DTESGeometry(n, dim)
+        self.multiscale_geometry = bool(multiscale_geometry)
+        self.nested_geometry = bool(nested_geometry)
         self.V = nn.Parameter(0.01 * torch.randn(n))
         self.edge_logits = nn.Parameter(0.01 * torch.randn(n, n))
+        self.multiscale_logits = nn.Parameter(torch.zeros(3))
+        self.level_logits = nn.Parameter(torch.zeros(3))
+        self.log_amplitude = nn.Parameter(torch.zeros(n))
+        t = torch.linspace(0.0, 1.0, n)
+        self.phase = nn.Parameter(0.05 * torch.sin(2 * torch.pi * t))
         if valid_mask is None:
             self.valid_mask = None
         else:
@@ -117,22 +280,63 @@ class DTESGraphOperator(nn.Module):
                 raise ValueError("valid_mask length must match n")
             self.register_buffer("valid_mask", mask)
 
-    def forward(self):
+    def _apply_nodal_barrier(self, W):
+        A, _, _, _ = wavefunction_fields(self.log_amplitude, self.phase)
+        barrier = torch.exp(-2.0 * (A[:, None] + A[None, :]))
+        W = W * (1.0 - barrier)
+        return 0.5 * (W + W.T)
+
+    def forward(self, wavefunction_topology=False):
         Z = self.geometry()
-        W = build_graph_from_embedding(Z, valid_mask=self.valid_mask)
+        if self.nested_geometry:
+            Ws = build_nested_graphs(Z, valid_mask=self.valid_mask)
+            if wavefunction_topology:
+                Ws = [self._apply_nodal_barrier(W_level) for W_level in Ws]
+            levels = []
+            for W_level in Ws:
+                L_level = graph_laplacian_torch(W_level, normalize_trace=False)
+                levels.append(L_level)
+
+            raw_weights = torch.softmax(self.level_logits, dim=0)
+            level_floor = 0.05
+            ms_weights = level_floor + (1.0 - len(Ws) * level_floor) * raw_weights
+            H = torch.zeros_like(levels[0])
+            W = torch.zeros_like(Ws[0])
+            for w, L_level, W_level in zip(ms_weights, levels, Ws):
+                H = H + w * L_level
+                W = W + w * W_level
+
+            edge_scale = 1.0
+            H = H + torch.diag(self.V)
+            H = 0.5 * (H + H.T)
+            W = 0.5 * (W + W.T)
+
+            return H, W, Z, edge_scale, ms_weights
+
+        if self.multiscale_geometry:
+            W, ms_weights = build_multiscale_graph_from_embedding(
+                Z,
+                scale_logits=self.multiscale_logits,
+                valid_mask=self.valid_mask,
+            )
+        else:
+            W = build_graph_from_embedding(Z, valid_mask=self.valid_mask)
+            ms_weights = torch.softmax(self.multiscale_logits.detach(), dim=0)
+        if wavefunction_topology:
+            W = self._apply_nodal_barrier(W)
         E = torch.sigmoid(0.5 * (self.edge_logits + self.edge_logits.T))
         W = W * (0.5 + E)
         W = W * (1 - torch.eye(W.shape[0], device=W.device, dtype=W.dtype))
         if self.valid_mask is not None:
             mask = self.valid_mask.to(device=W.device, dtype=W.dtype)
             W = W * mask[:, None] * mask[None, :]
-        L = graph_laplacian_torch(W)
+        L = graph_laplacian_torch(W, normalize_trace=not self.multiscale_geometry)
 
         edge_scale = 1.0
         H = L + torch.diag(self.V)
         H = 0.5 * (H + H.T)
 
-        return H, W, Z, edge_scale
+        return H, W, Z, edge_scale, ms_weights
 
 
 def normalize(x):
@@ -206,6 +410,23 @@ def spectral_spread_loss(eig, k=50, min_std=0.3):
     vals = eig[:k]
     std = torch.std(vals)
     return torch.relu(torch.tensor(min_std, device=eig.device) - std) ** 2
+
+
+def spectral_range_loss(eig, zeta, k=50):
+    k = min(int(k), eig.numel(), zeta.numel())
+    if k <= 0:
+        return eig.new_tensor(float("inf"))
+    erange = eig[:k].max() - eig[:k].min()
+    zrange = zeta[:k].max() - zeta[:k].min()
+    return ((erange - zrange) / (zrange + 1e-8)) ** 2
+
+
+def multiscale_entropy_loss(weights):
+    return torch.sum(weights * torch.log(weights + 1e-8))
+
+
+def level_entropy_loss(weights):
+    return torch.sum(weights * torch.log(weights + 1e-8))
 
 
 def normalize_range(x):
@@ -297,6 +518,17 @@ def train_dtes_geometry(
     parametric_line=False,
     curve_smooth_weight=1.0,
     curve_amp_weight=0.1,
+    multiscale_geometry=False,
+    range_weight=10.0,
+    nested_geometry=False,
+    wavefunction_topology=False,
+    wave_amp_weight=0.2,
+    phase_weight=0.05,
+    nodal_weight=0.1,
+    amplitude_collapse_weight=0.1,
+    phase_activity_weight=1.0,
+    phase_target_std=0.5,
+    phase_curvature_weight=0.05,
 ):
     t_grid = _as_finite_1d("t_grid", t_grid)
     zeta_zeros = np.sort(np.abs(_as_finite_1d("zeta_zeros", zeta_zeros)))
@@ -318,7 +550,13 @@ def train_dtes_geometry(
 
     n = len(t_grid)
 
-    model = DTESGraphOperator(n, dim, valid_mask=valid_mask_arr).to(device)
+    model = DTESGraphOperator(
+        n,
+        dim,
+        valid_mask=valid_mask_arr,
+        multiscale_geometry=multiscale_geometry,
+        nested_geometry=nested_geometry,
+    ).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
 
     zeta = torch.tensor(zeta_zeros, dtype=torch.float32, device=device)
@@ -361,7 +599,9 @@ def train_dtes_geometry(
     for step in range(int(steps)):
         opt.zero_grad()
 
-        H, W, Z, edge_scale = model()
+        H, W, Z, edge_scale, ms_weights = model(
+            wavefunction_topology=wavefunction_topology
+        )
         eig = safe_eigvalsh(H)
 
         if no_scaling and train_idx is not None:
@@ -380,6 +620,12 @@ def train_dtes_geometry(
             loss_growth = spectral_growth_loss(eig, zeta, k=k)
             loss_affine = affine_penalty(eig, zeta, k)
             test_error_t = eig.new_tensor(float("nan"))
+        elif nested_geometry:
+            loss_spec = raw_spectral_loss(eig, zeta, k)
+            loss_spacing = spacing_loss(eig, zeta, k)
+            loss_growth = spectral_growth_loss(eig, zeta, k=k)
+            loss_affine = eig.new_tensor(0.0)
+            test_error_t = eig.new_tensor(float("nan"))
         else:
             loss_spec = spectral_loss(eig, zeta, k)
             loss_spacing = spacing_loss(eig, zeta, k)
@@ -387,6 +633,26 @@ def train_dtes_geometry(
             loss_affine = eig.new_tensor(0.0)
             test_error_t = eig.new_tensor(float("nan"))
         loss_spread = spectral_spread_loss(eig, k=k, min_std=0.3)
+        loss_range = spectral_range_loss(eig, zeta, k)
+        loss_ms_entropy = (
+            level_entropy_loss(ms_weights)
+            if nested_geometry
+            else multiscale_entropy_loss(ms_weights)
+        )
+        A, psi_real, psi_imag, psi_abs = wavefunction_fields(
+            model.log_amplitude,
+            model.phase,
+        )
+        loss_amp_energy = amplitude_energy_loss(model.log_amplitude, model.V)
+        loss_phase = phase_flow_loss(model.phase, W)
+        loss_phase_activity = phase_activity_loss(model.phase)
+        loss_phase_activity_target = phase_activity_target_loss(
+            model.phase,
+            target_std=phase_target_std,
+        )
+        loss_phase_curvature = phase_curvature_loss(model.phase)
+        loss_nodal = nodal_sparsity_loss(model.log_amplitude)
+        loss_amp_collapse = amplitude_collapse_loss(model.log_amplitude)
 
         geom_reg = torch.mean(Z**2)
         d = torch.cdist(Z, Z) + 1e-3
@@ -396,6 +662,13 @@ def train_dtes_geometry(
         loss_pauli = torch.tensor(0.0, device=device)
         eig_window = eig[: min(int(k), eig.numel())]
         eig_std = torch.std(eig_window)
+        zeta_window = zeta[: min(int(k), zeta.numel())]
+        eig_range = eig_window.max() - eig_window.min()
+        zeta_range = zeta_window.max() - zeta_window.min()
+        phase_grad = model.phase[1:] - model.phase[:-1]
+        phase_grad_std = (
+            torch.std(phase_grad) if phase_grad.numel() > 1 else model.phase.new_tensor(0.0)
+        )
         loss_line_spacing = torch.tensor(0.0, device=device)
         loss_ordering = torch.tensor(0.0, device=device)
         loss_center = torch.tensor(0.0, device=device)
@@ -475,6 +748,17 @@ def train_dtes_geometry(
             + float(anchor_weight) * loss_anchor
             + float(spacing_anchor_weight) * loss_spacing_anchor
         )
+        if multiscale_geometry or nested_geometry:
+            loss = (
+                loss
+                + float(range_weight) * loss_range
+                + 0.01 * loss_ms_entropy
+            )
+            weights["range"] = float(range_weight)
+            if nested_geometry:
+                weights["level_entropy"] = 0.01
+            else:
+                weights["multiscale_entropy"] = 0.01
         if line_geometry and not curve_geometry:
             loss = (
                 loss
@@ -493,6 +777,23 @@ def train_dtes_geometry(
             )
             weights["curve_smooth"] = float(curve_smooth_weight)
             weights["curve_amp"] = float(curve_amp_weight)
+        if wavefunction_topology:
+            loss = (
+                loss
+                + float(wave_amp_weight) * loss_amp_energy
+                + float(phase_weight) * loss_phase
+                + float(phase_weight) * loss_phase_activity
+                + float(phase_activity_weight) * loss_phase_activity_target
+                + float(phase_curvature_weight) * loss_phase_curvature
+                + float(nodal_weight) * loss_nodal
+                + float(amplitude_collapse_weight) * loss_amp_collapse
+            )
+            weights["wave_amp"] = float(wave_amp_weight)
+            weights["phase"] = float(phase_weight)
+            weights["phase_activity"] = float(phase_activity_weight)
+            weights["phase_curvature"] = float(phase_curvature_weight)
+            weights["nodal"] = float(nodal_weight)
+            weights["amplitude_collapse"] = float(amplitude_collapse_weight)
         if pauli_loss_available:
             loss = loss + weights["pauli"] * loss_pauli
         if not torch.isfinite(loss):
@@ -502,7 +803,26 @@ def train_dtes_geometry(
         opt.step()
 
         if step % 50 == 0:
-            if curve_geometry:
+            if wavefunction_topology:
+                print(
+                    f"[V10.6-PHASE] step={step} "
+                    f"phase_grad_std={phase_grad_std.item():.4f} "
+                    f"eig_range={eig_range.item():.2f}"
+                )
+            elif nested_geometry:
+                print(
+                    f"[V10.5-NESTED] step={step} "
+                    f"weights={ms_weights.detach().cpu().numpy()} "
+                    f"eig_range={eig_range.item():.2f}"
+                )
+            elif multiscale_geometry:
+                print(
+                    f"[V10.4-MULTISCALE] step={step} "
+                    f"range={loss_range.item():.4f} "
+                    f"eig_range={eig_range.item():.2f} "
+                    f"weights={ms_weights.detach().cpu().numpy()}"
+                )
+            elif curve_geometry:
                 print(
                     f"[V10-PARAM-LINE] step={step} "
                     f"curve_smooth={loss_curve_smooth.item():.6f} "
@@ -551,6 +871,29 @@ def train_dtes_geometry(
                 "spacing_loss": float(loss_spacing.detach().cpu()),
                 "spread_loss": float(loss_spread.detach().cpu()),
                 "growth_loss": float(loss_growth.detach().cpu()),
+                "range_loss": float(loss_range.detach().cpu()),
+                "multiscale_entropy_loss": float(loss_ms_entropy.detach().cpu()),
+                "wave_amp_loss": float(loss_amp_energy.detach().cpu()),
+                "phase_loss": float(loss_phase.detach().cpu()),
+                "phase_activity_loss": float(loss_phase_activity.detach().cpu()),
+                "phase_activity_target_loss": float(
+                    loss_phase_activity_target.detach().cpu()
+                ),
+                "phase_curvature_loss": float(loss_phase_curvature.detach().cpu()),
+                "phase_grad_std": float(phase_grad_std.detach().cpu()),
+                "nodal_loss": float(loss_nodal.detach().cpu()),
+                "amplitude_collapse_loss": float(loss_amp_collapse.detach().cpu()),
+                "amplitude_min": float(A.min().detach().cpu()),
+                "amplitude_max": float(A.max().detach().cpu()),
+                "amplitude_std": float(A.std().detach().cpu()),
+                "multiscale_weights": [
+                    float(x) for x in ms_weights.detach().cpu()
+                ],
+                "nested_weights": [
+                    float(x) for x in ms_weights.detach().cpu()
+                ]
+                if nested_geometry
+                else [],
                 "anchor_loss": float(loss_anchor.detach().cpu()),
                 "spacing_anchor_loss": float(loss_spacing_anchor.detach().cpu()),
                 "n_anchor": int(n_anchor),
@@ -569,6 +912,8 @@ def train_dtes_geometry(
                 "spread": float(embedding_spread.detach().cpu()),
                 "eig_mean": float(eig.detach().mean().cpu()),
                 "eig_std": float(eig_std.detach().cpu()),
+                "eig_range": float(eig_range.detach().cpu()),
+                "zeta_range": float(zeta_range.detach().cpu()),
                 "eig_min": float(eig_window.min().detach().cpu()),
                 "eig_max": float(eig_window.max().detach().cpu()),
                 "weights": {k: float(v) for k, v in weights.items()},
@@ -576,8 +921,15 @@ def train_dtes_geometry(
         )
 
     with torch.no_grad():
-        H, W, Z, edge_scale = model()
+        H, W, Z, edge_scale, ms_weights = model(
+            wavefunction_topology=wavefunction_topology
+        )
         eig = safe_eigvalsh(H)
+        A, psi_real, psi_imag, psi_abs = wavefunction_fields(
+            model.log_amplitude,
+            model.phase,
+        )
+        final_nodal_score = nodal_score(model.log_amplitude)
         if no_scaling and train_idx is not None:
             final_train_error = raw_spectral_loss(eig[train_idx], zeta_train, k)
             if zeta_test is not None and test_idx is not None and test_idx.numel():
@@ -599,10 +951,20 @@ def train_dtes_geometry(
         "W": W.detach().cpu().numpy(),
         "V": model.V.detach().cpu().numpy(),
         "eig": eig.detach().cpu().numpy(),
+        "amplitude": A.detach().cpu().numpy(),
+        "phase": model.phase.detach().cpu().numpy(),
+        "psi_real": psi_real.detach().cpu().numpy(),
+        "psi_imag": psi_imag.detach().cpu().numpy(),
+        "psi_abs": psi_abs.detach().cpu().numpy(),
+        "nodal_score": final_nodal_score.detach().cpu().numpy(),
         "history": history,
         "final_weights": history[-1]["weights"] if history else dict(base_weights),
         "train_error": float(final_train_error.detach().cpu()),
         "test_error": float(final_test_error.detach().cpu()),
         "affine_penalty": float(final_affine_penalty.detach().cpu()),
         "edge_scale": float(edge_scale),
+        "multiscale_weights": [float(x) for x in ms_weights.detach().cpu()],
+        "nested_weights": [float(x) for x in ms_weights.detach().cpu()]
+        if nested_geometry
+        else [],
     }
