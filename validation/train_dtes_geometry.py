@@ -119,6 +119,19 @@ def _history_loss(row):
     return float(row.get("loss", 0.0)) if isinstance(row, dict) else float(row)
 
 
+def _json_safe(value):
+    if isinstance(value, dict):
+        return {k: _json_safe(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, tuple):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, (float, np.floating)):
+        value = float(value)
+        return value if np.isfinite(value) else None
+    return value
+
+
 def _write_weights(path: Path, history):
     weight_names = []
     for row in history:
@@ -254,6 +267,19 @@ def parse_args(argv=None):
     parser.add_argument("--adaptive-weights", action="store_true")
     parser.add_argument("--adaptive-lr", type=float, default=0.05)
     parser.add_argument("--wavefunction-aware", action="store_true")
+    parser.add_argument("--no-scaling", action="store_true")
+    parser.add_argument("--generalization-split", action="store_true")
+    parser.add_argument("--anchor-loss", action="store_true")
+    parser.add_argument("--anchor-weight", type=float, default=10.0)
+    parser.add_argument("--spacing-anchor-weight", type=float, default=5.0)
+    parser.add_argument("--n-anchor", type=int, default=5)
+    parser.add_argument("--line-geometry", action="store_true")
+    parser.add_argument("--spacing-weight", type=float, default=1.0)
+    parser.add_argument("--ordering-weight", type=float, default=0.5)
+    parser.add_argument("--center-weight", type=float, default=0.1)
+    parser.add_argument("--parametric-line", action="store_true")
+    parser.add_argument("--curve-smooth-weight", type=float, default=1.0)
+    parser.add_argument("--curve-amp-weight", type=float, default=0.1)
     return parser.parse_args(argv)
 
 
@@ -281,6 +307,19 @@ def main(argv=None):
         pauli_weight=args.pauli_weight,
         adaptive_weights=args.adaptive_weights,
         adaptive_lr=args.adaptive_lr,
+        no_scaling=args.no_scaling,
+        generalization_split=args.generalization_split,
+        anchor_loss_enabled=args.anchor_loss,
+        anchor_weight=args.anchor_weight,
+        spacing_anchor_weight=args.spacing_anchor_weight,
+        n_anchor=args.n_anchor,
+        line_geometry=args.line_geometry,
+        spacing_weight=args.spacing_weight,
+        ordering_weight=args.ordering_weight,
+        center_weight=args.center_weight,
+        parametric_line=args.parametric_line,
+        curve_smooth_weight=args.curve_smooth_weight,
+        curve_amp_weight=args.curve_amp_weight,
     )
 
     embedding_path = out_path.parent / "dtes_v10_embedding.npy"
@@ -301,14 +340,21 @@ def main(argv=None):
     Z = np.asarray(result["Z"], dtype=float)
     history = result["history"]
     history_losses = [_history_loss(row) for row in history]
+    final_history = history[-1] if history and isinstance(history[-1], dict) else {}
     finite_outputs = all(
         np.all(np.isfinite(x)) for x in (eig, W, Z, np.asarray(history_losses, dtype=float))
     )
 
     report = {
-        "version": "V10.1 Pauli-Aware DTES Geometry Learning"
-        if args.pauli_aware
-        else "V10 DTES Geometry Learning",
+        "version": (
+            "V10.3 No-Scaling DTES Geometry Learning"
+            if args.no_scaling
+            else (
+                "V10.1 Pauli-Aware DTES Geometry Learning"
+                if args.pauli_aware
+                else "V10 DTES Geometry Learning"
+            )
+        ),
         "input": str(input_path),
         "steps": int(args.steps),
         "lr": float(args.lr),
@@ -319,7 +365,30 @@ def main(argv=None):
         "adaptive_weights": bool(args.adaptive_weights),
         "adaptive_lr": float(args.adaptive_lr),
         "wavefunction_aware": bool(args.wavefunction_aware),
+        "no_scaling": bool(args.no_scaling),
+        "generalization_split": bool(args.generalization_split),
+        "anchor_loss_enabled": bool(args.anchor_loss),
+        "anchor_weight": float(args.anchor_weight),
+        "spacing_anchor_weight": float(args.spacing_anchor_weight),
+        "n_anchor": int(args.n_anchor),
+        "line_geometry": bool(args.line_geometry),
+        "spacing_weight": float(args.spacing_weight),
+        "ordering_weight": float(args.ordering_weight),
+        "center_weight": float(args.center_weight),
+        "parametric_line": bool(args.parametric_line),
+        "curve_smooth_weight": float(args.curve_smooth_weight),
+        "curve_amp_weight": float(args.curve_amp_weight),
+        "final_anchor_loss": final_history.get("anchor_loss"),
+        "final_spacing_anchor_loss": final_history.get("spacing_anchor_loss"),
+        "final_line_spacing_loss": final_history.get("line_spacing_loss"),
+        "final_ordering_loss": final_history.get("ordering_loss"),
+        "final_center_loss": final_history.get("center_loss"),
+        "final_curve_smoothness_loss": final_history.get("curve_smoothness_loss"),
+        "final_curve_amplitude_loss": final_history.get("curve_amplitude_loss"),
         "final_weights": result.get("final_weights", {}),
+        "train_error": result.get("train_error"),
+        "test_error": result.get("test_error"),
+        "affine_penalty": result.get("affine_penalty"),
         "n_input": n_input,
         "n_nodes": n_nodes,
         "zeta_zero_count": int(zeta_zeros.size),
@@ -341,18 +410,24 @@ def main(argv=None):
         },
         "history": history,
         "note": (
-            "Pauli-aware DTES geometry learning. Pauli nodal states are removed "
-            "as hard constraints; numerical experiment, not proof of RH."
-            if args.pauli_aware
+            "V10.3 no-scaling DTES operator identification experiment. "
+            "Eigenvalues are evaluated in raw scale with a held-out split when "
+            "enabled; numerical experiment, not proof of RH."
+            if args.no_scaling
             else (
-                "Numerical DTES geometry learning experiment; not a proof of the "
-                "Riemann hypothesis."
+                "Pauli-aware DTES geometry learning. Pauli nodal states are removed "
+                "as hard constraints; numerical experiment, not proof of RH."
+                if args.pauli_aware
+                else (
+                    "Numerical DTES geometry learning experiment; not a proof of the "
+                    "Riemann hypothesis."
+                )
             )
         ),
     }
 
     with out_path.open("w", encoding="utf-8") as f:
-        json.dump(report, f, indent=2, allow_nan=False)
+        json.dump(_json_safe(report), f, indent=2, allow_nan=False)
 
     print(f"[V10] report saved: {out_path}")
     print(f"[V10] embedding saved: {embedding_path}")

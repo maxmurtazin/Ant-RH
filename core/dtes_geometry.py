@@ -17,17 +17,32 @@ from core.adaptive_loss_controller import AdaptiveLossController
 class DTESGeometry(nn.Module):
     def __init__(self, n, dim=2):
         super().__init__()
+        self.n = n
+        self.dim = dim
+
         t = torch.linspace(0.0, 1.0, n)
-        Z_init = torch.zeros(n, dim)
-        Z_init[:, 0] = t
+        self.register_buffer("t_fixed", t)
+
         if dim > 1:
-            Z_init[:, 1] = 0.1 * torch.sin(10 * t)
+            self.y_raw = nn.Parameter(0.05 * torch.sin(2 * torch.pi * t))
+        else:
+            self.y_raw = None
+
         if dim > 2:
-            Z_init[:, 2] = 0.1 * torch.cos(10 * t)
-        self.Z = nn.Parameter(Z_init)
+            self.z_raw = nn.Parameter(0.05 * torch.cos(2 * torch.pi * t))
+        else:
+            self.z_raw = None
 
     def forward(self):
-        return self.Z
+        coords = [self.t_fixed]
+
+        if self.dim > 1:
+            coords.append(self.y_raw)
+
+        if self.dim > 2:
+            coords.append(self.z_raw)
+
+        return torch.stack(coords, dim=1)
 
 
 def build_graph_from_embedding(Z, sigma=1.0, k_neighbors=8, valid_mask=None):
@@ -62,6 +77,8 @@ def graph_laplacian_torch(W, eps=1e-5):
     D = torch.diag(W.sum(dim=1))
     L = D - W
     L = 0.5 * (L + L.T)
+    trace = torch.trace(L)
+    L = L / (trace / L.shape[0] + 1e-8)
     L = L + eps * torch.eye(L.shape[0], device=W.device, dtype=W.dtype)
     return L
 
@@ -92,7 +109,6 @@ class DTESGraphOperator(nn.Module):
         self.geometry = DTESGeometry(n, dim)
         self.V = nn.Parameter(0.01 * torch.randn(n))
         self.edge_logits = nn.Parameter(0.01 * torch.randn(n, n))
-        self.log_edge_scale = nn.Parameter(torch.zeros(1))
         if valid_mask is None:
             self.valid_mask = None
         else:
@@ -112,8 +128,8 @@ class DTESGraphOperator(nn.Module):
             W = W * mask[:, None] * mask[None, :]
         L = graph_laplacian_torch(W)
 
-        edge_scale = torch.exp(self.log_edge_scale).clamp(0.1, 100.0)
-        H = edge_scale * L + torch.diag(self.V)
+        edge_scale = 1.0
+        H = L + torch.diag(self.V)
         H = 0.5 * (H + H.T)
 
         return H, W, Z, edge_scale
@@ -130,6 +146,48 @@ def spectral_loss(eig, zeta, k):
     e = normalize(eig[:k])
     z = normalize(zeta[:k])
     return torch.mean((e - z) ** 2)
+
+
+def raw_spectral_loss(eig, zeta, k):
+    k = min(int(k), eig.numel(), zeta.numel())
+    if k <= 0:
+        return eig.new_tensor(float("inf"))
+    return torch.mean((eig[:k] - zeta[:k]) ** 2)
+
+
+def anchor_loss(eig, zeta, n_anchor=5):
+    k = min(int(n_anchor), eig.numel(), zeta.numel())
+    if k <= 0:
+        return eig.new_tensor(0.0)
+    return torch.mean((eig[:k] - zeta[:k]) ** 2)
+
+
+def spacing_anchor_loss(eig, zeta, n_anchor=5):
+    k = min(int(n_anchor), eig.numel(), zeta.numel())
+
+    if k < 2:
+        return torch.tensor(0.0, device=eig.device)
+
+    de = eig[1:k] - eig[: k - 1]
+    dz = zeta[1:k] - zeta[: k - 1]
+
+    return torch.mean((de - dz) ** 2)
+
+
+def affine_penalty(eig, zeta, k):
+    k = min(int(k), eig.numel(), zeta.numel())
+    if k <= 1:
+        return eig.new_tensor(0.0)
+    x = eig[:k]
+    y = zeta[:k]
+
+    A = torch.stack([x, torch.ones_like(x)], dim=1)
+    sol = torch.linalg.lstsq(A, y.unsqueeze(1)).solution
+
+    a = sol[0, 0]
+    b = sol[1, 0]
+
+    return (a - 1.0) ** 2 + b**2
 
 
 def spacing_loss(eig, zeta, k):
@@ -161,6 +219,42 @@ def spectral_growth_loss(eig, zeta_zeros, k=50):
     return torch.mean((e - z) ** 2)
 
 
+def uniform_spacing_loss(Z):
+    z = torch.sort(Z[:, 0]).values
+    diffs = z[1:] - z[:-1]
+    return torch.var(diffs)
+
+
+def ordering_loss(Z):
+    z = Z[:, 0]
+    z_sorted, _ = torch.sort(z)
+    return torch.mean((z - z_sorted) ** 2)
+
+
+def center_loss(Z):
+    return torch.mean(Z[:, 0] ** 2)
+
+
+def curve_smoothness_loss(Z):
+    if Z.shape[0] < 3 or Z.shape[1] < 2:
+        return Z.new_tensor(0.0)
+
+    loss = Z.new_tensor(0.0)
+
+    for d in range(1, Z.shape[1]):
+        y = Z[:, d]
+        loss = loss + torch.mean((y[2:] - 2 * y[1:-1] + y[:-2]) ** 2)
+
+    return loss
+
+
+def curve_amplitude_loss(Z):
+    if Z.shape[1] < 2:
+        return Z.new_tensor(0.0)
+
+    return torch.mean(Z[:, 1:] ** 2)
+
+
 def _as_finite_1d(name, values):
     arr = np.asarray(values, dtype=float).reshape(-1)
     arr = arr[np.isfinite(arr)]
@@ -190,6 +284,19 @@ def train_dtes_geometry(
     pauli_weight=1.0,
     adaptive_weights=False,
     adaptive_lr=0.05,
+    no_scaling=False,
+    generalization_split=False,
+    anchor_loss_enabled=False,
+    anchor_weight=10.0,
+    spacing_anchor_weight=5.0,
+    n_anchor=5,
+    line_geometry=False,
+    spacing_weight=1.0,
+    ordering_weight=0.5,
+    center_weight=0.1,
+    parametric_line=False,
+    curve_smooth_weight=1.0,
+    curve_amp_weight=0.1,
 ):
     t_grid = _as_finite_1d("t_grid", t_grid)
     zeta_zeros = np.sort(np.abs(_as_finite_1d("zeta_zeros", zeta_zeros)))
@@ -215,6 +322,17 @@ def train_dtes_geometry(
     opt = torch.optim.Adam(model.parameters(), lr=lr)
 
     zeta = torch.tensor(zeta_zeros, dtype=torch.float32, device=device)
+    train_idx = None
+    test_idx = None
+    zeta_train = zeta
+    zeta_test = None
+    if no_scaling and generalization_split:
+        split_n = min(zeta.numel(), n)
+        idx_all = torch.arange(split_n, device=device)
+        train_idx = idx_all[0::2]
+        test_idx = idx_all[1::2]
+        zeta_train = zeta[train_idx]
+        zeta_test = zeta[test_idx] if test_idx.numel() else None
 
     history = []
     base_weights = {
@@ -223,7 +341,7 @@ def train_dtes_geometry(
         "growth": 3.0,
         "spread": 10.0,
         "geom": 0.01,
-        "repulsion": 0.001,
+        "repulsion": 0.0001,
         "amplitude": 0.001,
     }
     pauli_loss_available = valid_mask_arr is not None and not bool(np.all(valid_mask_arr))
@@ -231,7 +349,7 @@ def train_dtes_geometry(
         base_weights["pauli"] = float(pauli_weight)
     loss_names = list(base_weights)
     controller = None
-    if adaptive_weights:
+    if adaptive_weights and not no_scaling:
         controller = AdaptiveLossController(
             names=loss_names,
             init_weights=base_weights,
@@ -246,10 +364,29 @@ def train_dtes_geometry(
         H, W, Z, edge_scale = model()
         eig = safe_eigvalsh(H)
 
-        loss_spec = spectral_loss(eig, zeta, k)
-        loss_spacing = spacing_loss(eig, zeta, k)
+        if no_scaling and train_idx is not None:
+            eig_train = eig[train_idx]
+            loss_spec = raw_spectral_loss(eig_train, zeta_train, k)
+            loss_spacing = spacing_loss(eig_train, zeta_train, k)
+            loss_growth = spectral_growth_loss(eig_train, zeta_train, k=k)
+            loss_affine = affine_penalty(eig_train, zeta_train, k)
+            if zeta_test is not None and test_idx is not None and test_idx.numel():
+                test_error_t = raw_spectral_loss(eig[test_idx], zeta_test, k)
+            else:
+                test_error_t = eig.new_tensor(float("nan"))
+        elif no_scaling:
+            loss_spec = raw_spectral_loss(eig, zeta, k)
+            loss_spacing = spacing_loss(eig, zeta, k)
+            loss_growth = spectral_growth_loss(eig, zeta, k=k)
+            loss_affine = affine_penalty(eig, zeta, k)
+            test_error_t = eig.new_tensor(float("nan"))
+        else:
+            loss_spec = spectral_loss(eig, zeta, k)
+            loss_spacing = spacing_loss(eig, zeta, k)
+            loss_growth = spectral_growth_loss(eig, zeta, k=k)
+            loss_affine = eig.new_tensor(0.0)
+            test_error_t = eig.new_tensor(float("nan"))
         loss_spread = spectral_spread_loss(eig, k=k, min_std=0.3)
-        loss_growth = spectral_growth_loss(eig, zeta, k=k)
 
         geom_reg = torch.mean(Z**2)
         d = torch.cdist(Z, Z) + 1e-3
@@ -259,6 +396,24 @@ def train_dtes_geometry(
         loss_pauli = torch.tensor(0.0, device=device)
         eig_window = eig[: min(int(k), eig.numel())]
         eig_std = torch.std(eig_window)
+        loss_line_spacing = torch.tensor(0.0, device=device)
+        loss_ordering = torch.tensor(0.0, device=device)
+        loss_center = torch.tensor(0.0, device=device)
+        loss_curve_smooth = torch.tensor(0.0, device=device)
+        loss_curve_amp = torch.tensor(0.0, device=device)
+        curve_geometry = parametric_line or line_geometry
+        if line_geometry and not curve_geometry:
+            loss_line_spacing = uniform_spacing_loss(Z)
+            loss_ordering = ordering_loss(Z)
+            loss_center = center_loss(Z)
+        if curve_geometry:
+            loss_curve_smooth = curve_smoothness_loss(Z)
+            loss_curve_amp = curve_amplitude_loss(Z)
+        loss_anchor = torch.tensor(0.0, device=device)
+        loss_spacing_anchor = torch.tensor(0.0, device=device)
+        if anchor_loss_enabled:
+            loss_anchor = anchor_loss(eig, zeta, n_anchor=n_anchor)
+            loss_spacing_anchor = spacing_anchor_loss(eig, zeta, n_anchor=n_anchor)
 
         loss_dict = {
             "spectral": loss_spec.detach().item(),
@@ -269,6 +424,8 @@ def train_dtes_geometry(
             "repulsion": repulsion.detach().item(),
             "amplitude": amp.detach().item(),
         }
+        if no_scaling:
+            loss_dict["affine"] = loss_affine.detach().item()
         if pauli_loss_available:
             loss_dict["pauli"] = loss_pauli.detach().item()
         if controller is not None:
@@ -276,15 +433,66 @@ def train_dtes_geometry(
         else:
             weights = dict(base_weights)
 
+        if no_scaling:
+            loss = (
+                5.0 * loss_spec
+                + 2.0 * loss_spacing
+                + 3.0 * loss_growth
+                + 5.0 * loss_affine
+                + 2.0 * loss_spread
+                + 0.01 * geom_reg
+                + 0.0001 * repulsion
+            )
+            weights = {
+                "raw_spectral": 5.0,
+                "spacing": 2.0,
+                "growth": 3.0,
+                "affine": 5.0,
+                "spread": 2.0,
+                "geom": 0.01,
+                "repulsion": 0.0001,
+            }
+            if anchor_loss_enabled:
+                weights["anchor"] = float(anchor_weight)
+                weights["spacing_anchor"] = float(spacing_anchor_weight)
+            if pauli_loss_available:
+                weights["pauli"] = float(pauli_weight)
+        else:
+            loss = (
+                weights["spectral"] * loss_spec
+                + weights["spacing"] * loss_spacing
+                + weights["growth"] * loss_growth
+                + weights["spread"] * loss_spread
+                + weights["geom"] * geom_reg
+                + weights["repulsion"] * repulsion
+                + weights["amplitude"] * amp
+            )
+            if anchor_loss_enabled:
+                weights["anchor"] = float(anchor_weight)
+                weights["spacing_anchor"] = float(spacing_anchor_weight)
         loss = (
-            weights["spectral"] * loss_spec
-            + weights["spacing"] * loss_spacing
-            + weights["growth"] * loss_growth
-            + weights["spread"] * loss_spread
-            + weights["geom"] * geom_reg
-            + weights["repulsion"] * repulsion
-            + weights["amplitude"] * amp
+            loss
+            + float(anchor_weight) * loss_anchor
+            + float(spacing_anchor_weight) * loss_spacing_anchor
         )
+        if line_geometry and not curve_geometry:
+            loss = (
+                loss
+                + float(spacing_weight) * loss_line_spacing
+                + float(ordering_weight) * loss_ordering
+                + float(center_weight) * loss_center
+            )
+            weights["line_spacing"] = float(spacing_weight)
+            weights["ordering"] = float(ordering_weight)
+            weights["center"] = float(center_weight)
+        if curve_geometry:
+            loss = (
+                loss
+                + float(curve_smooth_weight) * loss_curve_smooth
+                + float(curve_amp_weight) * loss_curve_amp
+            )
+            weights["curve_smooth"] = float(curve_smooth_weight)
+            weights["curve_amp"] = float(curve_amp_weight)
         if pauli_loss_available:
             loss = loss + weights["pauli"] * loss_pauli
         if not torch.isfinite(loss):
@@ -294,7 +502,34 @@ def train_dtes_geometry(
         opt.step()
 
         if step % 50 == 0:
-            if controller is not None:
+            if curve_geometry:
+                print(
+                    f"[V10-PARAM-LINE] step={step} "
+                    f"curve_smooth={loss_curve_smooth.item():.6f} "
+                    f"curve_amp={loss_curve_amp.item():.6f}"
+                )
+            elif line_geometry:
+                print(
+                    f"[V10-LINE] step={step} "
+                    f"loss={loss.item():.6f} "
+                    f"spacing={loss_line_spacing.item():.4f} "
+                    f"ordering={loss_ordering.item():.4f}"
+                )
+            elif anchor_loss_enabled:
+                print(
+                    f"[V10-ANCHOR] step={step} "
+                    f"loss={loss.item():.6f} "
+                    f"anchor={loss_anchor.item():.4f} "
+                    f"spacing_anchor={loss_spacing_anchor.item():.4f}"
+                )
+            elif no_scaling:
+                print(
+                    f"[V10.3] step={step} "
+                    f"loss={loss.item():.6f} "
+                    f"train_mse={loss_spec.item():.4f} "
+                    f"test_mse={test_error_t.item():.4f}"
+                )
+            elif controller is not None:
                 print(
                     f"[V10-AUTO] step={step} loss={loss.item():.6f} "
                     f"spec={loss_spec.item():.4f} spacing={loss_spacing.item():.4f} "
@@ -316,6 +551,17 @@ def train_dtes_geometry(
                 "spacing_loss": float(loss_spacing.detach().cpu()),
                 "spread_loss": float(loss_spread.detach().cpu()),
                 "growth_loss": float(loss_growth.detach().cpu()),
+                "anchor_loss": float(loss_anchor.detach().cpu()),
+                "spacing_anchor_loss": float(loss_spacing_anchor.detach().cpu()),
+                "n_anchor": int(n_anchor),
+                "line_spacing_loss": float(loss_line_spacing.detach().cpu()),
+                "ordering_loss": float(loss_ordering.detach().cpu()),
+                "center_loss": float(loss_center.detach().cpu()),
+                "curve_smoothness_loss": float(loss_curve_smooth.detach().cpu()),
+                "curve_amplitude_loss": float(loss_curve_amp.detach().cpu()),
+                "affine_penalty": float(loss_affine.detach().cpu()),
+                "train_error": float(loss_spec.detach().cpu()),
+                "test_error": float(test_error_t.detach().cpu()),
                 "geom_loss": float(geom_reg.detach().cpu()),
                 "repulsion_loss": float(repulsion.detach().cpu()),
                 "amplitude_loss": float(amp.detach().cpu()),
@@ -332,6 +578,21 @@ def train_dtes_geometry(
     with torch.no_grad():
         H, W, Z, edge_scale = model()
         eig = safe_eigvalsh(H)
+        if no_scaling and train_idx is not None:
+            final_train_error = raw_spectral_loss(eig[train_idx], zeta_train, k)
+            if zeta_test is not None and test_idx is not None and test_idx.numel():
+                final_test_error = raw_spectral_loss(eig[test_idx], zeta_test, k)
+            else:
+                final_test_error = eig.new_tensor(float("nan"))
+            final_affine_penalty = affine_penalty(eig[train_idx], zeta_train, k)
+        elif no_scaling:
+            final_train_error = raw_spectral_loss(eig, zeta, k)
+            final_test_error = eig.new_tensor(float("nan"))
+            final_affine_penalty = affine_penalty(eig, zeta, k)
+        else:
+            final_train_error = eig.new_tensor(float("nan"))
+            final_test_error = eig.new_tensor(float("nan"))
+            final_affine_penalty = eig.new_tensor(float("nan"))
 
     return {
         "Z": Z.detach().cpu().numpy(),
@@ -340,5 +601,8 @@ def train_dtes_geometry(
         "eig": eig.detach().cpu().numpy(),
         "history": history,
         "final_weights": history[-1]["weights"] if history else dict(base_weights),
-        "edge_scale": float(edge_scale.detach().cpu().reshape(-1)[0]),
+        "train_error": float(final_train_error.detach().cpu()),
+        "test_error": float(final_test_error.detach().cpu()),
+        "affine_penalty": float(final_affine_penalty.detach().cpu()),
+        "edge_scale": float(edge_scale),
     }
