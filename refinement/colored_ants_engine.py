@@ -32,10 +32,17 @@ import argparse
 import json
 import math
 import random
+import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from core.pauli import pauli_valid
 
 
 COLORS = ("red", "blue", "green", "violet")
@@ -94,6 +101,9 @@ class ColoredGroupedAntEngine:
         self.visit_count: List[int] = [0 for _ in self.points]
         self.selected: List[int] = []
         self.history: List[dict] = []
+        self.pauli_rejections = 0
+        self.pauli_action_checks = 0
+        self.pauli_valid_action_checks = 0
         self._build_roads()
 
     def _point_score(self, idx: int) -> float:
@@ -182,21 +192,36 @@ class ColoredGroupedAntEngine:
             + self.cfg.delta_color * cb
         )
 
+    def is_valid_action(self, ant: ColoredAnt, current: int, action: int) -> bool:
+        occupied = ant.memory if ant.memory else [current]
+        return pauli_valid(occupied + [action])
+
     def choose_next(self, ant: ColoredAnt, current: int) -> int:
         nbrs = self.neighbors.get(current, [])
         if not nbrs:
             return current
-        vals = [self.road_value(ant.color, current, j) for j in nbrs]
+        legal_nbrs = []
+        for nxt in nbrs:
+            self.pauli_action_checks += 1
+            if self.is_valid_action(ant, current, nxt):
+                self.pauli_valid_action_checks += 1
+                legal_nbrs.append(nxt)
+            else:
+                self.pauli_rejections += 1
+        if not legal_nbrs:
+            return current
+
+        vals = [self.road_value(ant.color, current, j) for j in legal_nbrs]
         m = max(vals)
         weights = [math.exp(v - m) for v in vals]
         s = sum(weights)
         r = self.rng.random() * s
         acc = 0.0
-        for j, w in zip(nbrs, weights):
+        for j, w in zip(legal_nbrs, weights):
             acc += w
             if acc >= r:
                 return j
-        return nbrs[-1]
+        return legal_nbrs[-1]
 
     def path_score(self, path: List[int], color: str) -> float:
         if not path:
@@ -236,12 +261,14 @@ class ColoredGroupedAntEngine:
                 # Start: violet/blue prefer sparse regions, green boundaries, red high score.
                 start = self.pick_start(color)
                 path = [start]
+                ant.memory = [start]
                 cur = start
                 for _ in range(self.cfg.max_steps):
                     nxt = self.choose_next(ant, cur)
                     if nxt == cur:
                         break
                     path.append(nxt)
+                    ant.memory.append(nxt)
                     cur = nxt
                 score = self.path_score(path, color)
                 paths.append((path, score))
@@ -266,6 +293,12 @@ class ColoredGroupedAntEngine:
                 "iter_time_s": dt,
                 "eta_s": eta,
                 "mean_path_score": sum(s for _, s in paths) / max(1, len(paths)),
+                "pauli_rejections": int(self.pauli_rejections),
+                "valid_action_ratio": (
+                    self.pauli_valid_action_checks / self.pauli_action_checks
+                    if self.pauli_action_checks
+                    else 1.0
+                ),
             })
             print(
                 f"[GROUP {group_idx}:{color}] {it+1}/{self.cfg.iterations_per_group} "

@@ -283,6 +283,11 @@ class ETAFractalDTESACOZeta(VisualFractalDTESACOZeta):
                 float(sum(self.pheromones.values())) if self.pheromones else 0.0
             )
             diversity = self._terminal_diversity(paths)
+            pauli_checks = int(getattr(self, "pauli_action_checks", 0))
+            pauli_valid = int(getattr(self, "pauli_valid_action_checks", 0))
+            valid_action_ratio = (
+                pauli_valid / pauli_checks if pauli_checks else 1.0
+            )
             rec = {
                 "iteration": done,
                 "n_iterations": self.cfg.n_iterations,
@@ -295,6 +300,8 @@ class ETAFractalDTESACOZeta(VisualFractalDTESACOZeta):
                 "best_leaf_energy": best_energy,
                 "shared_pheromone_mass": pheromone_mass,
                 "terminal_diversity": diversity,
+                "pauli_rejections": int(getattr(self, "pauli_rejections", 0)),
+                "valid_action_ratio": float(valid_action_ratio),
             }
             self.aco_history.append(rec)
 
@@ -307,6 +314,8 @@ class ETAFractalDTESACOZeta(VisualFractalDTESACOZeta):
                     best_E=f"{best_energy:.5g}" if best_energy is not None else None,
                     max_score=f"{max_score:.5g}" if max_score is not None else None,
                     diversity=f"{diversity:.3f}",
+                    pauli_rejections=rec["pauli_rejections"],
+                    valid_action_ratio=f"{valid_action_ratio:.3f}",
                 )
 
             if max_score is not None and max_score > best_score + min_delta:

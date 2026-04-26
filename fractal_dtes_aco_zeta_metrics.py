@@ -9,6 +9,8 @@ from typing import Dict, List, Tuple, Optional, Iterable
 import numpy as np
 import mpmath as mp
 
+from core.pauli import pauli_valid
+
 
 # ------------------------------------------------------------
 # Fractal-DTES-ACO-Zeta: research skeleton / MVP
@@ -174,6 +176,9 @@ class FractalDTESACOZeta:
         self.pheromone_channels: Dict[str, Dict[Tuple[int, int], float]] = {}
         self.node_stability: Dict[int, float] = {}
         self.ant_types = tuple(cfg.ant_types)
+        self.pauli_rejections = 0
+        self.pauli_action_checks = 0
+        self.pauli_valid_action_checks = 0
 
     # ------------------------------
     # Public API
@@ -414,6 +419,9 @@ class FractalDTESACOZeta:
             self.evaporate_pheromones()
             self.reinforce_pheromones(paths)
 
+    def is_valid_action(self, path: List[int], action: int) -> bool:
+        return pauli_valid(path + [action])
+
     def sample_ant_path(self, start_node_id: int, ant: DTESAnt) -> List[int]:
         path = [start_node_id]
         current = start_node_id
@@ -426,9 +434,19 @@ class FractalDTESACOZeta:
             nbrs = self.neighbors.get(current, [])
             if not nbrs:
                 break
+            legal_nbrs = []
+            for nxt in nbrs:
+                self.pauli_action_checks += 1
+                if self.is_valid_action(path, nxt):
+                    self.pauli_valid_action_checks += 1
+                    legal_nbrs.append(nxt)
+                else:
+                    self.pauli_rejections += 1
+            if not legal_nbrs:
+                break
 
             weights = []
-            for nxt in nbrs:
+            for nxt in legal_nbrs:
                 barrier = self.compute_barrier(current, nxt)
                 tau = self.mixed_pheromone(ant.agent_type, current, nxt)
                 agent_score = self.compute_agent_value(ant, current, nxt)
@@ -446,8 +464,8 @@ class FractalDTESACOZeta:
 
             r = self.rng.random() * total
             cumsum = 0.0
-            chosen = nbrs[-1]
-            for nxt, w in zip(nbrs, weights):
+            chosen = legal_nbrs[-1]
+            for nxt, w in zip(legal_nbrs, weights):
                 cumsum += w
                 if r <= cumsum:
                     chosen = nxt
@@ -847,6 +865,8 @@ def _compute_metrics(self, candidate_nodes, candidates):
         z = mp.zeta(mp.mpf('0.5') + 1j * mp.mpf(str(float(t))))
         zeta_abs.append(float(abs(complex(z))))
     candidate_node_stability = [self.node_stability.get(nid, 1.0) for nid in candidate_nodes]
+    pauli_checks = int(getattr(self, "pauli_action_checks", 0))
+    pauli_valid = int(getattr(self, "pauli_valid_action_checks", 0))
     return {
         "interval": [self.cfg.t_min, self.cfg.t_max],
         "n_grid": self.cfg.n_grid,
@@ -863,6 +883,8 @@ def _compute_metrics(self, candidate_nodes, candidates):
         "agent_stats": self.compute_agent_metrics(),
         "channel_stats": self.compute_channel_metrics(),
         "ramsey_stats": self.compute_ramsey_metrics(),
+        "pauli_rejections": int(getattr(self, "pauli_rejections", 0)),
+        "valid_action_ratio": float(pauli_valid / pauli_checks) if pauli_checks else 1.0,
     }
 
 

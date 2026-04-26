@@ -55,6 +55,8 @@ from typing import Dict, List, Tuple, Optional, Iterable
 import numpy as np
 import mpmath as mp
 
+from core.pauli import pauli_valid
+
 
 KNOWN_ZETA_ZEROS: Tuple[float, ...] = (
     14.134725141734693,
@@ -263,6 +265,9 @@ class FractalDTESACOZeta:
         self.pheromone_channels: Dict[str, Dict[Tuple[int, int], float]] = {}
         self.node_stability: Dict[int, float] = {}
         self.ant_types = tuple(cfg.ant_types)
+        self.pauli_rejections = 0
+        self.pauli_action_checks = 0
+        self.pauli_valid_action_checks = 0
 
     # ------------------------------
     # Public API
@@ -509,6 +514,9 @@ class FractalDTESACOZeta:
             if self.cfg.spectral_learning:
                 self.run_spectral_learning_step(_it)
 
+    def is_valid_action(self, path: List[int], action: int) -> bool:
+        return pauli_valid(path + [action])
+
     def spectral_learning_inputs(self) -> Tuple[np.ndarray, np.ndarray, List[Optional[int]]]:
         max_points = max(2, int(self.cfg.spectral_max_points))
         stride = max(1, int(math.ceil(len(self.t_grid) / max_points)))
@@ -627,9 +635,19 @@ class FractalDTESACOZeta:
             nbrs = self.neighbors.get(current, [])
             if not nbrs:
                 break
+            legal_nbrs = []
+            for nxt in nbrs:
+                self.pauli_action_checks += 1
+                if self.is_valid_action(path, nxt):
+                    self.pauli_valid_action_checks += 1
+                    legal_nbrs.append(nxt)
+                else:
+                    self.pauli_rejections += 1
+            if not legal_nbrs:
+                break
 
             weights = []
-            for nxt in nbrs:
+            for nxt in legal_nbrs:
                 barrier = self.compute_barrier(current, nxt)
                 tau = self.mixed_pheromone(ant.agent_type, current, nxt)
                 agent_score = self.compute_agent_value(ant, current, nxt)
@@ -652,8 +670,8 @@ class FractalDTESACOZeta:
 
             r = self.rng.random() * total
             cumsum = 0.0
-            chosen = nbrs[-1]
-            for nxt, w in zip(nbrs, weights):
+            chosen = legal_nbrs[-1]
+            for nxt, w in zip(legal_nbrs, weights):
                 cumsum += w
                 if r <= cumsum:
                     chosen = nxt

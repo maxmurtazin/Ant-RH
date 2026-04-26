@@ -262,9 +262,19 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
             nbrs = self.neighbors.get(current, [])
             if not nbrs:
                 break
+            legal_nbrs = []
+            for nxt in nbrs:
+                self.pauli_action_checks += 1
+                if self.is_valid_action(path, nxt):
+                    self.pauli_valid_action_checks += 1
+                    legal_nbrs.append(nxt)
+                else:
+                    self.pauli_rejections += 1
+            if not legal_nbrs:
+                break
 
             weights = []
-            for nxt in nbrs:
+            for nxt in legal_nbrs:
                 barrier = self.compute_barrier(current, nxt)
                 tau = self.mixed_pheromone(ant.agent_type, current, nxt)
                 pheromone = self.node_pheromone_mass(nxt)
@@ -286,8 +296,8 @@ class WaterETAFractalDTESACOZeta(ETAFractalDTESACOZeta):
 
             r = self.rng.random() * total
             cumsum = 0.0
-            chosen = nbrs[-1]
-            for nxt, w in zip(nbrs, weights):
+            chosen = legal_nbrs[-1]
+            for nxt, w in zip(legal_nbrs, weights):
                 cumsum += w
                 if r <= cumsum:
                     chosen = nxt
