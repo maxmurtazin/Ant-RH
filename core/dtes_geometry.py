@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 
 from core.adaptive_loss_controller import AdaptiveLossController
+from core.operator_health import validate_operator_health
 
 
 class DTESGeometry(nn.Module):
@@ -213,7 +214,72 @@ def build_magnetic_hermitian_operator(W, phase, beta=1.0, diagonal_potential=Non
     return H
 
 
+def fractional_operator_from_hermitian(
+    H,
+    alpha=0.7,
+    eps=1e-4,
+    detach_fractional=True,
+):
+    H = 0.5 * (H + H.conj().T)
+
+    if detach_fractional:
+        with torch.no_grad():
+            eigvals, eigvecs = torch.linalg.eigh(H)
+
+            eigvals = eigvals.real
+            eigvals = torch.nan_to_num(
+                eigvals,
+                nan=0.0,
+                posinf=1e6,
+                neginf=0.0,
+            )
+            eigvals = eigvals.clamp_min(0.0)
+            eigvals = eigvals + 1e-8
+            eigvals_alpha = eigvals ** alpha
+
+            eigvals_alpha = torch.nan_to_num(
+                eigvals_alpha,
+                nan=1.0,
+                posinf=1e6,
+                neginf=eps,
+            )
+
+            H_frac = (
+                eigvecs
+                @ torch.diag(eigvals_alpha.to(eigvecs.dtype))
+                @ eigvecs.conj().T
+            )
+            H_frac = 0.5 * (H_frac + H_frac.conj().T)
+
+        return H_frac.detach(), eigvals.detach(), eigvals_alpha.detach()
+
+    eigvals, eigvecs = torch.linalg.eigh(H)
+    eigvals = eigvals.real
+    eigvals = torch.nan_to_num(
+        eigvals,
+        nan=0.0,
+        posinf=1e6,
+        neginf=0.0,
+    )
+    eigvals = eigvals.clamp_min(0.0)
+    eigvals = eigvals + 1e-8
+    eigvals_alpha = eigvals ** alpha
+
+    H_frac = (
+        eigvecs
+        @ torch.diag(eigvals_alpha.to(eigvecs.dtype))
+        @ eigvecs.conj().T
+    )
+    H_frac = 0.5 * (H_frac + H_frac.conj().T)
+
+    return H_frac, eigvals, eigvals_alpha
+
+
 def safe_eigvalsh_complex(H, jitter=1e-6, max_tries=6):
+    if not torch.is_complex(H):
+        complex_dtype = torch.complex128 if H.dtype == torch.float64 else torch.complex64
+        H = H.to(complex_dtype)
+
     n = H.shape[0]
     eye = torch.eye(n, dtype=H.dtype, device=H.device)
 
@@ -345,6 +411,9 @@ class DTESGraphOperator(nn.Module):
         phase_coupling_positive=False,
         magnetic_operator=False,
         magnetic_beta=1.0,
+        fractional_operator=False,
+        fractional_alpha=0.7,
+        detach_fractional=True,
     ):
         super().__init__()
         self.geometry = DTESGeometry(n, dim)
@@ -355,6 +424,9 @@ class DTESGraphOperator(nn.Module):
         self.phase_coupling_positive = bool(phase_coupling_positive)
         self.magnetic_operator = bool(magnetic_operator)
         self.magnetic_beta = float(magnetic_beta)
+        self.fractional_operator = bool(fractional_operator)
+        self.fractional_alpha = float(fractional_alpha)
+        self.detach_fractional = bool(detach_fractional)
         self.V = nn.Parameter(0.01 * torch.randn(n))
         self.edge_logits = nn.Parameter(0.01 * torch.randn(n, n))
         self.multiscale_logits = nn.Parameter(torch.zeros(3))
@@ -422,6 +494,13 @@ class DTESGraphOperator(nn.Module):
                     beta=self.magnetic_beta,
                     diagonal_potential=self.V,
                 )
+            if self.fractional_operator:
+                H_frac, _, _ = fractional_operator_from_hermitian(
+                    H,
+                    alpha=self.fractional_alpha,
+                    detach_fractional=self.detach_fractional,
+                )
+                H = H_frac
 
             return H, W, Z, edge_scale, ms_weights
 
@@ -452,12 +531,26 @@ class DTESGraphOperator(nn.Module):
                 beta=self.magnetic_beta,
                 diagonal_potential=self.V,
             )
+            if self.fractional_operator:
+                H_frac, _, _ = fractional_operator_from_hermitian(
+                    H,
+                    alpha=self.fractional_alpha,
+                    detach_fractional=self.detach_fractional,
+                )
+                H = H_frac
             return H, W, Z, edge_scale, ms_weights
         L = graph_laplacian_torch(W, normalize_trace=not self.multiscale_geometry)
 
         edge_scale = 1.0
         H = L + torch.diag(self.V)
         H = 0.5 * (H + H.T)
+        if self.fractional_operator:
+            H_frac, _, _ = fractional_operator_from_hermitian(
+                H,
+                alpha=self.fractional_alpha,
+                detach_fractional=self.detach_fractional,
+            )
+            H = H_frac
 
         return H, W, Z, edge_scale, ms_weights
 
@@ -657,6 +750,13 @@ def train_dtes_geometry(
     phase_coupling_positive=False,
     magnetic_operator=False,
     magnetic_beta=1.0,
+    fractional_operator=False,
+    fractional_alpha=0.7,
+    detach_fractional=True,
+    self_adjoint_tol=1e-8,
+    strict_self_adjoint=False,
+    jitter_eps=1e-8,
+    log_operator_health=False,
 ):
     t_grid = _as_finite_1d("t_grid", t_grid)
     zeta_zeros = np.sort(np.abs(_as_finite_1d("zeta_zeros", zeta_zeros)))
@@ -689,6 +789,9 @@ def train_dtes_geometry(
         phase_coupling_positive=phase_coupling_positive,
         magnetic_operator=magnetic_operator,
         magnetic_beta=magnetic_beta,
+        fractional_operator=fractional_operator,
+        fractional_alpha=fractional_alpha,
+        detach_fractional=detach_fractional,
     ).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -728,15 +831,38 @@ def train_dtes_geometry(
             min_weight=1e-4,
             max_weight=20.0,
         )
+    latest_health_report = None
 
     for step in range(int(steps)):
         opt.zero_grad()
 
-        H, W, Z, edge_scale, ms_weights = model(
+        H_raw, W, Z, edge_scale, ms_weights = model(
             wavefunction_topology=wavefunction_topology
         )
-        eig = safe_eigvalsh_complex(H).real if magnetic_operator else safe_eigvalsh(H)
-        hermitian_error = torch.mean(torch.abs(H - H.conj().T))
+        H, eig, health_report = validate_operator_health(
+            H_raw,
+            self_adjoint_tol=self_adjoint_tol,
+            strict_self_adjoint=strict_self_adjoint,
+            jitter_eps=jitter_eps,
+        )
+        latest_health_report = health_report
+        if eig is None:
+            reason = health_report.get("failure_reason") or "operator health failed"
+            if strict_self_adjoint:
+                raise RuntimeError(f"V10.10 operator health failed: {reason}")
+            print(f"[WARN] operator health failed; skipping step: {reason}")
+            history.append(
+                {
+                    "step": int(step),
+                    "skipped": True,
+                    "loss": 0.0,
+                    "failure_reason": reason,
+                    **health_report,
+                }
+            )
+            opt.zero_grad(set_to_none=True)
+            continue
+        hermitian_error_value = float(health_report["hermitian_error_projected"])
 
         if no_scaling and train_idx is not None:
             eig_train = eig[train_idx]
@@ -754,7 +880,7 @@ def train_dtes_geometry(
             loss_growth = spectral_growth_loss(eig, zeta, k=k)
             loss_affine = affine_penalty(eig, zeta, k)
             test_error_t = eig.new_tensor(float("nan"))
-        elif nested_geometry:
+        elif fractional_operator or nested_geometry:
             loss_spec = raw_spectral_loss(eig, zeta, k)
             loss_spacing = spacing_loss(eig, zeta, k)
             loss_growth = spectral_growth_loss(eig, zeta, k=k)
@@ -940,9 +1066,12 @@ def train_dtes_geometry(
         if pauli_loss_available:
             loss = loss + weights["pauli"] * loss_pauli
         if not torch.isfinite(loss):
-            raise FloatingPointError("DTES geometry loss became NaN or inf")
+            print("[WARN] non-finite loss; skipping step")
+            opt.zero_grad(set_to_none=True)
+            continue
 
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         opt.step()
         if wavefunction_topology and (phase_coupled_operator or magnetic_operator):
             with torch.no_grad():
@@ -969,7 +1098,21 @@ def train_dtes_geometry(
                 phase_weight_max = phase_weight_factor.max()
 
         if step % 50 == 0:
-            if phase_coupled_operator:
+            if log_operator_health:
+                print(
+                    f"[V10.10-HEALTH] step={step} "
+                    f"raw={health_report['hermitian_error_raw']:.2e} "
+                    f"projected={health_report['hermitian_error_projected']:.2e} "
+                    f"jitter={health_report['used_jitter']:.1e} "
+                    f"pass={health_report['self_adjoint_pass']}"
+                )
+            if fractional_operator:
+                print(
+                    f"[V10.9-FRACTIONAL] step={step} "
+                    f"alpha={float(fractional_alpha):.2f} "
+                    f"eig_range={eig_range.item():.2f}"
+                )
+            elif phase_coupled_operator:
                 print(
                     f"[V10.7-PHASE-COUPLED] "
                     f"eig_range={eig_range.item():.2f} "
@@ -979,7 +1122,7 @@ def train_dtes_geometry(
                 print(
                     f"[V10.8-MAGNETIC] step={step} "
                     f"eig_range={eig_range.item():.2f} "
-                    f"herm={hermitian_error.detach().cpu().item():.2e} "
+                    f"herm={hermitian_error_value:.2e} "
                     f"beta={float(magnetic_beta):.2f}"
                 )
             elif wavefunction_topology:
@@ -1066,7 +1209,20 @@ def train_dtes_geometry(
                 "phase_weight_max": float(phase_weight_max.detach().cpu()),
                 "magnetic_operator": bool(magnetic_operator),
                 "magnetic_beta": float(magnetic_beta),
-                "hermitian_error": float(hermitian_error.detach().cpu()),
+                "fractional_operator": bool(fractional_operator),
+                "fractional_alpha": float(fractional_alpha),
+                "detach_fractional": bool(detach_fractional),
+                "hermitian_error": hermitian_error_value,
+                "hermitian_error_raw": health_report.get("hermitian_error_raw"),
+                "hermitian_error_projected": health_report.get(
+                    "hermitian_error_projected"
+                ),
+                "finite_outputs": health_report.get("finite_outputs"),
+                "condition_proxy": health_report.get("condition_proxy"),
+                "used_jitter": health_report.get("used_jitter"),
+                "self_adjoint_pass": health_report.get("self_adjoint_pass"),
+                "spectral_pass": health_report.get("spectral_pass"),
+                "failure_reason": health_report.get("failure_reason"),
                 "nodal_loss": float(loss_nodal.detach().cpu()),
                 "amplitude_collapse_loss": float(loss_amp_collapse.detach().cpu()),
                 "amplitude_min": float(A.min().detach().cpu()),
@@ -1107,11 +1263,20 @@ def train_dtes_geometry(
         )
 
     with torch.no_grad():
-        H, W, Z, edge_scale, ms_weights = model(
+        H_raw, W, Z, edge_scale, ms_weights = model(
             wavefunction_topology=wavefunction_topology
         )
-        eig = safe_eigvalsh_complex(H).real if magnetic_operator else safe_eigvalsh(H)
-        final_hermitian_error = torch.mean(torch.abs(H - H.conj().T))
+        H, eig, final_health_report = validate_operator_health(
+            H_raw,
+            self_adjoint_tol=self_adjoint_tol,
+            strict_self_adjoint=strict_self_adjoint,
+            jitter_eps=jitter_eps,
+        )
+        latest_health_report = final_health_report
+        if eig is None:
+            reason = final_health_report.get("failure_reason") or "operator health failed"
+            raise RuntimeError(f"V10.10 final operator health failed: {reason}")
+        final_hermitian_error = float(final_health_report["hermitian_error_projected"])
         A, psi_real, psi_imag, psi_abs = wavefunction_fields(
             model.log_amplitude,
             model.phase,
@@ -1124,7 +1289,7 @@ def train_dtes_geometry(
             else:
                 final_test_error = eig.new_tensor(float("nan"))
             final_affine_penalty = affine_penalty(eig[train_idx], zeta_train, k)
-        elif no_scaling:
+        elif no_scaling or fractional_operator:
             final_train_error = raw_spectral_loss(eig, zeta, k)
             final_test_error = eig.new_tensor(float("nan"))
             final_affine_penalty = affine_penalty(eig, zeta, k)
@@ -1146,12 +1311,15 @@ def train_dtes_geometry(
         "psi_abs": psi_abs.detach().cpu().numpy(),
         "nodal_score": final_nodal_score.detach().cpu().numpy(),
         "history": history,
-        "final_weights": history[-1]["weights"] if history else dict(base_weights),
+        "final_weights": history[-1].get("weights", dict(base_weights))
+        if history
+        else dict(base_weights),
         "train_error": float(final_train_error.detach().cpu()),
         "test_error": float(final_test_error.detach().cpu()),
         "affine_penalty": float(final_affine_penalty.detach().cpu()),
         "edge_scale": float(edge_scale),
-        "hermitian_error": float(final_hermitian_error.detach().cpu()),
+        "hermitian_error": final_hermitian_error,
+        "operator_health": latest_health_report,
         "multiscale_weights": [float(x) for x in ms_weights.detach().cpu()],
         "nested_weights": [float(x) for x in ms_weights.detach().cpu()]
         if nested_geometry

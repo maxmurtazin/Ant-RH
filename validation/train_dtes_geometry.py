@@ -154,6 +154,16 @@ def _write_weights(path: Path, history):
             )
 
 
+def _write_loss_curve(path: Path, history):
+    with path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["step", "loss"])
+        for i, row in enumerate(history):
+            if not isinstance(row, dict):
+                continue
+            writer.writerow([int(row.get("step", i)), float(row.get("loss", 0.0))])
+
+
 def _maybe_write_plots(out_dir: Path, zeta_zeros, result):
     plot_cache = out_dir / ".matplotlib"
     plot_cache.mkdir(parents=True, exist_ok=True)
@@ -335,6 +345,14 @@ def parse_args(argv=None):
     parser.add_argument("--phase-coupling-positive", action="store_true")
     parser.add_argument("--magnetic-operator", action="store_true")
     parser.add_argument("--magnetic-beta", type=float, default=1.0)
+    parser.add_argument("--fractional-operator", action="store_true")
+    parser.add_argument("--fractional-alpha", type=float, default=0.7)
+    parser.add_argument("--detach-fractional", action="store_true")
+    parser.add_argument("--self-adjoint-tol", type=float, default=1e-8)
+    parser.add_argument("--strict-self-adjoint", action="store_true")
+    parser.add_argument("--jitter-eps", type=float, default=1e-8)
+    parser.add_argument("--log-operator-health", action="store_true")
+    parser.add_argument("--save-operator-health", action="store_true")
     return parser.parse_args(argv)
 
 
@@ -349,6 +367,12 @@ def main(argv=None):
     )
     n_input = int(t_grid.size)
     n_nodes = int(min(t_grid.size, args.max_n))
+    detach_fractional = bool(args.detach_fractional or args.fractional_operator)
+    v10_10_output = bool(
+        args.log_operator_health
+        or args.save_operator_health
+        or "v10_10_self_adjoint" in str(out_path.parent)
+    )
 
     result = train_dtes_geometry(
         t_grid,
@@ -391,35 +415,82 @@ def main(argv=None):
         phase_coupling_positive=args.phase_coupling_positive,
         magnetic_operator=args.magnetic_operator,
         magnetic_beta=args.magnetic_beta,
+        fractional_operator=args.fractional_operator,
+        fractional_alpha=args.fractional_alpha,
+        detach_fractional=detach_fractional,
+        self_adjoint_tol=args.self_adjoint_tol,
+        strict_self_adjoint=args.strict_self_adjoint,
+        jitter_eps=args.jitter_eps,
+        log_operator_health=args.log_operator_health,
     )
 
     embedding_path = out_path.parent / "dtes_v10_embedding.npy"
     adjacency_path = out_path.parent / "dtes_v10_adjacency.npy"
     potential_path = out_path.parent / "dtes_v10_potential.npy"
-    eigenvalues_path = out_path.parent / "dtes_v10_eigenvalues.csv"
+    eigenvalues_path = (
+        out_path.parent / "eigenvalues.csv"
+        if v10_10_output
+        else out_path.parent / "dtes_v10_eigenvalues.csv"
+    )
     weights_path = out_path.parent / "dtes_v10_weights.csv"
+    loss_curve_path = out_path.parent / "loss_curve.csv"
     amplitude_path = out_path.parent / "dtes_v10_6_amplitude.npy"
     phase_path = out_path.parent / "dtes_v10_6_phase.npy"
     psi_real_path = out_path.parent / "dtes_v10_6_psi_real.npy"
     psi_imag_path = out_path.parent / "dtes_v10_6_psi_imag.npy"
-    operator_real_path = out_path.parent / "dtes_v10_8_operator_real.npy"
-    operator_imag_path = out_path.parent / "dtes_v10_8_operator_imag.npy"
+    learned_operator_path = out_path.parent / "learned_operator.npy"
+    operator_real_path = (
+        out_path.parent / "learned_operator_real.npy"
+        if v10_10_output
+        else out_path.parent / "dtes_v10_8_operator_real.npy"
+    )
+    operator_imag_path = (
+        out_path.parent / "learned_operator_imag.npy"
+        if v10_10_output
+        else out_path.parent / "dtes_v10_8_operator_imag.npy"
+    )
+    operator_health_path = out_path.parent / "operator_health.json"
+    v10_10_dir = Path("runs/v10_10_self_adjoint")
+    v10_10_dir.mkdir(parents=True, exist_ok=True)
+    v10_10_operator_path = v10_10_dir / "learned_operator.npy"
+    v10_10_operator_real_path = v10_10_dir / "learned_operator_real.npy"
+    v10_10_operator_imag_path = v10_10_dir / "learned_operator_imag.npy"
+    v10_10_eigenvalues_path = v10_10_dir / "eigenvalues.csv"
+    v10_10_report_path = v10_10_dir / "report.json"
 
     np.save(embedding_path, result["Z"])
     np.save(adjacency_path, result["W"])
     np.save(potential_path, result["V"])
+    H_result = np.asarray(result["H"])
+    operator_is_complex = bool(np.iscomplexobj(H_result))
+    np.save(v10_10_operator_path, H_result)
+    if operator_is_complex:
+        np.save(v10_10_operator_real_path, H_result.real)
+        np.save(v10_10_operator_imag_path, H_result.imag)
+    np.savetxt(v10_10_eigenvalues_path, result["eig"], delimiter=",")
+    print(f"[V10.10] Operator saved to {v10_10_dir}")
     if args.wavefunction_topology:
         np.save(amplitude_path, result["amplitude"])
         np.save(phase_path, result["phase"])
         np.save(psi_real_path, result["psi_real"])
         np.save(psi_imag_path, result["psi_imag"])
     if args.magnetic_operator:
-        H = np.asarray(result["H"])
-        np.save(operator_real_path, H.real)
-        np.save(operator_imag_path, H.imag)
-    _write_eigenvalues(eigenvalues_path, result["eig"])
+        np.save(operator_real_path, H_result.real)
+        np.save(operator_imag_path, H_result.imag)
+    if v10_10_output:
+        np.save(learned_operator_path, H_result)
+        if operator_is_complex:
+            np.save(operator_real_path, H_result.real)
+            np.save(operator_imag_path, H_result.imag)
+        np.savetxt(eigenvalues_path, result["eig"], delimiter=",")
+        _write_loss_curve(loss_curve_path, result["history"])
+    else:
+        _write_eigenvalues(eigenvalues_path, result["eig"])
     _write_weights(weights_path, result["history"])
     plots = _maybe_write_plots(out_path.parent, zeta_zeros, result)
+    if args.save_operator_health:
+        with operator_health_path.open("w", encoding="utf-8") as f:
+            json.dump(_json_safe(result.get("operator_health", {})), f, indent=2)
 
     eig = np.asarray(result["eig"], dtype=float)
     W = np.asarray(result["W"], dtype=float)
@@ -427,6 +498,7 @@ def main(argv=None):
     history = result["history"]
     history_losses = [_history_loss(row) for row in history]
     final_history = history[-1] if history and isinstance(history[-1], dict) else {}
+    operator_health = result.get("operator_health") or {}
     finite_outputs = all(
         np.all(np.isfinite(x)) for x in (eig, W, Z, np.asarray(history_losses, dtype=float))
     )
@@ -480,10 +552,28 @@ def main(argv=None):
         "phase_coupling_positive": bool(args.phase_coupling_positive),
         "magnetic_operator": bool(args.magnetic_operator),
         "magnetic_beta": float(args.magnetic_beta),
+        "fractional_operator": bool(args.fractional_operator),
+        "fractional_alpha": float(args.fractional_alpha),
+        "detach_fractional": bool(detach_fractional),
+        "self_adjoint_tol": float(args.self_adjoint_tol),
+        "strict_self_adjoint": bool(args.strict_self_adjoint),
+        "jitter_eps": float(args.jitter_eps),
+        "log_operator_health": bool(args.log_operator_health),
+        "save_operator_health": bool(args.save_operator_health),
+        "operator_saved": True,
+        "is_complex": operator_is_complex,
         "operator_type": (
-            "complex_hermitian_magnetic_dtes"
-            if args.magnetic_operator
-            else "real_dtes"
+            "fractional_complex_hermitian_magnetic_dtes"
+            if args.fractional_operator and args.magnetic_operator
+            else (
+                "fractional_real_dtes"
+                if args.fractional_operator
+                else (
+                    "complex_hermitian_magnetic_dtes"
+                    if args.magnetic_operator
+                    else "real_dtes"
+                )
+            )
         ),
         "final_anchor_loss": final_history.get("anchor_loss"),
         "final_spacing_anchor_loss": final_history.get("spacing_anchor_loss"),
@@ -497,6 +587,14 @@ def main(argv=None):
         "final_nested_weights": result.get("nested_weights"),
         "final_eig_range": final_history.get("eig_range"),
         "final_zeta_range": final_history.get("zeta_range"),
+        "final_eig_min": operator_health.get("eig_min"),
+        "final_eig_max": operator_health.get("eig_max"),
+        "final_eig_std": operator_health.get("eig_std"),
+        "eig_range": final_history.get("eig_range"),
+        "zeta_range": final_history.get("zeta_range"),
+        "eig_min": operator_health.get("eig_min"),
+        "eig_max": operator_health.get("eig_max"),
+        "eig_std": operator_health.get("eig_std"),
         "final_wave_amp_loss": final_history.get("wave_amp_loss"),
         "final_phase_loss": final_history.get("phase_loss"),
         "final_phase_activity_loss": final_history.get("phase_activity_loss"),
@@ -510,6 +608,15 @@ def main(argv=None):
         "final_hermitian_error": final_history.get(
             "hermitian_error", result.get("hermitian_error")
         ),
+        "hermitian_error_raw": operator_health.get("hermitian_error_raw"),
+        "hermitian_error_projected": operator_health.get(
+            "hermitian_error_projected"
+        ),
+        "condition_proxy": operator_health.get("condition_proxy"),
+        "used_jitter": operator_health.get("used_jitter"),
+        "self_adjoint_pass": operator_health.get("self_adjoint_pass"),
+        "spectral_pass": operator_health.get("spectral_pass"),
+        "failure_reason": operator_health.get("failure_reason"),
         "final_nodal_loss": final_history.get("nodal_loss"),
         "final_amplitude_collapse_loss": final_history.get("amplitude_collapse_loss"),
         "final_amplitude_min": final_history.get("amplitude_min"),
@@ -525,7 +632,9 @@ def main(argv=None):
         "initial_loss": history_losses[0] if history_losses else None,
         "final_loss": history_losses[-1] if history_losses else None,
         "edge_scale": result.get("edge_scale"),
-        "finite_outputs": bool(finite_outputs),
+        "finite_outputs": bool(
+            finite_outputs and operator_health.get("finite_outputs", True)
+        ),
         "graph_weight_sum": float(np.sum(W)),
         "graph_weight_mean": float(np.mean(W)) if W.size else None,
         "embedding_std": [float(x) for x in np.std(Z, axis=0)] if Z.size else [],
@@ -536,27 +645,51 @@ def main(argv=None):
             "potential": str(potential_path),
             "eigenvalues": str(eigenvalues_path),
             "weights": str(weights_path),
+            "loss_curve": str(loss_curve_path) if v10_10_output else None,
             "amplitude": str(amplitude_path) if args.wavefunction_topology else None,
             "phase": str(phase_path) if args.wavefunction_topology else None,
             "psi_real": str(psi_real_path) if args.wavefunction_topology else None,
             "psi_imag": str(psi_imag_path) if args.wavefunction_topology else None,
-            "operator_real": str(operator_real_path) if args.magnetic_operator else None,
-            "operator_imag": str(operator_imag_path) if args.magnetic_operator else None,
+            "operator_real": str(operator_real_path)
+            if args.magnetic_operator or (v10_10_output and operator_is_complex)
+            else None,
+            "operator_imag": str(operator_imag_path)
+            if args.magnetic_operator or (v10_10_output and operator_is_complex)
+            else None,
+            "learned_operator": str(learned_operator_path) if v10_10_output else None,
+            "v10_10_operator_dir": str(v10_10_dir),
+            "v10_10_learned_operator": str(v10_10_operator_path),
+            "v10_10_learned_operator_real": str(v10_10_operator_real_path)
+            if operator_is_complex
+            else None,
+            "v10_10_learned_operator_imag": str(v10_10_operator_imag_path)
+            if operator_is_complex
+            else None,
+            "v10_10_eigenvalues": str(v10_10_eigenvalues_path),
+            "v10_10_report": str(v10_10_report_path),
+            "operator_health": str(operator_health_path)
+            if args.save_operator_health
+            else None,
             "plots": plots,
         },
+        "operator_health": operator_health,
         "history": history,
         "note": (
-            "V10.3 no-scaling DTES operator identification experiment. "
-            "Eigenvalues are evaluated in raw scale with a held-out split when "
-            "enabled; numerical experiment, not proof of RH."
-            if args.no_scaling
+            "operator-level Hilbert–Pólya compatibility check; not a proof of RH"
+            if v10_10_output
             else (
-                "Pauli-aware DTES geometry learning. Pauli nodal states are removed "
-                "as hard constraints; numerical experiment, not proof of RH."
-                if args.pauli_aware
+                "V10.3 no-scaling DTES operator identification experiment. "
+                "Eigenvalues are evaluated in raw scale with a held-out split when "
+                "enabled; numerical experiment, not proof of RH."
+                if args.no_scaling
                 else (
-                    "Numerical DTES geometry learning experiment; not a proof of the "
-                    "Riemann hypothesis."
+                    "Pauli-aware DTES geometry learning. Pauli nodal states are removed "
+                    "as hard constraints; numerical experiment, not proof of RH."
+                    if args.pauli_aware
+                    else (
+                        "Numerical DTES geometry learning experiment; not a proof of the "
+                        "Riemann hypothesis."
+                    )
                 )
             )
         ),
@@ -564,6 +697,9 @@ def main(argv=None):
 
     with out_path.open("w", encoding="utf-8") as f:
         json.dump(_json_safe(report), f, indent=2, allow_nan=False)
+    if v10_10_report_path.resolve() != out_path.resolve():
+        with v10_10_report_path.open("w", encoding="utf-8") as f:
+            json.dump(_json_safe(report), f, indent=2, allow_nan=False)
 
     print(f"[V10] report saved: {out_path}")
     print(f"[V10] embedding saved: {embedding_path}")

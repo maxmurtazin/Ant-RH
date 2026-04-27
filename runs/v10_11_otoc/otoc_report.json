@@ -1,0 +1,14 @@
+{
+  "version": "V10.11 OTOC diagnostic",
+  "operator": "runs/v10_10_self_adjoint/learned_operator.npy",
+  "self_adjoint_pass": true,
+  "hermitian_error_projected": 0.0,
+  "finite_outputs": true,
+  "spectral_pass": true,
+  "used_jitter": 0.0,
+  "otoc_initial": 8.918619278119877e-05,
+  "otoc_max": 0.01912514679133892,
+  "otoc_final": 0.01912514679133892,
+  "growth_rate_proxy": 1.2082293313382784,
+  "note": "operator-level Hilbert\u2013P\u00f3lya compatibility check; OTOC diagnostic for quantum-chaos-like behavior; not a proof of RH."
+}
