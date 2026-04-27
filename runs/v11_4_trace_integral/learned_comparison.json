@@ -1,0 +1,10 @@
+{
+  "available": true,
+  "k": 512,
+  "spectral_relative_error": 0.9957296702671777,
+  "first_k_spectral_error": 0.9999891817418435,
+  "range_error": 430.2767102264171,
+  "std_error": 122.83161446965453,
+  "heat_trace_relative_error_mean": 356748720656873.9,
+  "heat_trace_relative_error_max": 497195252617134.8
+}

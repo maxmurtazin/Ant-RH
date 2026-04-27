@@ -21,9 +21,9 @@
   "n_tau": 100,
   "gue_hist_l2": 1.5889036195687802,
   "r_stat_mean": 0.9638091103307229,
-  "learned_comparison_available": false,
+  "learned_comparison_available": true,
   "zeta_comparison_available": false,
-  "otoc_available": false,
+  "otoc_available": true,
   "outputs": {
     "integral_operator": "runs/v11_4_trace_integral/integral_operator.npy",
     "eigenvalues": "runs/v11_4_trace_integral/eigenvalues.csv",
@@ -31,9 +31,9 @@
     "heat_trace_plot": "runs/v11_4_trace_integral/heat_trace.png",
     "gue_spacing_report": "runs/v11_4_trace_integral/gue_spacing_report.json",
     "gue_spacing_hist": "runs/v11_4_trace_integral/gue_spacing_hist.png",
-    "learned_comparison": null,
+    "learned_comparison": "runs/v11_4_trace_integral/learned_comparison.json",
     "zeta_trace_comparison": null,
-    "otoc_curve": null
+    "otoc_curve": "runs/v11_4_trace_integral/otoc_curve.csv"
   },
   "note": "Trace/integral-operator diagnostic; not proof of RH."
 }
