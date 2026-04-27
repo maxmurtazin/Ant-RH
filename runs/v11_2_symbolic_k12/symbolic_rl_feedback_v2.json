@@ -1,0 +1,238 @@
+{
+  "label": "Symbolic kernel candidate \u2014 not a proof of RH",
+  "symbolic_quality_score": -0.5526905055774973,
+  "suggested_reward_bonus": -0.5526905055774973,
+  "selected_terms": [
+    "1",
+    "Delta",
+    "Delta^2",
+    "log(1+Delta)",
+    "1/(1+Delta)",
+    "exp(-Delta^2)",
+    "cos(1*Delta)",
+    "sin(1*Delta)",
+    "cos(2*Delta)",
+    "sin(2*Delta)",
+    "cos(3*Delta)",
+    "sin(3*Delta)",
+    "cos(4*Delta)",
+    "sin(4*Delta)",
+    "cos(5*Delta)",
+    "sin(5*Delta)",
+    "cos(6*Delta)",
+    "sin(6*Delta)",
+    "cos(7*Delta)",
+    "sin(7*Delta)",
+    "cos(8*Delta)",
+    "sin(8*Delta)",
+    "cos(9*Delta)",
+    "sin(9*Delta)",
+    "cos(10*Delta)",
+    "sin(10*Delta)",
+    "cos(11*Delta)",
+    "sin(11*Delta)",
+    "cos(12*Delta)",
+    "sin(12*Delta)",
+    "1/(epsilon+Delta)",
+    "1/(epsilon+Delta^2)",
+    "cos(t_i*log(1+t_j))",
+    "cos(t_j*log(1+t_i))",
+    "sin((t_i-t_j)*log(1+Delta))"
+  ],
+  "coefficients": {
+    "1": {
+      "real": 789.0293925937618,
+      "imag": 0.0
+    },
+    "Delta": {
+      "real": -4033.9257900812877,
+      "imag": 0.0
+    },
+    "Delta^2": {
+      "real": -3244.07343496747,
+      "imag": 0.0
+    },
+    "log(1+Delta)": {
+      "real": -3694.519042410316,
+      "imag": 0.0
+    },
+    "1/(1+Delta)": {
+      "real": 4946.677288073527,
+      "imag": 0.0
+    },
+    "exp(-Delta^2)": {
+      "real": 1315.2307750320704,
+      "imag": 0.0
+    },
+    "cos(1*Delta)": {
+      "real": 1994.8127107643202,
+      "imag": 0.0
+    },
+    "sin(1*Delta)": {
+      "real": -2942.885677330321,
+      "imag": 0.0
+    },
+    "cos(2*Delta)": {
+      "real": 2046.5309339657072,
+      "imag": 0.0
+    },
+    "sin(2*Delta)": {
+      "real": -1964.7030629158921,
+      "imag": 0.0
+    },
+    "cos(3*Delta)": {
+      "real": -2362.870957596829,
+      "imag": 0.0
+    },
+    "sin(3*Delta)": {
+      "real": -776.194224346042,
+      "imag": 0.0
+    },
+    "cos(4*Delta)": {
+      "real": -6174.242254942311,
+      "imag": 0.0
+    },
+    "sin(4*Delta)": {
+      "real": -3251.2557477255446,
+      "imag": 0.0
+    },
+    "cos(5*Delta)": {
+      "real": -3912.6645425331835,
+      "imag": 0.0
+    },
+    "sin(5*Delta)": {
+      "real": -4316.440853304437,
+      "imag": 0.0
+    },
+    "cos(6*Delta)": {
+      "real": -571.0794110070108,
+      "imag": 0.0
+    },
+    "sin(6*Delta)": {
+      "real": 1579.9959658954758,
+      "imag": 0.0
+    },
+    "cos(7*Delta)": {
+      "real": -2755.7126563144657,
+      "imag": 0.0
+    },
+    "sin(7*Delta)": {
+      "real": 7469.56413634668,
+      "imag": 0.0
+    },
+    "cos(8*Delta)": {
+      "real": -3299.919290373477,
+      "imag": 0.0
+    },
+    "sin(8*Delta)": {
+      "real": 3979.363025262863,
+      "imag": 0.0
+    },
+    "cos(9*Delta)": {
+      "real": 5946.9470829880365,
+      "imag": 0.0
+    },
+    "sin(9*Delta)": {
+      "real": -1030.9699549768902,
+      "imag": 0.0
+    },
+    "cos(10*Delta)": {
+      "real": 8752.046682645814,
+      "imag": 0.0
+    },
+    "sin(10*Delta)": {
+      "real": 1584.7059578465419,
+      "imag": 0.0
+    },
+    "cos(11*Delta)": {
+      "real": -7557.531733887047,
+      "imag": 0.0
+    },
+    "sin(11*Delta)": {
+      "real": -6912.905122912154,
+      "imag": 0.0
+    },
+    "cos(12*Delta)": {
+      "real": 845.2019441161282,
+      "imag": 0.0
+    },
+    "sin(12*Delta)": {
+      "real": 2667.305280003512,
+      "imag": 0.0
+    },
+    "1/(epsilon+Delta)": {
+      "real": 0.0006516994250832749,
+      "imag": 0.0
+    },
+    "1/(epsilon+Delta^2)": {
+      "real": -3.996321589305028e-05,
+      "imag": 0.0
+    },
+    "cos(t_i*log(1+t_j))": {
+      "real": -0.07923472836026685,
+      "imag": 0.0
+    },
+    "cos(t_j*log(1+t_i))": {
+      "real": 0.6051219081602445,
+      "imag": 0.0
+    },
+    "sin((t_i-t_j)*log(1+Delta))": {
+      "real": -0.00777286878921088,
+      "imag": 0.0
+    }
+  },
+  "sympy_report": {
+    "mode": "safe",
+    "before": {
+      "ops": 113,
+      "terms": 22
+    },
+    "after": {
+      "ops": 113,
+      "terms": 22
+    },
+    "skipped": true,
+    "reason": "complexity_guard"
+  },
+  "metrics": {
+    "kernel_relative_error": 0.21623737059723533,
+    "hermitian_error": 0.0,
+    "num_terms": 35,
+    "regression_sample_mse": 9.99317187223556,
+    "regression_score": 9.99352187223556,
+    "spectral_relative_error": 0.16145313498026195,
+    "first_k_spectral_error": 1.991810631177563,
+    "first_k": 50,
+    "eigenvalue_range_true": [
+      101.53998703336639,
+      912.5855763606552
+    ],
+    "eigenvalue_range_fit": [
+      88.09120301431471,
+      694.6751937044914
+    ],
+    "eigenvalue_std_true": 145.4042969912269,
+    "eigenvalue_std_fit": 51.83406910979828,
+    "eigen_solver_true": {
+      "label": "H_herm",
+      "n": 1804,
+      "mode": "principal_submatrix_sketch",
+      "sketch_n": 1800
+    },
+    "eigen_solver_fit": {
+      "label": "K_fit",
+      "n": 1804,
+      "mode": "principal_submatrix_sketch",
+      "sketch_n": 1800
+    },
+    "zeta_zeros_csv": null,
+    "zeta_diagnostics_available": false,
+    "symbolic_quality_score": -0.5526905055774973,
+    "suggested_reward_bonus": -0.5526905055774973
+  },
+  "config": {
+    "lambda_spec": 1.0,
+    "lambda_complexity": 0.005,
+    "lambda_herm": 10.0
+  }
+}

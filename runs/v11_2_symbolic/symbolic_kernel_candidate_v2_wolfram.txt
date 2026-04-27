@@ -1,0 +1,4 @@
+Symbolic kernel candidate — not a proof of RH
+
+InputForm[(-11261.9003605 - 12527.5602732*Delta)*Delta + 28335.8529898/(1 + Delta) - 11932.6836432*Cos[2*Delta] - 30082.8069569*Cos[3*Delta] + 28080.546692*Cos[5*Delta] - 7432.49557584*Cos[6*Delta] - 15666.9449966*Log[1 + Delta] + 19027.25128244*Cos[Delta]*Sin[Delta] + 28367.4266155*Sin[5*Delta] - 27655.5871098*Sin[6*Delta] + 6082.22308033*Sin[7*Delta]]
+Null

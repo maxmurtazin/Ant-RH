@@ -1,0 +1,13 @@
+{
+  "mode": "safe",
+  "before": {
+    "ops": 66,
+    "terms": 14
+  },
+  "after": {
+    "ops": 66,
+    "terms": 14
+  },
+  "skipped": true,
+  "reason": "complexity_guard"
+}
