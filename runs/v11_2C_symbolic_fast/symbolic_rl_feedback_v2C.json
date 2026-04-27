@@ -1,0 +1,757 @@
+{
+  "label": "Symbolic kernel candidate \u2014 not a proof of RH",
+  "symbolic_quality_score": -15.631434743532544,
+  "suggested_reward_bonus": -15.631434743532544,
+  "selected_terms": [
+    "diag:1",
+    "diag:Delta",
+    "diag:Delta^2",
+    "diag:log(1+Delta)",
+    "diag:1/(1+Delta)",
+    "diag:exp(-Delta^2)",
+    "diag:cos(1*Delta)",
+    "diag:sin(1*Delta)",
+    "diag:cos(2*Delta)",
+    "diag:sin(2*Delta)",
+    "diag:cos(3*Delta)",
+    "diag:sin(3*Delta)",
+    "diag:cos(4*Delta)",
+    "diag:sin(4*Delta)",
+    "diag:cos(5*Delta)",
+    "diag:sin(5*Delta)",
+    "diag:cos(6*Delta)",
+    "diag:sin(6*Delta)",
+    "diag:1/(epsilon+Delta)",
+    "diag:1/(epsilon+Delta^2)",
+    "diag:cos(t_i*log(1+t_j))",
+    "diag:cos(t_j*log(1+t_i))",
+    "diag:sin((t_i-t_j)*log(1+Delta))",
+    "diag:m",
+    "diag:m^2",
+    "diag:Delta*m",
+    "diag:Delta^2*m",
+    "diag:Delta*m^2",
+    "diag:cos(1*m)",
+    "diag:sin(1*m)",
+    "diag:cos(2*m)",
+    "diag:sin(2*m)",
+    "diag:cos(3*m)",
+    "diag:sin(3*m)",
+    "diag:cos(4*m)",
+    "diag:sin(4*m)",
+    "diag:cos(5*m)",
+    "diag:sin(5*m)",
+    "diag:cos(6*m)",
+    "diag:sin(6*m)",
+    "diag:cos(1*Delta*log(1+m))",
+    "diag:sin(1*Delta*log(1+m))",
+    "diag:cos(2*Delta*log(1+m))",
+    "diag:sin(2*Delta*log(1+m))",
+    "diag:cos(3*Delta*log(1+m))",
+    "diag:sin(3*Delta*log(1+m))",
+    "diag:cos(4*Delta*log(1+m))",
+    "diag:sin(4*Delta*log(1+m))",
+    "diag:cos(5*Delta*log(1+m))",
+    "diag:sin(5*Delta*log(1+m))",
+    "diag:cos(6*Delta*log(1+m))",
+    "diag:sin(6*Delta*log(1+m))",
+    "diag:cos(1*log(1+Delta+m))",
+    "diag:sin(1*log(1+Delta+m))",
+    "diag:cos(2*log(1+Delta+m))",
+    "diag:sin(2*log(1+Delta+m))",
+    "diag:cos(3*log(1+Delta+m))",
+    "diag:sin(3*log(1+Delta+m))",
+    "diag:cos(4*log(1+Delta+m))",
+    "diag:sin(4*log(1+Delta+m))",
+    "diag:cos(5*log(1+Delta+m))",
+    "diag:sin(5*log(1+Delta+m))",
+    "diag:cos(6*log(1+Delta+m))",
+    "diag:sin(6*log(1+Delta+m))",
+    "diag:near_diag",
+    "diag:near_diag*m",
+    "diag:near_diag*cos(2*pi*m)",
+    "diag:near_diag*sin(2*pi*m)",
+    "off:1",
+    "off:Delta",
+    "off:Delta^2",
+    "off:log(1+Delta)",
+    "off:1/(1+Delta)",
+    "off:exp(-Delta^2)",
+    "off:cos(1*Delta)",
+    "off:sin(1*Delta)",
+    "off:cos(2*Delta)",
+    "off:sin(2*Delta)",
+    "off:cos(3*Delta)",
+    "off:sin(3*Delta)",
+    "off:cos(4*Delta)",
+    "off:sin(4*Delta)",
+    "off:cos(5*Delta)",
+    "off:sin(5*Delta)",
+    "off:cos(6*Delta)",
+    "off:sin(6*Delta)",
+    "off:1/(epsilon+Delta)",
+    "off:1/(epsilon+Delta^2)",
+    "off:cos(t_i*log(1+t_j))",
+    "off:cos(t_j*log(1+t_i))",
+    "off:sin((t_i-t_j)*log(1+Delta))",
+    "off:m",
+    "off:m^2",
+    "off:Delta*m",
+    "off:Delta^2*m",
+    "off:Delta*m^2",
+    "off:cos(1*m)",
+    "off:sin(1*m)",
+    "off:cos(2*m)",
+    "off:sin(2*m)",
+    "off:cos(3*m)",
+    "off:sin(3*m)",
+    "off:cos(4*m)",
+    "off:sin(4*m)",
+    "off:cos(5*m)",
+    "off:sin(5*m)",
+    "off:cos(6*m)",
+    "off:sin(6*m)",
+    "off:cos(1*Delta*log(1+m))",
+    "off:sin(1*Delta*log(1+m))",
+    "off:cos(2*Delta*log(1+m))",
+    "off:sin(2*Delta*log(1+m))",
+    "off:cos(3*Delta*log(1+m))",
+    "off:sin(3*Delta*log(1+m))",
+    "off:cos(4*Delta*log(1+m))",
+    "off:sin(4*Delta*log(1+m))",
+    "off:cos(5*Delta*log(1+m))",
+    "off:sin(5*Delta*log(1+m))",
+    "off:cos(6*Delta*log(1+m))",
+    "off:sin(6*Delta*log(1+m))",
+    "off:cos(1*log(1+Delta+m))",
+    "off:sin(1*log(1+Delta+m))",
+    "off:cos(2*log(1+Delta+m))",
+    "off:sin(2*log(1+Delta+m))",
+    "off:cos(3*log(1+Delta+m))",
+    "off:sin(3*log(1+Delta+m))",
+    "off:cos(4*log(1+Delta+m))",
+    "off:sin(4*log(1+Delta+m))",
+    "off:cos(5*log(1+Delta+m))",
+    "off:sin(5*log(1+Delta+m))",
+    "off:cos(6*log(1+Delta+m))",
+    "off:sin(6*log(1+Delta+m))",
+    "off:near_diag",
+    "off:near_diag*m",
+    "off:near_diag*cos(2*pi*m)",
+    "off:near_diag*sin(2*pi*m)"
+  ],
+  "coefficients": {
+    "diag": {
+      "1": {
+        "real": 6163.973078913801,
+        "imag": 0.0
+      },
+      "Delta": {
+        "real": -39.599661491806486,
+        "imag": 0.0
+      },
+      "Delta^2": {
+        "real": 527.2576439273174,
+        "imag": 0.0
+      },
+      "log(1+Delta)": {
+        "real": -378.25210993273845,
+        "imag": 0.0
+      },
+      "1/(1+Delta)": {
+        "real": 6953.351083999656,
+        "imag": 0.0
+      },
+      "exp(-Delta^2)": {
+        "real": 5632.3927494416075,
+        "imag": 0.0
+      },
+      "cos(1*Delta)": {
+        "real": 5900.032701251903,
+        "imag": 0.0
+      },
+      "sin(1*Delta)": {
+        "real": -0.8766995486591327,
+        "imag": 0.0
+      },
+      "cos(2*Delta)": {
+        "real": 5103.708068237297,
+        "imag": 0.0
+      },
+      "sin(2*Delta)": {
+        "real": 230.8518862033058,
+        "imag": 0.0
+      },
+      "cos(3*Delta)": {
+        "real": 3761.8737937850256,
+        "imag": 0.0
+      },
+      "sin(3*Delta)": {
+        "real": 929.123899111486,
+        "imag": 0.0
+      },
+      "cos(4*Delta)": {
+        "real": 1852.189857416823,
+        "imag": 0.0
+      },
+      "sin(4*Delta)": {
+        "real": 2330.5211772056464,
+        "imag": 0.0
+      },
+      "cos(5*Delta)": {
+        "real": -657.4170201534724,
+        "imag": 0.0
+      },
+      "sin(5*Delta)": {
+        "real": 4675.536178447656,
+        "imag": 0.0
+      },
+      "cos(6*Delta)": {
+        "real": -3809.543645970518,
+        "imag": 0.0
+      },
+      "sin(6*Delta)": {
+        "real": 8209.773313976606,
+        "imag": 0.0
+      },
+      "1/(epsilon+Delta)": {
+        "real": 0.0006609665539372145,
+        "imag": 0.0
+      },
+      "1/(epsilon+Delta^2)": {
+        "real": -6.053744107248349e-05,
+        "imag": 0.0
+      },
+      "cos(t_i*log(1+t_j))": {
+        "real": -14745.306573913273,
+        "imag": 0.0
+      },
+      "cos(t_j*log(1+t_i))": {
+        "real": -14850.050500115927,
+        "imag": 0.0
+      },
+      "sin((t_i-t_j)*log(1+Delta))": {
+        "real": 16.62870243201405,
+        "imag": 0.0
+      },
+      "m": {
+        "real": -34272.26213152014,
+        "imag": 0.0
+      },
+      "m^2": {
+        "real": -23129.39243852687,
+        "imag": 0.0
+      },
+      "Delta*m": {
+        "real": -12835.615410088234,
+        "imag": 0.0
+      },
+      "Delta^2*m": {
+        "real": 48023.73565468563,
+        "imag": 0.0
+      },
+      "Delta*m^2": {
+        "real": 786.347702008137,
+        "imag": 0.0
+      },
+      "cos(1*m)": {
+        "real": 4268.744844383864,
+        "imag": 0.0
+      },
+      "sin(1*m)": {
+        "real": -6485.593654606331,
+        "imag": 0.0
+      },
+      "cos(2*m)": {
+        "real": -64310.7141608678,
+        "imag": 0.0
+      },
+      "sin(2*m)": {
+        "real": 32651.185409246074,
+        "imag": 0.0
+      },
+      "cos(3*m)": {
+        "real": -65658.94722914918,
+        "imag": 0.0
+      },
+      "sin(3*m)": {
+        "real": 3445.0525051075833,
+        "imag": 0.0
+      },
+      "cos(4*m)": {
+        "real": 88350.53742159532,
+        "imag": 0.0
+      },
+      "sin(4*m)": {
+        "real": 54567.02430743437,
+        "imag": 0.0
+      },
+      "cos(5*m)": {
+        "real": -21691.57014510378,
+        "imag": 0.0
+      },
+      "sin(5*m)": {
+        "real": -45001.541239791164,
+        "imag": 0.0
+      },
+      "cos(6*m)": {
+        "real": -1033.8220245657237,
+        "imag": 0.0
+      },
+      "sin(6*m)": {
+        "real": 8663.432975009251,
+        "imag": 0.0
+      },
+      "cos(1*Delta*log(1+m))": {
+        "real": 6155.764435406163,
+        "imag": 0.0
+      },
+      "sin(1*Delta*log(1+m))": {
+        "real": -7785.98186145671,
+        "imag": 0.0
+      },
+      "cos(2*Delta*log(1+m))": {
+        "real": 6052.904186005078,
+        "imag": 0.0
+      },
+      "sin(2*Delta*log(1+m))": {
+        "real": -13696.322674765788,
+        "imag": 0.0
+      },
+      "cos(3*Delta*log(1+m))": {
+        "real": 5621.374513614255,
+        "imag": 0.0
+      },
+      "sin(3*Delta*log(1+m))": {
+        "real": -15863.866946959624,
+        "imag": 0.0
+      },
+      "cos(4*Delta*log(1+m))": {
+        "real": 4471.680741220048,
+        "imag": 0.0
+      },
+      "sin(4*Delta*log(1+m))": {
+        "real": -12438.415905067892,
+        "imag": 0.0
+      },
+      "cos(5*Delta*log(1+m))": {
+        "real": 2059.8276224091396,
+        "imag": 0.0
+      },
+      "sin(5*Delta*log(1+m))": {
+        "real": -1595.1699042021694,
+        "imag": 0.0
+      },
+      "cos(6*Delta*log(1+m))": {
+        "real": -2311.3854927545426,
+        "imag": 0.0
+      },
+      "sin(6*Delta*log(1+m))": {
+        "real": 18456.872264500507,
+        "imag": 0.0
+      },
+      "cos(1*log(1+Delta+m))": {
+        "real": 11371.132936537968,
+        "imag": 0.0
+      },
+      "sin(1*log(1+Delta+m))": {
+        "real": -20386.820319018214,
+        "imag": 0.0
+      },
+      "cos(2*log(1+Delta+m))": {
+        "real": 19667.02758482191,
+        "imag": 0.0
+      },
+      "sin(2*log(1+Delta+m))": {
+        "real": -23125.277007422163,
+        "imag": 0.0
+      },
+      "cos(3*log(1+Delta+m))": {
+        "real": 15618.594143527149,
+        "imag": 0.0
+      },
+      "sin(3*log(1+Delta+m))": {
+        "real": -7291.066734586191,
+        "imag": 0.0
+      },
+      "cos(4*log(1+Delta+m))": {
+        "real": -3424.355306896644,
+        "imag": 0.0
+      },
+      "sin(4*log(1+Delta+m))": {
+        "real": 4704.270332307763,
+        "imag": 0.0
+      },
+      "cos(5*log(1+Delta+m))": {
+        "real": -9293.112691861556,
+        "imag": 0.0
+      },
+      "sin(5*log(1+Delta+m))": {
+        "real": -6142.690406881637,
+        "imag": 0.0
+      },
+      "cos(6*log(1+Delta+m))": {
+        "real": 2814.1227016855346,
+        "imag": 0.0
+      },
+      "sin(6*log(1+Delta+m))": {
+        "real": 3392.0093835915463,
+        "imag": 0.0
+      },
+      "near_diag": {
+        "real": -26.368028721285953,
+        "imag": 0.0
+      },
+      "near_diag*m": {
+        "real": 8.240635282162543,
+        "imag": 0.0
+      },
+      "near_diag*cos(2*pi*m)": {
+        "real": 4.393032029444612,
+        "imag": 0.0
+      },
+      "near_diag*sin(2*pi*m)": {
+        "real": 1.547106233624163,
+        "imag": 0.0
+      }
+    },
+    "off": {
+      "1": {
+        "real": -876050.5486370479,
+        "imag": 0.0
+      },
+      "Delta": {
+        "real": -63987.69909982581,
+        "imag": 0.0
+      },
+      "Delta^2": {
+        "real": 254504.84472780992,
+        "imag": 0.0
+      },
+      "log(1+Delta)": {
+        "real": -380754.1431197924,
+        "imag": 0.0
+      },
+      "1/(1+Delta)": {
+        "real": 596154.3130063264,
+        "imag": 0.0
+      },
+      "exp(-Delta^2)": {
+        "real": -551928.17497114,
+        "imag": 0.0
+      },
+      "cos(1*Delta)": {
+        "real": -808626.9872488438,
+        "imag": 0.0
+      },
+      "sin(1*Delta)": {
+        "real": -203396.01694286533,
+        "imag": 0.0
+      },
+      "cos(2*Delta)": {
+        "real": 145964.03661490662,
+        "imag": 0.0
+      },
+      "sin(2*Delta)": {
+        "real": 63349.96243634273,
+        "imag": 0.0
+      },
+      "cos(3*Delta)": {
+        "real": 276106.9317327634,
+        "imag": 0.0
+      },
+      "sin(3*Delta)": {
+        "real": 1016471.90546966,
+        "imag": 0.0
+      },
+      "cos(4*Delta)": {
+        "real": 343789.44724923436,
+        "imag": 0.0
+      },
+      "sin(4*Delta)": {
+        "real": -811497.5978771016,
+        "imag": 0.0
+      },
+      "cos(5*Delta)": {
+        "real": -263976.06431227265,
+        "imag": 0.0
+      },
+      "sin(5*Delta)": {
+        "real": 163912.00330837397,
+        "imag": 0.0
+      },
+      "cos(6*Delta)": {
+        "real": 43136.98378248396,
+        "imag": 0.0
+      },
+      "sin(6*Delta)": {
+        "real": 2599.9097124804393,
+        "imag": 0.0
+      },
+      "1/(epsilon+Delta)": {
+        "real": -22.337579463841394,
+        "imag": 0.0
+      },
+      "1/(epsilon+Delta^2)": {
+        "real": 0.4289206056855619,
+        "imag": 0.0
+      },
+      "cos(t_i*log(1+t_j))": {
+        "real": -442.2803189367987,
+        "imag": 0.0
+      },
+      "cos(t_j*log(1+t_i))": {
+        "real": -442.4666469686199,
+        "imag": 0.0
+      },
+      "sin((t_i-t_j)*log(1+Delta))": {
+        "real": -0.0005024441052228212,
+        "imag": 0.0
+      },
+      "m": {
+        "real": 77613.09946279613,
+        "imag": 0.0
+      },
+      "m^2": {
+        "real": -867139.2259904115,
+        "imag": 0.0
+      },
+      "Delta*m": {
+        "real": 396812.34919356625,
+        "imag": 0.0
+      },
+      "Delta^2*m": {
+        "real": -76407.27148735325,
+        "imag": 0.0
+      },
+      "Delta*m^2": {
+        "real": -77031.3235041388,
+        "imag": 0.0
+      },
+      "cos(1*m)": {
+        "real": -576345.6024829055,
+        "imag": 0.0
+      },
+      "sin(1*m)": {
+        "real": 137070.6495252733,
+        "imag": 0.0
+      },
+      "cos(2*m)": {
+        "real": -333777.4014142862,
+        "imag": 0.0
+      },
+      "sin(2*m)": {
+        "real": -85027.16240881622,
+        "imag": 0.0
+      },
+      "cos(3*m)": {
+        "real": 171591.10488347098,
+        "imag": 0.0
+      },
+      "sin(3*m)": {
+        "real": -629397.1986824363,
+        "imag": 0.0
+      },
+      "cos(4*m)": {
+        "real": -313946.760962944,
+        "imag": 0.0
+      },
+      "sin(4*m)": {
+        "real": 465694.52706356614,
+        "imag": 0.0
+      },
+      "cos(5*m)": {
+        "real": 169566.0709391454,
+        "imag": 0.0
+      },
+      "sin(5*m)": {
+        "real": -100752.9638678839,
+        "imag": 0.0
+      },
+      "cos(6*m)": {
+        "real": -27081.536108243687,
+        "imag": 0.0
+      },
+      "sin(6*m)": {
+        "real": 1845.9085744811455,
+        "imag": 0.0
+      },
+      "cos(1*Delta*log(1+m))": {
+        "real": 858333.3751015946,
+        "imag": 0.0
+      },
+      "sin(1*Delta*log(1+m))": {
+        "real": 274341.4909482738,
+        "imag": 0.0
+      },
+      "cos(2*Delta*log(1+m))": {
+        "real": 2640232.6178960963,
+        "imag": 0.0
+      },
+      "sin(2*Delta*log(1+m))": {
+        "real": 1243838.6356587529,
+        "imag": 0.0
+      },
+      "cos(3*Delta*log(1+m))": {
+        "real": 308482.07789234695,
+        "imag": 0.0
+      },
+      "sin(3*Delta*log(1+m))": {
+        "real": 140811.99061287555,
+        "imag": 0.0
+      },
+      "cos(4*Delta*log(1+m))": {
+        "real": -2241321.517770102,
+        "imag": 0.0
+      },
+      "sin(4*Delta*log(1+m))": {
+        "real": -2645428.9736599103,
+        "imag": 0.0
+      },
+      "cos(5*Delta*log(1+m))": {
+        "real": 1029460.718513958,
+        "imag": 0.0
+      },
+      "sin(5*Delta*log(1+m))": {
+        "real": 2023504.8301966984,
+        "imag": 0.0
+      },
+      "cos(6*Delta*log(1+m))": {
+        "real": -112788.06065802905,
+        "imag": 0.0
+      },
+      "sin(6*Delta*log(1+m))": {
+        "real": -453628.5998362348,
+        "imag": 0.0
+      },
+      "cos(1*log(1+Delta+m))": {
+        "real": -631319.6429773967,
+        "imag": 0.0
+      },
+      "sin(1*log(1+Delta+m))": {
+        "real": 150678.8824122926,
+        "imag": 0.0
+      },
+      "cos(2*log(1+Delta+m))": {
+        "real": 2706.0636805871327,
+        "imag": 0.0
+      },
+      "sin(2*log(1+Delta+m))": {
+        "real": 171158.6862258374,
+        "imag": 0.0
+      },
+      "cos(3*log(1+Delta+m))": {
+        "real": 335002.1401878441,
+        "imag": 0.0
+      },
+      "sin(3*log(1+Delta+m))": {
+        "real": 172124.69226235646,
+        "imag": 0.0
+      },
+      "cos(4*log(1+Delta+m))": {
+        "real": -233617.0049618519,
+        "imag": 0.0
+      },
+      "sin(4*log(1+Delta+m))": {
+        "real": -245200.76585807616,
+        "imag": 0.0
+      },
+      "cos(5*log(1+Delta+m))": {
+        "real": 53464.1096303728,
+        "imag": 0.0
+      },
+      "sin(5*log(1+Delta+m))": {
+        "real": 109358.8126151152,
+        "imag": 0.0
+      },
+      "cos(6*log(1+Delta+m))": {
+        "real": -1866.4375335727818,
+        "imag": 0.0
+      },
+      "sin(6*log(1+Delta+m))": {
+        "real": -16925.763263218338,
+        "imag": 0.0
+      },
+      "near_diag": {
+        "real": -345.0794846305216,
+        "imag": 0.0
+      },
+      "near_diag*m": {
+        "real": 822.5130021740333,
+        "imag": 0.0
+      },
+      "near_diag*cos(2*pi*m)": {
+        "real": -140.1764193995623,
+        "imag": 0.0
+      },
+      "near_diag*sin(2*pi*m)": {
+        "real": 7.587201708229259,
+        "imag": 0.0
+      }
+    }
+  },
+  "sympy_report": {
+    "mode": "safe",
+    "before": {
+      "ops": 206,
+      "terms": 55
+    },
+    "after": {
+      "ops": 206,
+      "terms": 55
+    },
+    "skipped": true,
+    "reason": "complexity_guard"
+  },
+  "metrics": {
+    "kernel_relative_error": 7.539266544604554,
+    "hermitian_error": 0.0,
+    "num_terms": 136,
+    "regression_sample_mse": {
+      "diag": 56.428506350926405,
+      "off": 4.184015367005011
+    },
+    "regression_score": {
+      "diag": 56.42918635092641,
+      "off": 4.184695367005011
+    },
+    "separate_diagonal": true,
+    "diag_threshold": 0.05,
+    "diag_weight_power": 2.0,
+    "spectral_relative_error": 7.41216819892799,
+    "first_k_spectral_error": 16.053128708017073,
+    "first_k": 50,
+    "eigenvalue_range_true": [
+      101.53998703336639,
+      912.5855763606552
+    ],
+    "eigenvalue_range_fit": [
+      -2364.4857729913633,
+      46844.420309327914
+    ],
+    "eigenvalue_std_true": 145.4042969912269,
+    "eigenvalue_std_fit": 4716.22779663707,
+    "eigen_solver_true": {
+      "label": "H_herm",
+      "n": 1804,
+      "mode": "principal_submatrix_sketch",
+      "sketch_n": 1800
+    },
+    "eigen_solver_fit": {
+      "label": "K_fit",
+      "n": 1804,
+      "mode": "principal_submatrix_sketch",
+      "sketch_n": 1800
+    },
+    "zeta_zeros_csv": null,
+    "zeta_diagnostics_available": false,
+    "symbolic_quality_score": -15.631434743532544,
+    "suggested_reward_bonus": -15.631434743532544
+  },
+  "config": {
+    "lambda_spec": 1.0,
+    "lambda_complexity": 0.005,
+    "lambda_herm": 10.0
+  },
+  "variant": "V11.2C"
+}

@@ -1,0 +1,9 @@
+Symbolic kernel candidate — not a proof of RH
+
+Delta = Abs(t_i - t_j)
+m = (t_i + t_j)/2
+
+w(Delta) = exp(-((Delta/0.02)**2))
+K(t_i,t_j) = w*K_diag + (1-w)*K_off
+
+K_off(Delta,m) = 396812.3491935662*Delta*m - 867139.2259904115*m**2 + 1016471.90546966*sin(3*Delta) - 811497.5978771016*sin(4*Delta) - 629397.1986824363*sin(3*m) + 465694.5270635661*sin(4*m) + 1243838.635658753*sin(2*Delta*log(m + 1)) - 2645428.97365991*sin(4*Delta*log(m + 1)) + 2023504.830196698*sin(5*Delta*log(m + 1)) - 453628.5998362348*sin(6*Delta*log(m + 1)) - 808626.9872488438*cos(Delta) - 576345.6024829055*cos(m) + 858333.3751015946*cos(Delta*log(m + 1)) + 2640232.617896096*cos(2*Delta*log(m + 1)) - 2241321.517770102*cos(4*Delta*log(m + 1)) + 1029460.718513958*cos(5*Delta*log(m + 1)) - 631319.6429773967*cos(log(Delta + m + 1)) - 876050.5486370479 - 551928.17497114*exp(-Delta**2) + 596154.3130063264/(Delta + 1)

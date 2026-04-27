@@ -1,0 +1,13 @@
+{
+  "mode": "safe",
+  "before": {
+    "ops": 80,
+    "terms": 20
+  },
+  "after": {
+    "ops": 80,
+    "terms": 20
+  },
+  "skipped": false,
+  "reason": null
+}
