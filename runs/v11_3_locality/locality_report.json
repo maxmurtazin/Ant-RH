@@ -1,0 +1,45 @@
+{
+  "diagnostic_label": "Symbolic locality diagnostic \u2014 not proof of RH",
+  "formula": "runs/v11_2_symbolic/symbolic_kernel_candidate_v2_sympy.txt",
+  "operator": "runs/v11_1_best_operator.npy",
+  "locality_class": "strongly_nonlocal",
+  "symbolic_nonlocal_score": 3.0,
+  "reasons": [
+    "log_terms",
+    "oscillatory_terms"
+  ],
+  "tail_ratio": 0.5798691309754512,
+  "tail_decay_slope": -0.7594623221440839,
+  "tail_metrics": {
+    "tail_ratio": 0.5798691309754512,
+    "tail_decay_slope": -0.7594623221440839,
+    "near_mean_abs": 6542.622537045738,
+    "tail_mean_abs": 3793.864844857114,
+    "tail_grid": 200
+  },
+  "local_series": "10669.65986158681*s**3 - 34342.14947763762*s**2 - 17758.27508374646*s + 6968.413505909768",
+  "parse_report": {
+    "input": "-12527.56027320404*(t_i - t_j)**2 - 15666.94499664541*log(Abs(t_i - t_j) + 1) + 9513.625641218297*sin(2*Abs(t_i - t_j)) + 28367.42661548071*sin(5*Abs(t_i - t_j)) - 27655.58710981825*sin(6*Abs(t_i - t_j)) + 6082.223080332757*sin(7*Abs(t_i - t_j)) - 11932.68364315104*cos(2*Abs(t_i - t_j)) - 30082.80695694441*cos(3*Abs(t_i - t_j)) + 28080.54669201467*cos(5*Abs(t_i - t_j)) - 7432.495575836033*cos(6*Abs(t_i - t_j)) - 11261.90036053442*Abs(t_i - t_j) + 28335.85298982658/(Abs(t_i - t_j) + 1)",
+    "parsed": "-12527.56027320404*(t_i - t_j)**2 - 15666.94499664541*log(Abs(t_i - t_j) + 1) + 9513.625641218297*sin(2*Abs(t_i - t_j)) + 28367.42661548071*sin(5*Abs(t_i - t_j)) - 27655.58710981825*sin(6*Abs(t_i - t_j)) + 6082.223080332757*sin(7*Abs(t_i - t_j)) - 11932.68364315104*cos(2*Abs(t_i - t_j)) - 30082.80695694441*cos(3*Abs(t_i - t_j)) + 28080.54669201467*cos(5*Abs(t_i - t_j)) - 7432.495575836033*cos(6*Abs(t_i - t_j)) - 11261.90036053442*Abs(t_i - t_j) + 28335.85298982658/(Abs(t_i - t_j) + 1)",
+    "used_wolfram_conversion": false
+  },
+  "outputs": {
+    "locality_report": "runs/v11_3_locality/locality_report.json",
+    "local_series": "runs/v11_3_locality/local_series.txt",
+    "local_series_latex": "runs/v11_3_locality/local_series_latex.tex",
+    "tail_test": "runs/v11_3_locality/tail_test.json",
+    "tail_profile_csv": "runs/v11_3_locality/tail_profile.csv",
+    "tail_profile_png": "runs/v11_3_locality/tail_profile.png",
+    "pde_candidate": null,
+    "nonlocal_integral_operator": "runs/v11_3_locality/nonlocal_integral_operator.txt"
+  },
+  "wolfram_report": {
+    "available": true,
+    "ok": true,
+    "returncode": 0,
+    "stderr": "",
+    "series_file": "wolfram_local_series.txt",
+    "tail_file": "wolfram_tail_limit.txt"
+  },
+  "note": "Symbolic locality/nonlocality diagnostic for operator research; not a proof of RH."
+}

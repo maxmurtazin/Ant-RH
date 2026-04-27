@@ -1,0 +1,8 @@
+{
+  "available": true,
+  "ok": true,
+  "returncode": 0,
+  "stderr": "",
+  "series_file": "wolfram_local_series.txt",
+  "tail_file": "wolfram_tail_limit.txt"
+}
