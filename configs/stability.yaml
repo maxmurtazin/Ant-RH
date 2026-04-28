@@ -1,0 +1,6 @@
+stability:
+  operator_path: runs/artin_operator.npy
+  zeros: data/zeta_zeros.txt
+  k: 128
+  out: runs/operator_stability_report.json
+

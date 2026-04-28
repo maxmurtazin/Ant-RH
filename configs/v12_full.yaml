@@ -1,0 +1,23 @@
+defaults:
+  - config
+
+artin:
+  num_samples: 50000
+  max_length: 10
+  max_power: 8
+
+operator:
+  n_points: 512
+  top_k_geodesics: 1000
+
+aco:
+  num_ants: 128
+  num_iters: 200
+
+rl:
+  num_updates: 300
+  steps_per_update: 2048
+
+stability:
+  k: 256
+

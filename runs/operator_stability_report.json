@@ -1,0 +1,88 @@
+{
+  "input_shape": [
+    64,
+    64
+  ],
+  "dtype": "float64",
+  "nan_count": 0,
+  "inf_count": 0,
+  "symmetry_error_before": 0.0,
+  "fro_norm_before": 298.7368748278515,
+  "symmetry_error_after": 0.0,
+  "normalization": "frobenius",
+  "normalization_scale": 298.7368680983233,
+  "fro_norm_after": 0.9999999886750988,
+  "gershgorin_min": -0.3017920891585181,
+  "gershgorin_max": 9.536472385190953e-06,
+  "diagonal_shift": 1e-06,
+  "jitter": 1e-08,
+  "condition_proxy_before": 3190867.5863290234,
+  "condition_proxy_after": 3190867.5863290234,
+  "diagonal_shift_effective": 1e-06,
+  "stabilization_time_s": 0.0006914579989825143,
+  "backend": "numpy",
+  "eigh_before": {
+    "input_shape": [
+      64,
+      64
+    ],
+    "dtype": "float64",
+    "n": 64,
+    "requested_k": null,
+    "eigh_backend_used": "numpy",
+    "eigh_success": true,
+    "num_repeated_eigenvalues_estimate": 0,
+    "eig_time_s": 0.00029608299882966094
+  },
+  "eigh_after": {
+    "input_shape": [
+      64,
+      64
+    ],
+    "dtype": "float64",
+    "n": 64,
+    "requested_k": null,
+    "eigh_backend_used": "numpy",
+    "eigh_success": true,
+    "num_repeated_eigenvalues_estimate": 0,
+    "eig_time_s": 0.00018900000031862874
+  },
+  "eigh_input_shape": [
+    64,
+    64
+  ],
+  "eigh_dtype": "float64",
+  "eigh_stabilize_input_shape": [
+    64,
+    64
+  ],
+  "eigh_stabilize_dtype": "float64",
+  "eigh_stabilize_nan_count": 0,
+  "eigh_stabilize_inf_count": 0,
+  "eigh_stabilize_symmetry_error_before": 0.0,
+  "eigh_stabilize_fro_norm_before": 0.9999999886750988,
+  "eigh_stabilize_symmetry_error_after": 0.0,
+  "eigh_stabilize_normalization": "frobenius",
+  "eigh_stabilize_normalization_scale": 0.9999932591489318,
+  "eigh_stabilize_fro_norm_after": 0.9999989920157637,
+  "eigh_stabilize_gershgorin_min": -0.3017931277435015,
+  "eigh_stabilize_gershgorin_max": 1.051182675887441e-05,
+  "eigh_stabilize_diagonal_shift": 1e-06,
+  "eigh_stabilize_jitter": 1e-08,
+  "eigh_stabilize_condition_proxy_before": 761076.3663525474,
+  "eigh_stabilize_condition_proxy_after": 761076.3663525474,
+  "eigh_stabilize_diagonal_shift_effective": 1e-06,
+  "eigh_stabilize_stabilization_time_s": 0.0005752920005761553,
+  "eigh_stabilize_backend": "numpy",
+  "eigh_n": 64,
+  "eigh_requested_k": null,
+  "eigh_eigh_backend_used": "numpy",
+  "eigh_eigh_success": true,
+  "eigh_num_repeated_eigenvalues_estimate": 0,
+  "eigh_eig_time_s": 0.0007422090002364712,
+  "spectrum_normalization": "zscore",
+  "spectral_loss": 0.012503465344558741,
+  "spacing_loss": 0.515005380230902,
+  "total_loss": 0.5275088455754607,
+  "total_time_s": 0.0026452920010342496
+}

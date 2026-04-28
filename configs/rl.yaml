@@ -1,0 +1,12 @@
+rl:
+  num_updates: 50
+  steps_per_update: 1024
+  max_length: 8
+  max_power: 6
+  lr: 0.0003
+  pheromone_bias: 0.5
+  eval_operator_every: 20
+  out_dir: runs/artin_rl
+  seed: 42
+  target_zeros_path: data/zeta_zeros.txt
+

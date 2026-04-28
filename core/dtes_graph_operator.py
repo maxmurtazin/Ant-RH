@@ -10,30 +10,19 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from core.spectral_stabilization import safe_torch_eigh
+
 
 def safe_eigvalsh(H, jitter=1e-6, max_tries=6):
-    H = 0.5 * (H + H.T)
-    H = torch.nan_to_num(H, nan=0.0, posinf=1e6, neginf=-1e6)
-
-    n = H.shape[0]
-    eye = torch.eye(n, dtype=H.dtype, device=H.device)
-    last_err = None
-
-    for i in range(max_tries):
-        try:
-            jj = jitter * (10.0 ** i)
-            Hs = H + jj * eye
-            return torch.linalg.eigvalsh(Hs)
-        except RuntimeError as e:
-            last_err = e
-
-    noise = 1e-5 * torch.randn_like(H)
-    noise = 0.5 * (noise + noise.T)
-
-    try:
-        return torch.linalg.eigvalsh(H + noise + jitter * eye)
-    except RuntimeError:
-        raise RuntimeError(f"safe_eigvalsh failed after jitter attempts: {last_err}")
+    # Prefer differentiable torch path; fallback to stabilized CPU/numpy if needed.
+    eigvals, _, _ = safe_torch_eigh(
+        H,
+        k=None,
+        return_eigenvectors=False,
+        stabilize=True,
+        seed=42,
+    )
+    return eigvals
 
 
 def build_dtes_graph_weights(

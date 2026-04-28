@@ -1,0 +1,6 @@
+artin:
+  num_samples: 10000
+  max_length: 8
+  max_power: 6
+  out_dir: runs
+

@@ -1,0 +1,9 @@
+operator:
+  n_points: 256
+  sigma: 0.3
+  top_k_geodesics: 500
+  eps: 0.6
+  geodesics: runs/artin_words.json
+  out_dir: runs
+  zeros: data/zeta_zeros.txt
+

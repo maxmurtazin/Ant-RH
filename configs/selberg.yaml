@@ -1,0 +1,7 @@
+selberg:
+  lengths: runs/artin_lengths.csv
+  zeros: data/zeta_zeros.txt
+  sigma: 0.5
+  m_max: 5
+  out_dir: runs
+

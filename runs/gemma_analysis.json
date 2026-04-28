@@ -1,0 +1,58 @@
+{
+  "learning": true,
+  "operator_quality": "medium",
+  "main_issue": "scaling_and_alignment",
+  "suggestions": [
+    "Normalize spectra (z-score) consistently and compare spacing statistics after normalization.",
+    "Log per-stage contributions (Selberg vs spectral vs spacing) to identify dominating term.",
+    "Cache operator builds and reuse geodesic banks between ACO and RL updates."
+  ],
+  "warnings": [
+    "selberg_relative_error_large"
+  ],
+  "aco": {
+    "path": "runs/artin_aco_history.csv",
+    "n": 5,
+    "best_loss_stats": {
+      "last": 88526.29283751908,
+      "mean_tail": 88526.27611088028,
+      "min": 88526.26236534242
+    },
+    "mean_loss_stats": {
+      "last": 88526.29409759532,
+      "mean_tail": 88526.27702374448,
+      "min": 88526.2631509048
+    },
+    "best_loss_trend": "increasing",
+    "mean_loss_trend": "increasing"
+  },
+  "rl": {
+    "path": "runs/artin_rl/train_history.csv",
+    "n": 3,
+    "mean_reward_stats": {
+      "last": 1.365898022428155,
+      "mean_tail": 0.06274649337235205,
+      "min": -1.8274510173962033
+    },
+    "mean_reward_trend": "increasing"
+  },
+  "operator": {
+    "path": "runs/operator_stability_report.json",
+    "eigh_success": true,
+    "spectral_loss": 0.012503465344558741,
+    "spacing_loss": 0.515005380230902,
+    "condition_proxy_after": 3190867.5863290234,
+    "stability_flags": {
+      "nan_count": 0,
+      "inf_count": 0
+    },
+    "eigh_backend_used": "numpy"
+  },
+  "selberg": {
+    "path": "runs/selberg_trace_report.json",
+    "S_spec": 1.6636469522697837,
+    "S_geo": -0.044032277507084876,
+    "loss": 2.916168351811319,
+    "relative_error": 1.0264673145839847
+  }
+}

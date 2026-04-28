@@ -1,0 +1,12 @@
+aco:
+  num_ants: 64
+  num_iters: 50
+  max_length: 8
+  max_power: 6
+  alpha: 1.0
+  beta: 2.0
+  rho: 0.1
+  seed: 42
+  out_dir: runs
+  zeros: data/zeta_zeros.txt
+

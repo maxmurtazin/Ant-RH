@@ -1,0 +1,69 @@
+defaults:
+  - _self_
+
+run:
+  stages:
+    - artin
+    - selberg
+    - operator
+    - aco
+    - rl
+    - stability
+
+paths:
+  runs_dir: runs
+  logs_dir: logs/v12
+  zeros: data/zeta_zeros.txt
+
+artin:
+  num_samples: 10000
+  max_length: 8
+  max_power: 6
+  out_dir: runs
+
+selberg:
+  lengths: runs/artin_lengths.csv
+  zeros: data/zeta_zeros.txt
+  sigma: 0.5
+  m_max: 5
+  out_dir: runs
+
+operator:
+  n_points: 256
+  sigma: 0.3
+  top_k_geodesics: 500
+  eps: 0.6
+  geodesics: runs/artin_words.json
+  out_dir: runs
+  zeros: data/zeta_zeros.txt
+
+aco:
+  num_ants: 64
+  num_iters: 50
+  max_length: 8
+  max_power: 6
+  alpha: 1.0
+  beta: 2.0
+  rho: 0.1
+  seed: 42
+  out_dir: runs
+  zeros: data/zeta_zeros.txt
+
+rl:
+  num_updates: 50
+  steps_per_update: 1024
+  max_length: 8
+  max_power: 6
+  lr: 0.0003
+  pheromone_bias: 0.5
+  eval_operator_every: 20
+  out_dir: runs/artin_rl
+  seed: 42
+  target_zeros_path: data/zeta_zeros.txt
+
+stability:
+  operator_path: runs/artin_operator.npy
+  zeros: data/zeta_zeros.txt
+  k: 128
+  out: runs/operator_stability_report.json
+
