@@ -1,0 +1,5658 @@
+[
+  {
+    "attempt": 1,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 CLUSTER_3 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -1,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        -1
+      ],
+      "reward": 1.820554700558875,
+      "validity_score": 1.5,
+      "length_score": -0.5187881749403112,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.4166666666666667,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 1.9248473002387554,
+      "trace": 3.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        1
+      ],
+      "reward": 2.0568707104385426,
+      "validity_score": 1.5,
+      "length_score": -0.2794894885143093,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 5.117957954057237,
+      "trace": 13.0
+    }
+  },
+  {
+    "attempt": 3,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_3 <braid> SIGMA_1_MINUS SIGMA_7_PLUS SIGMA_3_PLUS SIGMA_6_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> SIGMA_5_MINUS SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      -1,
+      7,
+      3,
+      -6,
+      -5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        7,
+        3,
+        -6,
+        -5
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.72605026175121,
+      "trace": -580.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        7,
+        3,
+        -6,
+        -5
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.72605026175121,
+      "trace": -580.0
+    }
+  },
+  {
+    "attempt": 7,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_3 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS SIGMA_6_MINUS SIGMA_4_PLUS SIGMA_2_MINUS </braid> <operator> <spectrum> SIGMA_4_PLUS </braid> <operator> </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -1,
+      -1,
+      -6,
+      4,
+      -2,
+      4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        -1,
+        -6,
+        4,
+        -2,
+        4
+      ],
+      "reward": 1.0680440261242687,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.35714285714285715,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.061713388705567,
+      "trace": 1131.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        -1,
+        -6,
+        4
+      ],
+      "reward": 1.4081214143183751,
+      "validity_score": 1.5,
+      "length_score": -1.3636547474213105,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.4666666666666666,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.454618989685242,
+      "trace": -113.0
+    }
+  },
+  {
+    "attempt": 12,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_6 <braid> SIGMA_3_MINUS SIGMA_4_PLUS SIGMA_3_MINUS SIGMA_7_PLUS SIGMA_2_MINUS SIGMA_3_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      -3,
+      4,
+      -3,
+      7,
+      -2,
+      -3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        4,
+        -3,
+        7,
+        -2,
+        -3
+      ],
+      "reward": 1.1299487880290306,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6666666666666666,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.569640884298332,
+      "trace": 1458.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        4,
+        -3,
+        7,
+        -2,
+        -3
+      ],
+      "reward": 1.1299487880290306,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6666666666666666,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.569640884298332,
+      "trace": 1458.0
+    }
+  },
+  {
+    "attempt": 13,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_3 CLUSTER_1 <braid> SIGMA_1_PLUS SIGMA_7_PLUS SIGMA_6_MINUS SIGMA_4_MINUS SIGMA_7_PLUS SIGMA_6_PLUS SIGMA_8_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      1,
+      7,
+      -6,
+      -4,
+      7,
+      6,
+      -8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        7,
+        -6,
+        -4,
+        7,
+        6,
+        -8
+      ],
+      "reward": 1.1680440261242686,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8571428571428571,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 21.880661628984605,
+      "trace": -56406.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        7,
+        -6,
+        -4,
+        7,
+        6
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.97181771758754,
+      "trace": 4846.0
+    }
+  },
+  {
+    "attempt": 15,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 SIGMA_1_MINUS <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      -1,
+      4,
+      -2,
+      -1,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        4,
+        -2,
+        -1,
+        -1
+      ],
+      "reward": 1.9935075373054003,
+      "validity_score": 1.5,
+      "length_score": -0.14621583478059397,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.35,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 4.584863339122376,
+      "trace": -10.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        4,
+        -2,
+        -1,
+        1
+      ],
+      "reward": 1.8843729784845458,
+      "validity_score": 1.5,
+      "length_score": -0.5444849524223025,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.17793980968921,
+      "trace": -22.0
+    }
+  },
+  {
+    "attempt": 16,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_6 <braid> SIGMA_1_PLUS SIGMA_5_MINUS SIGMA_1_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_3 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      1,
+      -5,
+      1
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        1,
+        -5,
+        1
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "non_hyperbolic"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        1,
+        -5,
+        1
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "non_hyperbolic"
+    }
+  },
+  {
+    "attempt": 21,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_2 <braid> SIGMA_5_MINUS SIGMA_3_PLUS SIGMA_7_PLUS SIGMA_4_MINUS SIGMA_1_PLUS SIGMA_7_PLUS SIGMA_6_PLUS SIGMA_8_PLUS SIGMA_3_MINUS <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      -5,
+      3,
+      7,
+      -4,
+      1,
+      7,
+      6,
+      8,
+      -3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -5,
+        3,
+        7,
+        -4,
+        1,
+        7,
+        6,
+        8,
+        -3
+      ],
+      "reward": 1.174393232473475,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8888888888888888,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 26.072625986108044,
+      "trace": -458774.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -5,
+        3,
+        7,
+        -4,
+        1,
+        7
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.330158355827347,
+      "trace": 3516.0
+    }
+  },
+  {
+    "attempt": 22,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_4 <braid> SIGMA_5_MINUS SIGMA_8_MINUS SIGMA_3_MINUS SIGMA_8_PLUS SIGMA_2_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_4 </braid> <operator> SIGMA_5_MINUS <reward> REWARD_BIN_27 </episode> EOS",
+    "word": [
+      -5,
+      -8,
+      -3,
+      8,
+      -2,
+      -5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -5,
+        -8,
+        -3,
+        8,
+        -2,
+        -5
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 18.111579197011157,
+      "trace": -8568.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -5,
+        -8,
+        -3,
+        8,
+        -2,
+        -5
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 18.111579197011157,
+      "trace": -8568.0
+    }
+  },
+  {
+    "attempt": 25,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 SIGMA_2_MINUS <braid> </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_4 </braid> <operator> UNK SIGMA_2_MINUS <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      -2,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        -2,
+        -2
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        -2,
+        -2
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    }
+  },
+  {
+    "attempt": 27,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_1 <braid> SIGMA_1_PLUS SIGMA_1_PLUS SIGMA_3_PLUS <braid> SIGMA_6_PLUS SIGMA_1_PLUS SIGMA_5_PLUS </braid> <operator> <spectrum> SIGMA_4_PLUS </episode> EOS",
+    "word": [
+      1,
+      1,
+      3,
+      6,
+      1,
+      5,
+      4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        1,
+        3,
+        6,
+        1,
+        5,
+        4
+      ],
+      "reward": 1.4426718555028435,
+      "validity_score": 1.5,
+      "length_score": -1.3269348174333264,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.5476190476190477,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.307739269733306,
+      "trace": -105.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        1,
+        3,
+        6,
+        1,
+        5
+      ],
+      "reward": 1.757217149868717,
+      "validity_score": 1.5,
+      "length_score": -0.6654632763206265,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.4666666666666666,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.661853105282506,
+      "trace": -28.0
+    }
+  },
+  {
+    "attempt": 35,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_4 <braid> SIGMA_1_PLUS SIGMA_7_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_4_PLUS SIGMA_3_MINUS SIGMA_5_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      1,
+      7,
+      -2,
+      -1,
+      4,
+      -3,
+      5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        7,
+        -2,
+        -1,
+        4,
+        -3,
+        5
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.590525194658365,
+      "trace": -542.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        7,
+        -2,
+        -1,
+        4,
+        -3
+      ],
+      "reward": 1.4025860017613303,
+      "validity_score": 1.5,
+      "length_score": -1.588058905868734,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 10.352235623474936,
+      "trace": -177.0
+    }
+  },
+  {
+    "attempt": 37,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 CLUSTER_3 <braid> SIGMA_8_MINUS SIGMA_1_PLUS SIGMA_5_PLUS <episode> <state> SIGMA_4_MINUS SIGMA_1_PLUS SIGMA_7_PLUS SIGMA_2_MINUS SIGMA_3_PLUS </episode> EOS",
+    "word": [
+      -8,
+      1,
+      5,
+      -4,
+      1,
+      7,
+      -2,
+      3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        1,
+        5,
+        -4,
+        1,
+        7,
+        -2,
+        3
+      ],
+      "reward": 1.1716154546956972,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.875,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 18.26907729384583,
+      "trace": -9270.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        1,
+        5,
+        -4,
+        1,
+        7
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.216486940131777,
+      "trace": 1222.0
+    }
+  },
+  {
+    "attempt": 44,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 CLUSTER_4 <braid> SIGMA_8_MINUS SIGMA_8_MINUS SIGMA_3_MINUS SIGMA_6_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      -8,
+      -8,
+      -3,
+      6
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        -8,
+        -3,
+        6
+      ],
+      "reward": 1.0799487880290306,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.4166666666666667,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.13293248422741,
+      "trace": -1172.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        -8,
+        -3,
+        6
+      ],
+      "reward": 1.0799487880290306,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.4166666666666667,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.13293248422741,
+      "trace": -1172.0
+    }
+  },
+  {
+    "attempt": 45,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_1 <braid> SIGMA_6_MINUS SIGMA_3_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 SIGMA_1_MINUS </braid> <operator> SIGMA_5_MINUS SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      -6,
+      3,
+      -1,
+      -5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        3,
+        -1,
+        -5
+      ],
+      "reward": 1.540396284059321,
+      "validity_score": 1.5,
+      "length_score": -1.3124383412727525,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.24975336509101,
+      "trace": -102.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        3,
+        -1,
+        -5
+      ],
+      "reward": 1.540396284059321,
+      "validity_score": 1.5,
+      "length_score": -1.3124383412727525,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.24975336509101,
+      "trace": -102.0
+    }
+  },
+  {
+    "attempt": 48,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 SIGMA_11_PLUS <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      11,
+      4,
+      -2,
+      -1,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        11,
+        4,
+        -2,
+        -1,
+        -1
+      ],
+      "reward": 1.6973922250796636,
+      "validity_score": 1.5,
+      "length_score": -0.8184464592320673,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.273785836928269,
+      "trace": 38.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        11,
+        4,
+        -2,
+        -1,
+        1
+      ],
+      "reward": 1.4507255283732412,
+      "validity_score": 1.5,
+      "length_score": -1.4917798526449122,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.967119410579649,
+      "trace": 146.0
+    }
+  },
+  {
+    "attempt": 49,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 CLUSTER_7 <braid> SIGMA_7_PLUS SIGMA_7_PLUS SIGMA_2_MINUS SIGMA_8_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_4 <reward> REWARD_BIN_25 </episode> EOS",
+    "word": [
+      7,
+      7,
+      -2,
+      -8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        7,
+        7,
+        -2,
+        -8
+      ],
+      "reward": 1.0799487880290306,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.4166666666666667,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.34659273901057,
+      "trace": 791.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        7,
+        7,
+        -2,
+        -8
+      ],
+      "reward": 1.0799487880290306,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.4166666666666667,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.34659273901057,
+      "trace": 791.0
+    }
+  },
+  {
+    "attempt": 52,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 SIGMA_2_MINUS <braid> SIGMA_4_PLUS SIGMA_3_PLUS SIGMA_7_MINUS SIGMA_4_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> <braid> <reward> REWARD_BIN_26 </episode> EOS",
+    "word": [
+      -2,
+      4,
+      3,
+      -7,
+      -4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        4,
+        3,
+        -7,
+        -4
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.891434599699455,
+      "trace": -630.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        4,
+        3,
+        -7,
+        -4
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.891434599699455,
+      "trace": -630.0
+    }
+  },
+  {
+    "attempt": 54,
+    "decoded_tokens": "BOS <episode> <state> CLUSTER_4 CLUSTER_3 <braid> SIGMA_1_PLUS SIGMA_2_MINUS SIGMA_5_MINUS SIGMA_4_PLUS SIGMA_8_PLUS SIGMA_1_MINUS SIGMA_4_PLUS </episode> EOS",
+    "word": [
+      1,
+      -2,
+      -5,
+      4,
+      8,
+      -1,
+      4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -2,
+        -5,
+        4,
+        8,
+        -1,
+        4
+      ],
+      "reward": 1.1680440261242686,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8571428571428571,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.3860510809703,
+      "trace": -2193.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -2,
+        -5,
+        4,
+        8,
+        -1
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.39899764699849,
+      "trace": -812.0
+    }
+  },
+  {
+    "attempt": 60,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_5 <braid> SIGMA_8_MINUS SIGMA_1_PLUS SIGMA_2_MINUS SIGMA_1_PLUS SIGMA_7_MINUS SIGMA_4_PLUS SIGMA_2_MINUS <spectrum> SPECTRAL_ERROR_BIN_1 <reward> SIGMA_6_PLUS EOS",
+    "word": [
+      -8,
+      1,
+      -2,
+      1,
+      -7,
+      4,
+      -2,
+      6
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        1,
+        -2,
+        1,
+        -7,
+        4,
+        -2,
+        6
+      ],
+      "reward": 1.1466154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.75,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 19.417376941080185,
+      "trace": 16460.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        1,
+        -2,
+        1,
+        -7,
+        4
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.095032930425543,
+      "trace": -1150.0
+    }
+  },
+  {
+    "attempt": 62,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 CLUSTER_2 <braid> SIGMA_1_MINUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_5_MINUS <state> </braid> <operator> <spectrum> CLUSTER_30 SPECTRAL_ERROR_BIN_7 <reward> <braid> </episode> EOS",
+    "word": [
+      -1,
+      -2,
+      -1,
+      -5
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        -1,
+        -2,
+        -1,
+        -5
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "non_hyperbolic"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        -1,
+        -2,
+        -1,
+        -5
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "non_hyperbolic"
+    }
+  },
+  {
+    "attempt": 64,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 SIGMA_8_PLUS <braid> SIGMA_1_MINUS <state> SIGMA_4_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      8,
+      -1,
+      -4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        8,
+        -1,
+        -4
+      ],
+      "reward": 1.8550892939644195,
+      "validity_score": 1.5,
+      "length_score": -0.683052321462555,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.73220928585022,
+      "trace": 29.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        8,
+        -1,
+        -4
+      ],
+      "reward": 1.8550892939644195,
+      "validity_score": 1.5,
+      "length_score": -0.683052321462555,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.73220928585022,
+      "trace": 29.0
+    }
+  },
+  {
+    "attempt": 66,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 CLUSTER_4 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_2_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -1,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        4,
+        -2,
+        -1,
+        -2
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "non_hyperbolic"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        4,
+        -2,
+        -1,
+        -2
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "non_hyperbolic"
+    }
+  },
+  {
+    "attempt": 70,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_1 <braid> SIGMA_4_MINUS SIGMA_7_PLUS SIGMA_8_MINUS SIGMA_7_PLUS <braid> SIGMA_1_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_4 <reward> REWARD_BIN_26 </episode> EOS",
+    "word": [
+      -4,
+      7,
+      -8,
+      7,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -4,
+        7,
+        -8,
+        7,
+        -1
+      ],
+      "reward": 1.1566154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.641053048551035,
+      "trace": -1511.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -4,
+        7,
+        -8,
+        7,
+        -1
+      ],
+      "reward": 1.1566154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.641053048551035,
+      "trace": -1511.0
+    }
+  },
+  {
+    "attempt": 71,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_6 <braid> </braid> <operator> <spectrum> <spectrum> SIGMA_4_PLUS SIGMA_3_MINUS SIGMA_8_MINUS </braid> <operator> <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      4,
+      -3,
+      -8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -3,
+        -8
+      ],
+      "reward": 1.537956775868541,
+      "validity_score": 1.5,
+      "length_score": -1.317317357654312,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.269269430617248,
+      "trace": 103.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -3,
+        -8
+      ],
+      "reward": 1.537956775868541,
+      "validity_score": 1.5,
+      "length_score": -1.317317357654312,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.269269430617248,
+      "trace": 103.0
+    }
+  },
+  {
+    "attempt": 75,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_4 <braid> SIGMA_5_PLUS SIGMA_7_PLUS SIGMA_8_PLUS SIGMA_8_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      5,
+      7,
+      8,
+      -8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        5,
+        7,
+        8,
+        -8
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.415023985211164,
+      "trace": -2225.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        5,
+        7,
+        8,
+        -8
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.415023985211164,
+      "trace": -2225.0
+    }
+  },
+  {
+    "attempt": 78,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_26 <braid> SIGMA_7_PLUS SIGMA_4_MINUS SIGMA_2_PLUS SIGMA_2_MINUS SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_6_MINUS </braid> <operator> <spectrum> SIGMA_10_MINUS CLUSTER_22 SPECTRAL_ERROR_BIN_4 SPECTRAL_ERROR_BIN_3 <reward> SIGMA_1_MINUS </episode> EOS",
+    "word": [
+      7,
+      -4,
+      2,
+      -2,
+      4,
+      -2,
+      -6,
+      -10,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        7,
+        -4,
+        2,
+        -2,
+        4,
+        -2,
+        -6,
+        -10,
+        -1
+      ],
+      "reward": 1.174393232473475,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8888888888888888,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 22.774679131744538,
+      "trace": 88198.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        7,
+        -4,
+        2,
+        -2,
+        4,
+        -2
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.82673394384327,
+      "trace": -1658.0
+    }
+  },
+  {
+    "attempt": 81,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_3 CLUSTER_4 <braid> SIGMA_5_MINUS <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      -5
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        -5
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        -5
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    }
+  },
+  {
+    "attempt": 100,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 <reward> <braid> SIGMA_8_PLUS <spectrum> SPECTRAL_ERROR_BIN_0 <reward> SIGMA_5_MINUS SIGMA_4_PLUS SIGMA_8_MINUS SIGMA_1_PLUS SIGMA_2_MINUS SIGMA_3_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_2 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      8,
+      -5,
+      4,
+      -8,
+      1,
+      -2,
+      3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        8,
+        -5,
+        4,
+        -8,
+        1,
+        -2,
+        3
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 19.206520896049373,
+      "trace": -14813.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        8,
+        -5,
+        4,
+        -8,
+        1,
+        -2
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.948153713480426,
+      "trace": -4789.0
+    }
+  },
+  {
+    "attempt": 102,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_1 <braid> SIGMA_3_MINUS SIGMA_1_PLUS SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_4_MINUS SIGMA_7_PLUS SIGMA_8_MINUS SIGMA_6_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      -3,
+      1,
+      4,
+      -2,
+      -4,
+      7,
+      -8,
+      6
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        1,
+        4,
+        -2,
+        -4,
+        7,
+        -8,
+        6
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 21.207915705719884,
+      "trace": 40294.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        1,
+        4,
+        -2,
+        -4,
+        7
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.37919544436793,
+      "trace": -804.0
+    }
+  },
+  {
+    "attempt": 103,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 CLUSTER_6 <braid> SIGMA_1_PLUS SIGMA_6_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> CLUSTER_3 SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      1,
+      -6
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        1,
+        -6
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        1,
+        -6
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    }
+  },
+  {
+    "attempt": 105,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_7 <braid> SIGMA_2_PLUS SIGMA_6_PLUS SIGMA_3_MINUS SIGMA_7_MINUS SIGMA_4_PLUS SIGMA_6_MINUS SIGMA_7_PLUS SIGMA_3_MINUS SIGMA_7_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      2,
+      6,
+      -3,
+      -7,
+      4,
+      -6,
+      7,
+      -3,
+      -7
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        2,
+        6,
+        -3,
+        -7,
+        4,
+        -6,
+        7,
+        -3,
+        -7
+      ],
+      "reward": 1.1521710102512528,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.7777777777777778,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 27.599126140117484,
+      "trace": -984179.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        2,
+        6,
+        -3,
+        -7,
+        4,
+        -6
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 17.585706531186293,
+      "trace": -6587.0
+    }
+  },
+  {
+    "attempt": 112,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_2 CLUSTER_2 <braid> SIGMA_1_MINUS SIGMA_5_MINUS SIGMA_3_MINUS SIGMA_3_PLUS SIGMA_3_MINUS SIGMA_1_PLUS SIGMA_2_MINUS SIGMA_6_PLUS </braid> <operator> <spectrum> <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      -1,
+      -5,
+      -3,
+      3,
+      -3,
+      1,
+      -2,
+      6
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        -5,
+        -3,
+        3,
+        -3,
+        1,
+        -2,
+        6
+      ],
+      "reward": 1.1716154546956972,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.875,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.238201497909667,
+      "trace": -3358.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        -5,
+        -3,
+        3,
+        -3,
+        1
+      ],
+      "reward": 1.2259364105236987,
+      "validity_score": 1.5,
+      "length_score": -1.8746914216773307,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 11.498765686709323,
+      "trace": 314.0
+    }
+  },
+  {
+    "attempt": 118,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_0 <braid> SIGMA_1_PLUS SIGMA_2_MINUS SIGMA_4_PLUS SIGMA_3_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> <braid> </braid> </episode> EOS",
+    "word": [
+      1,
+      -2,
+      4,
+      3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -2,
+        4,
+        3
+      ],
+      "reward": 1.872999881510149,
+      "validity_score": 1.5,
+      "length_score": -0.6472311463710965,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.588924585484386,
+      "trace": -27.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -2,
+        4,
+        3
+      ],
+      "reward": 1.872999881510149,
+      "validity_score": 1.5,
+      "length_score": -0.6472311463710965,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.588924585484386,
+      "trace": -27.0
+    }
+  },
+  {
+    "attempt": 124,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_6 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS SIGMA_5_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> CLUSTER_4 <reward> REWARD_BIN_25 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -1,
+      -1,
+      5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        -1,
+        5
+      ],
+      "reward": 1.9481365062332876,
+      "validity_score": 1.5,
+      "length_score": -0.31695789692481924,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 5.267831587699277,
+      "trace": 14.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        -1,
+        5
+      ],
+      "reward": 1.9481365062332876,
+      "validity_score": 1.5,
+      "length_score": -0.31695789692481924,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 5.267831587699277,
+      "trace": 14.0
+    }
+  },
+  {
+    "attempt": 127,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_3 CLUSTER_4 <braid> SIGMA_3_PLUS SIGMA_6_PLUS SIGMA_5_PLUS SIGMA_8_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> SIGMA_7_MINUS </episode> EOS",
+    "word": [
+      3,
+      6,
+      5,
+      -8,
+      -7
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        3,
+        6,
+        5,
+        -8,
+        -7
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.98046593523486,
+      "trace": 4867.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        3,
+        6,
+        5,
+        -8,
+        -7
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.98046593523486,
+      "trace": 4867.0
+    }
+  },
+  {
+    "attempt": 141,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_3 CLUSTER_3 <braid> SIGMA_2_MINUS SIGMA_2_PLUS SIGMA_1_MINUS SIGMA_4_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      -2,
+      2,
+      -1,
+      4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        2,
+        -1,
+        4
+      ],
+      "reward": 1.8009288449651604,
+      "validity_score": 1.5,
+      "length_score": -0.7913732194610736,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.165492877844295,
+      "trace": 36.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        2,
+        -1,
+        4
+      ],
+      "reward": 1.8009288449651604,
+      "validity_score": 1.5,
+      "length_score": -0.7913732194610736,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.165492877844295,
+      "trace": 36.0
+    }
+  },
+  {
+    "attempt": 143,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 CLUSTER_3 <braid> SIGMA_3_MINUS SIGMA_7_PLUS SIGMA_2_MINUS SIGMA_4_MINUS SIGMA_7_MINUS SIGMA_1_PLUS SIGMA_2_MINUS SIGMA_5_PLUS ENERGY_BIN_13 <reward> REWARD_BIN_25 </episode> EOS",
+    "word": [
+      -3,
+      7,
+      -2,
+      -4,
+      -7,
+      1,
+      -2,
+      5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        7,
+        -2,
+        -4,
+        -7,
+        1,
+        -2,
+        5
+      ],
+      "reward": 1.1716154546956972,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.875,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 19.889258987129555,
+      "trace": -20840.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        7,
+        -2,
+        -4,
+        -7,
+        1
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.801240408408866,
+      "trace": 1637.0
+    }
+  },
+  {
+    "attempt": 146,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_6 <braid> SIGMA_7_MINUS SIGMA_6_MINUS SIGMA_8_PLUS SIGMA_1_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_26 </episode> EOS",
+    "word": [
+      -7,
+      -6,
+      8,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -7,
+        -6,
+        8,
+        -1
+      ],
+      "reward": 1.249127750004163,
+      "validity_score": 1.5,
+      "length_score": -1.894975409383068,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 11.579901637532272,
+      "trace": -327.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -7,
+        -6,
+        8,
+        -1
+      ],
+      "reward": 1.249127750004163,
+      "validity_score": 1.5,
+      "length_score": -1.894975409383068,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 11.579901637532272,
+      "trace": -327.0
+    }
+  },
+  {
+    "attempt": 147,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 <braid> <braid> SIGMA_3_MINUS SIGMA_6_MINUS SIGMA_3_PLUS SIGMA_3_PLUS </braid> <operator> <spectrum> SIGMA_5_PLUS <reward> REWARD_BIN_26 </episode> EOS",
+    "word": [
+      -3,
+      -6,
+      3,
+      3,
+      5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        -6,
+        3,
+        3,
+        5
+      ],
+      "reward": 1.1066154546956972,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.164046441094415,
+      "trace": 722.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        -6,
+        3,
+        3,
+        5
+      ],
+      "reward": 1.1066154546956972,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.164046441094415,
+      "trace": 722.0
+    }
+  },
+  {
+    "attempt": 152,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 CLUSTER_5 <braid> SIGMA_6_MINUS SIGMA_1_PLUS EOS",
+    "word": [
+      -6,
+      1
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        -6,
+        1
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        -6,
+        1
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    }
+  },
+  {
+    "attempt": 153,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 CLUSTER_3 <braid> SIGMA_4_MINUS SIGMA_4_PLUS SIGMA_5_MINUS SIGMA_1_PLUS SIGMA_2_MINUS SIGMA_4_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_5 <reward> REWARD_BIN_25 </episode> EOS",
+    "word": [
+      -4,
+      4,
+      -5,
+      1,
+      -2,
+      -4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -4,
+        4,
+        -5,
+        1,
+        -2,
+        -4
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.868792523632736,
+      "trace": 1027.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -4,
+        4,
+        -5,
+        1,
+        -2,
+        -4
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.868792523632736,
+      "trace": 1027.0
+    }
+  },
+  {
+    "attempt": 157,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 CLUSTER_6 <braid> SIGMA_2_PLUS SIGMA_7_PLUS <braid> SIGMA_3_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      2,
+      7,
+      -3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        2,
+        7,
+        -3
+      ],
+      "reward": 1.7289237796239236,
+      "validity_score": 1.5,
+      "length_score": -0.9353833501435471,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.7415334005741885,
+      "trace": -48.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        2,
+        7,
+        -3
+      ],
+      "reward": 1.7289237796239236,
+      "validity_score": 1.5,
+      "length_score": -0.9353833501435471,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.7415334005741885,
+      "trace": -48.0
+    }
+  },
+  {
+    "attempt": 159,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 CLUSTER_0 <braid> SIGMA_3_PLUS SIGMA_1_PLUS SIGMA_5_MINUS SIGMA_7_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      3,
+      1,
+      -5,
+      7
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        3,
+        1,
+        -5,
+        7
+      ],
+      "reward": 1.5801714610419262,
+      "validity_score": 1.5,
+      "length_score": -1.2328879873075418,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.931551949230167,
+      "trace": -87.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        3,
+        1,
+        -5,
+        7
+      ],
+      "reward": 1.5801714610419262,
+      "validity_score": 1.5,
+      "length_score": -1.2328879873075418,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.931551949230167,
+      "trace": -87.0
+    }
+  },
+  {
+    "attempt": 162,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_7 <braid> SIGMA_7_PLUS SIGMA_1_MINUS SIGMA_6_MINUS SIGMA_8_PLUS SIGMA_8_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      7,
+      -1,
+      -6,
+      8,
+      -8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        7,
+        -1,
+        -6,
+        8,
+        -8
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.853204937705078,
+      "trace": -2770.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        7,
+        -1,
+        -6,
+        8,
+        -8
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.853204937705078,
+      "trace": -2770.0
+    }
+  },
+  {
+    "attempt": 166,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_2 CLUSTER_6 <braid> SIGMA_8_MINUS SIGMA_3_PLUS SIGMA_8_MINUS </episode> EOS",
+    "word": [
+      -8,
+      3,
+      -8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        3,
+        -8
+      ],
+      "reward": 1.2992022422967482,
+      "validity_score": 1.5,
+      "length_score": -1.661493091464565,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6666666666666666,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 10.64597236585826,
+      "trace": 205.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        3,
+        -8
+      ],
+      "reward": 1.2992022422967482,
+      "validity_score": 1.5,
+      "length_score": -1.661493091464565,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6666666666666666,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 10.64597236585826,
+      "trace": 205.0
+    }
+  },
+  {
+    "attempt": 167,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_4 <braid> SIGMA_7_PLUS SIGMA_1_MINUS <spectrum> SIGMA_8_MINUS SIGMA_6_PLUS SIGMA_3_PLUS SIGMA_8_MINUS SIGMA_6_PLUS SIGMA_7_MINUS <state> </episode> EOS",
+    "word": [
+      7,
+      -1,
+      -8,
+      6,
+      3,
+      -8,
+      6,
+      -7
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        7,
+        -1,
+        -8,
+        6,
+        3,
+        -8,
+        6,
+        -7
+      ],
+      "reward": 1.1466154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.75,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 25.64159203124217,
+      "trace": 369829.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        7,
+        -1,
+        -8,
+        6,
+        3,
+        -8
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 18.07577984171798,
+      "trace": -8416.0
+    }
+  },
+  {
+    "attempt": 170,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_4 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_6_MINUS SIGMA_3_PLUS SIGMA_1_PLUS SIGMA_7_PLUS SIGMA_2_PLUS SIGMA_6_PLUS SIGMA_5_PLUS REWARD_BIN_0 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -6,
+      3,
+      1,
+      7,
+      2,
+      6,
+      5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -6,
+        3,
+        1,
+        7,
+        2,
+        6,
+        5
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 20.446208484398024,
+      "trace": 27532.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -6,
+        3,
+        1,
+        7
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.72605026175121,
+      "trace": 580.0
+    }
+  },
+  {
+    "attempt": 171,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 CLUSTER_0 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_3_PLUS SIGMA_3_MINUS SIGMA_8_PLUS SIGMA_5_MINUS SIGMA_3_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_2 <reward> REWARD_BIN_29 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -1,
+      3,
+      -3,
+      8,
+      -5,
+      3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        3,
+        -3,
+        8,
+        -5,
+        3
+      ],
+      "reward": 1.1716154546956972,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.875,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 18.37823345018189,
+      "trace": 9790.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        3,
+        -3,
+        8
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.872295600295663,
+      "trace": -624.0
+    }
+  },
+  {
+    "attempt": 177,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 REWARD_BIN_31 <braid> <spectrum> SIGMA_2_PLUS SIGMA_6_MINUS SIGMA_8_PLUS SIGMA_2_MINUS SIGMA_6_PLUS SIGMA_3_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_4 <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      2,
+      -6,
+      8,
+      -2,
+      6,
+      3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        2,
+        -6,
+        8,
+        -2,
+        6,
+        3
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.303819579781248,
+      "trace": 3470.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        2,
+        -6,
+        8,
+        -2,
+        6,
+        3
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.303819579781248,
+      "trace": 3470.0
+    }
+  },
+  {
+    "attempt": 179,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 CLUSTER_1 <braid> SIGMA_1_MINUS SIGMA_8_MINUS SIGMA_3_MINUS SIGMA_5_MINUS SIGMA_6_PLUS SIGMA_1_PLUS SIGMA_7_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_4 <reward> REWARD_BIN_30 </episode> EOS",
+    "word": [
+      -1,
+      -8,
+      -3,
+      -5,
+      6,
+      1,
+      7
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        -8,
+        -3,
+        -5,
+        6,
+        1,
+        7
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.24830103103025,
+      "trace": 3375.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        -8,
+        -3,
+        -5,
+        6,
+        1
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.095032930425543,
+      "trace": 1150.0
+    }
+  },
+  {
+    "attempt": 180,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_1 <braid> SIGMA_6_PLUS SIGMA_8_MINUS SIGMA_2_MINUS SIGMA_7_PLUS SIGMA_2_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_26 </episode> EOS",
+    "word": [
+      6,
+      -8,
+      -2,
+      7,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        6,
+        -8,
+        -2,
+        7,
+        -2
+      ],
+      "reward": 1.1566154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.744235266561326,
+      "trace": -1591.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        6,
+        -8,
+        -2,
+        7,
+        -2
+      ],
+      "reward": 1.1566154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.744235266561326,
+      "trace": -1591.0
+    }
+  },
+  {
+    "attempt": 181,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_7 <braid> SIGMA_1_MINUS SIGMA_4_PLUS SIGMA_3_MINUS SIGMA_4_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      -1,
+      4,
+      -3,
+      4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        4,
+        -3,
+        4
+      ],
+      "reward": 1.544972831426453,
+      "validity_score": 1.5,
+      "length_score": -1.203285246538488,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.75,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.813140986153952,
+      "trace": 82.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        4,
+        -3,
+        4
+      ],
+      "reward": 1.544972831426453,
+      "validity_score": 1.5,
+      "length_score": -1.203285246538488,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.75,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.813140986153952,
+      "trace": 82.0
+    }
+  },
+  {
+    "attempt": 184,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_3 CLUSTER_0 <braid> SIGMA_1_MINUS SIGMA_1_MINUS SIGMA_4_MINUS SIGMA_3_PLUS SIGMA_5_MINUS <operator> <spectrum> SPECTRAL_ERROR_BIN_2 <reward> </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_4 SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      -1,
+      -1,
+      -4,
+      3,
+      -5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        -1,
+        -4,
+        3,
+        -5
+      ],
+      "reward": 1.7924619659956837,
+      "validity_score": 1.5,
+      "length_score": -0.628306977400027,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.513227909600108,
+      "trace": -26.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        -1,
+        -4,
+        3,
+        -5
+      ],
+      "reward": 1.7924619659956837,
+      "validity_score": 1.5,
+      "length_score": -0.628306977400027,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.513227909600108,
+      "trace": -26.0
+    }
+  },
+  {
+    "attempt": 185,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 CLUSTER_0 <braid> SIGMA_6_PLUS SIGMA_1_MINUS SIGMA_5_MINUS SIGMA_7_PLUS SIGMA_6_MINUS SIGMA_7_PLUS SIGMA_4_MINUS SIGMA_5_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      6,
+      -1,
+      -5,
+      7,
+      -6,
+      7,
+      -4,
+      5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        6,
+        -1,
+        -5,
+        7,
+        -6,
+        7,
+        -4,
+        5
+      ],
+      "reward": 1.1716154546956972,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.875,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 24.36212496499945,
+      "trace": 195060.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        6,
+        -1,
+        -5,
+        7,
+        -6,
+        7
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 18.22214471624271,
+      "trace": -9055.0
+    }
+  },
+  {
+    "attempt": 186,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 SIGMA_2_MINUS <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS CLUSTER_1 EOS",
+    "word": [
+      -2,
+      4,
+      -2,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        -2,
+        4,
+        -2,
+        -1
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "non_hyperbolic"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        -2,
+        4,
+        -2,
+        -1
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "non_hyperbolic"
+    }
+  },
+  {
+    "attempt": 189,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 SIGMA_2_MINUS <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      -2,
+      4,
+      -2,
+      -1,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        4,
+        -2,
+        -1,
+        -1
+      ],
+      "reward": 1.9081365062332876,
+      "validity_score": 1.5,
+      "length_score": -0.31695789692481924,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.35,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 5.267831587699277,
+      "trace": -14.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        4,
+        -2,
+        -1,
+        1
+      ],
+      "reward": 1.7609288449651603,
+      "validity_score": 1.5,
+      "length_score": -0.7913732194610736,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.165492877844295,
+      "trace": -36.0
+    }
+  },
+  {
+    "attempt": 193,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_3 SIGMA_4_PLUS <braid> SIGMA_1_MINUS SIGMA_1_MINUS SIGMA_3_MINUS SIGMA_8_PLUS SIGMA_8_MINUS SIGMA_5_MINUS SIGMA_1_PLUS SIGMA_2_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      4,
+      -1,
+      -1,
+      -3,
+      8,
+      -8,
+      -5,
+      1,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -1,
+        -1,
+        -3,
+        8,
+        -8,
+        -5,
+        1,
+        -2
+      ],
+      "reward": 1.149393232473475,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.7638888888888888,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.575593412301153,
+      "trace": -2411.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -1,
+        -1,
+        -3,
+        8,
+        -8
+      ],
+      "reward": 1.4064133029610286,
+      "validity_score": 1.5,
+      "length_score": -1.4337376368026709,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6333333333333333,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.734950547210683,
+      "trace": -130.0
+    }
+  },
+  {
+    "attempt": 196,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 </braid> <operator> <spectrum> SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS </braid> <operator> SIGMA_3_MINUS SIGMA_8_PLUS <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      -2,
+      -1,
+      -1,
+      -3,
+      8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        -1,
+        -1,
+        -3,
+        8
+      ],
+      "reward": 1.725241867676154,
+      "validity_score": 1.5,
+      "length_score": -0.7627471740390865,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.050988696156346,
+      "trace": -34.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        -1,
+        -1,
+        -3,
+        8
+      ],
+      "reward": 1.725241867676154,
+      "validity_score": 1.5,
+      "length_score": -0.7627471740390865,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.050988696156346,
+      "trace": -34.0
+    }
+  },
+  {
+    "attempt": 197,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 CLUSTER_4 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS CLUSTER_1 SIGMA_5_MINUS SIGMA_1_PLUS <spectrum> SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -1,
+      -5,
+      1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        -5,
+        1
+      ],
+      "reward": 1.9747977171062912,
+      "validity_score": 1.5,
+      "length_score": -0.44363547517881186,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 5.774541900715247,
+      "trace": -18.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        -5,
+        1
+      ],
+      "reward": 1.9747977171062912,
+      "validity_score": 1.5,
+      "length_score": -0.44363547517881186,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 5.774541900715247,
+      "trace": -18.0
+    }
+  },
+  {
+    "attempt": 202,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_6 <braid> SIGMA_6_MINUS SIGMA_7_PLUS SIGMA_8_MINUS SIGMA_1_PLUS SIGMA_8_MINUS SIGMA_1_PLUS SIGMA_3_PLUS SIGMA_4_PLUS SIGMA_2_MINUS <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_25 </episode> EOS",
+    "word": [
+      -6,
+      7,
+      -8,
+      1,
+      -8,
+      1,
+      3,
+      4,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        7,
+        -8,
+        1,
+        -8,
+        1,
+        3,
+        4,
+        -2
+      ],
+      "reward": 1.1521710102512528,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.7777777777777778,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 22.038634861105855,
+      "trace": 61042.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        7,
+        -8,
+        1,
+        -8,
+        1
+      ],
+      "reward": 1.1299487880290306,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6666666666666666,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.804013462488687,
+      "trace": -4456.0
+    }
+  },
+  {
+    "attempt": 207,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 CLUSTER_4 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_4_MINUS SIGMA_7_PLUS SIGMA_7_MINUS SIGMA_8_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -4,
+      7,
+      -7,
+      -8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -4,
+        7,
+        -7,
+        -8
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 19.011237031018805,
+      "trace": 13435.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -4,
+        7,
+        -7,
+        -8
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 19.011237031018805,
+      "trace": 13435.0
+    }
+  },
+  {
+    "attempt": 217,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 CLUSTER_4 <braid> SIGMA_1_PLUS SIGMA_2_MINUS <spectrum> SPECTRAL_ERROR_BIN_6 REWARD_BIN_31 </episode> EOS",
+    "word": [
+      1,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        1,
+        -2
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        1,
+        -2
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    }
+  },
+  {
+    "attempt": 219,
+    "decoded_tokens": "BOS <episode> <state> SIGMA_5_PLUS CLUSTER_7 <braid> SIGMA_1_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS SIGMA_4_PLUS SIGMA_3_PLUS SIGMA_6_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> CLUSTER_7 REWARD_BIN_11 SPECTRAL_ERROR_BIN_2 <spectrum> </episode> EOS",
+    "word": [
+      5,
+      1,
+      -2,
+      -1,
+      -1,
+      4,
+      3,
+      6
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        5,
+        1,
+        -2,
+        -1,
+        -1,
+        4,
+        3,
+        6
+      ],
+      "reward": 1.518122478456394,
+      "validity_score": 1.5,
+      "length_score": -1.2498430953357493,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.7321428571428572,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.999372381342997,
+      "trace": 90.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        5,
+        1,
+        -2,
+        -1,
+        -1,
+        4
+      ],
+      "reward": 2.063968914872143,
+      "validity_score": 1.5,
+      "length_score": -0.11862641298044174,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6333333333333333,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 3.525494348078233,
+      "trace": 6.0
+    }
+  },
+  {
+    "attempt": 220,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_6 <braid> SIGMA_3_MINUS SIGMA_6_PLUS SIGMA_1_MINUS SIGMA_4_MINUS SIGMA_7_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_29 </episode> EOS",
+    "word": [
+      -3,
+      6,
+      -1,
+      -4,
+      7
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        6,
+        -1,
+        -4,
+        7
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.534393895779289,
+      "trace": -527.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        6,
+        -1,
+        -4,
+        7
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.534393895779289,
+      "trace": -527.0
+    }
+  },
+  {
+    "attempt": 221,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 SIGMA_4_PLUS <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      4,
+      4,
+      -2,
+      -1,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        4,
+        -2,
+        -1,
+        -1
+      ],
+      "reward": 1.9435075373054003,
+      "validity_score": 1.5,
+      "length_score": -0.14621583478059397,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.09999999999999998,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 4.584863339122376,
+      "trace": 10.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        4,
+        -2,
+        -1,
+        1
+      ],
+      "reward": 1.6389237796239238,
+      "validity_score": 1.5,
+      "length_score": -0.9353833501435471,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.7415334005741885,
+      "trace": 48.0
+    }
+  },
+  {
+    "attempt": 224,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_4 CLUSTER_6 <braid> SIGMA_2_MINUS SIGMA_4_PLUS SIGMA_5_MINUS SIGMA_4_PLUS SIGMA_2_MINUS </braid> <operator> <spectrum> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      -2,
+      4,
+      -5,
+      4,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        4,
+        -5,
+        4,
+        -2
+      ],
+      "reward": 1.1500004467621547,
+      "validity_score": 1.5,
+      "length_score": -1.9332300158670854,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 11.732920063468342,
+      "trace": -353.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        4,
+        -5,
+        4,
+        -2
+      ],
+      "reward": 1.1500004467621547,
+      "validity_score": 1.5,
+      "length_score": -1.9332300158670854,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 11.732920063468342,
+      "trace": -353.0
+    }
+  },
+  {
+    "attempt": 227,
+    "decoded_tokens": "BOS <episode> <state> SIGMA_5_PLUS CLUSTER_4 <braid> SIGMA_6_MINUS SIGMA_5_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> SIGMA_7_PLUS SIGMA_7_MINUS </braid> <operator> SIGMA_5_MINUS <reward> REWARD_BIN_30 </episode> EOS",
+    "word": [
+      5,
+      -6,
+      5,
+      7,
+      -7,
+      -5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        5,
+        -6,
+        5,
+        7,
+        -7,
+        -5
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 21.15968912628451,
+      "trace": -39334.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        5,
+        -6,
+        5,
+        7,
+        -7,
+        -5
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 21.15968912628451,
+      "trace": -39334.0
+    }
+  },
+  {
+    "attempt": 238,
+    "decoded_tokens": "BOS <episode> <state> SIGMA_5_PLUS CLUSTER_4 <braid> SIGMA_1_PLUS </episode> EOS",
+    "word": [
+      5,
+      1
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        5,
+        1
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        5,
+        1
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    }
+  },
+  {
+    "attempt": 241,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_4 <braid> SIGMA_1_PLUS SIGMA_4_MINUS SIGMA_5_MINUS SIGMA_6_MINUS SIGMA_3_PLUS SIGMA_5_MINUS SIGMA_6_PLUS </braid> <operator> <spectrum> CLUSTER_30 SPECTRAL_ERROR_BIN_2 <reward> SIGMA_3_MINUS ENERGY_BIN_4 ENERGY_BIN_3 REWARD_BIN_6 SIGMA_4_PLUS </episode> EOS",
+    "word": [
+      1,
+      -4,
+      -5,
+      -6,
+      3,
+      -5,
+      6,
+      -3,
+      4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -4,
+        -5,
+        -6,
+        3,
+        -5,
+        6,
+        -3,
+        4
+      ],
+      "reward": 1.174393232473475,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8888888888888888,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 23.986365193782824,
+      "trace": -161649.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -4,
+        -5,
+        -6,
+        3,
+        -5
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.796821909846619,
+      "trace": 2693.0
+    }
+  },
+  {
+    "attempt": 243,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 CLUSTER_7 <braid> SIGMA_1_MINUS SIGMA_7_PLUS SIGMA_3_MINUS ENERGY_BIN_31 SIGMA_5_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> SPECTRAL_ERROR_BIN_16 <operator> <spectrum> SPECTRAL_ERROR_BIN_3 <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      -1,
+      7,
+      -3,
+      5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        7,
+        -3,
+        5
+      ],
+      "reward": 1.4357695819428964,
+      "validity_score": 1.5,
+      "length_score": -1.5216917455056018,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 10.086766982022407,
+      "trace": 155.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        7,
+        -3,
+        5
+      ],
+      "reward": 1.4357695819428964,
+      "validity_score": 1.5,
+      "length_score": -1.5216917455056018,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 10.086766982022407,
+      "trace": 155.0
+    }
+  },
+  {
+    "attempt": 244,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_5 <braid> SIGMA_7_PLUS SIGMA_7_PLUS SIGMA_6_MINUS SIGMA_5_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      7,
+      7,
+      -6,
+      5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        7,
+        7,
+        -6,
+        5
+      ],
+      "reward": 1.0799487880290306,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.4166666666666667,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.59959382044046,
+      "trace": -1480.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        7,
+        7,
+        -6,
+        5
+      ],
+      "reward": 1.0799487880290306,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.4166666666666667,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.59959382044046,
+      "trace": -1480.0
+    }
+  },
+  {
+    "attempt": 248,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_3 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS SIGMA_1_PLUS SIGMA_8_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_4 <reward> REWARD_BIN_29 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -1,
+      -1,
+      1,
+      -8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        -1,
+        1,
+        -8
+      ],
+      "reward": 1.9525215955935875,
+      "validity_score": 1.5,
+      "length_score": -0.34152105153755297,
+      "spectral_score": -0.003384545304302744,
+      "stability_score": 1.0,
+      "diversity_score": 0.6333333333333333,
+      "spectral_error": 0.003390279344976354,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 2.633915793849788,
+      "trace": 4.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        -1,
+        1,
+        -8
+      ],
+      "reward": 1.9525215955935875,
+      "validity_score": 1.5,
+      "length_score": -0.34152105153755297,
+      "spectral_score": -0.003384545304302744,
+      "stability_score": 1.0,
+      "diversity_score": 0.6333333333333333,
+      "spectral_error": 0.003390279344976354,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 2.633915793849788,
+      "trace": 4.0
+    }
+  },
+  {
+    "attempt": 250,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_2 CLUSTER_7 <braid> SIGMA_1_PLUS SIGMA_5_MINUS REWARD_BIN_0 SIGMA_3_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      1,
+      -5,
+      -3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -5,
+        -3
+      ],
+      "reward": 1.9243729784845458,
+      "validity_score": 1.5,
+      "length_score": -0.5444849524223025,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.17793980968921,
+      "trace": 22.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -5,
+        -3
+      ],
+      "reward": 1.9243729784845458,
+      "validity_score": 1.5,
+      "length_score": -0.5444849524223025,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.17793980968921,
+      "trace": 22.0
+    }
+  },
+  {
+    "attempt": 254,
+    "decoded_tokens": "BOS <episode> <state> CLUSTER_4 CLUSTER_0 <braid> SIGMA_8_MINUS SIGMA_7_PLUS SIGMA_8_MINUS SIGMA_5_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      -8,
+      7,
+      -8,
+      5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        7,
+        -8,
+        5
+      ],
+      "reward": 1.1466154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.75,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.594582209505424,
+      "trace": 2434.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -8,
+        7,
+        -8,
+        5
+      ],
+      "reward": 1.1466154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.75,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.594582209505424,
+      "trace": 2434.0
+    }
+  },
+  {
+    "attempt": 258,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_2 CLUSTER_6 <braid> SIGMA_3_PLUS SIGMA_8_PLUS EOS",
+    "word": [
+      3,
+      8
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        3,
+        8
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        3,
+        8
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    }
+  },
+  {
+    "attempt": 260,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_1 SIGMA_2_MINUS <braid> SIGMA_3_PLUS SIGMA_8_MINUS SIGMA_6_PLUS SIGMA_4_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_26 </episode> EOS",
+    "word": [
+      -2,
+      3,
+      -8,
+      6,
+      -4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        3,
+        -8,
+        6,
+        -4
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.37833433764423,
+      "trace": -1325.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        3,
+        -8,
+        6,
+        -4
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.37833433764423,
+      "trace": -1325.0
+    }
+  },
+  {
+    "attempt": 261,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 CLUSTER_6 <braid> SIGMA_7_PLUS SIGMA_6_MINUS SIGMA_1_PLUS SIGMA_1_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      7,
+      -6,
+      1,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        7,
+        -6,
+        1,
+        -1
+      ],
+      "reward": 1.5453479119495077,
+      "validity_score": 1.5,
+      "length_score": -1.3025350854923787,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.210140341969515,
+      "trace": 100.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        7,
+        -6,
+        1,
+        -1
+      ],
+      "reward": 1.5453479119495077,
+      "validity_score": 1.5,
+      "length_score": -1.3025350854923787,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.210140341969515,
+      "trace": 100.0
+    }
+  },
+  {
+    "attempt": 262,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_4 <braid> SIGMA_6_MINUS SIGMA_1_PLUS SIGMA_3_MINUS SIGMA_7_PLUS SIGMA_2_MINUS SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_6_MINUS <operator> <spectrum> SIGMA_10_MINUS ENERGY_BIN_21 <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      -6,
+      1,
+      -3,
+      7,
+      -2,
+      4,
+      -2,
+      -6,
+      -10
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        1,
+        -3,
+        7,
+        -2,
+        4,
+        -2,
+        -6,
+        -10
+      ],
+      "reward": 1.1521710102512528,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.7777777777777778,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 24.634136508332638,
+      "trace": 223478.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        1,
+        -3,
+        7,
+        -2,
+        4
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.134690817317804,
+      "trace": -1934.0
+    }
+  },
+  {
+    "attempt": 264,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_3 <braid> SIGMA_6_MINUS SIGMA_2_MINUS SIGMA_7_MINUS SIGMA_6_MINUS SIGMA_5_MINUS SIGMA_1_PLUS SIGMA_1_PLUS </braid> <operator> <spectrum> SIGMA_4_PLUS SIGMA_2_MINUS </episode> EOS",
+    "word": [
+      -6,
+      -2,
+      -7,
+      -6,
+      -5,
+      1,
+      1,
+      4,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        -2,
+        -7,
+        -6,
+        -5,
+        1,
+        1,
+        4,
+        -2
+      ],
+      "reward": 1.1049487880290305,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.5416666666666666,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.742180437050816,
+      "trace": -964.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        -2,
+        -7,
+        -6,
+        -5,
+        1
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.86472405100713,
+      "trace": -2786.0
+    }
+  },
+  {
+    "attempt": 265,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_6 <braid> SIGMA_2_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_26 </braid> <operator> SIGMA_2_PLUS CLUSTER_6 </episode> EOS",
+    "word": [
+      -2,
+      2
+    ],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [
+        -2,
+        2
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [
+        -2,
+        2
+      ],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    }
+  },
+  {
+    "attempt": 271,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 CLUSTER_4 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_PLUS SIGMA_4_MINUS REWARD_BIN_0 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -1,
+      4,
+      -2,
+      1,
+      -4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        4,
+        -2,
+        1,
+        -4
+      ],
+      "reward": 1.1394725975528401,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.7142857142857143,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.21848528891236,
+      "trace": 450.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        4,
+        -2,
+        1
+      ],
+      "reward": 1.5376268922264762,
+      "validity_score": 1.5,
+      "length_score": -1.184643791605109,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6666666666666666,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.738575166420436,
+      "trace": -79.0
+    }
+  },
+  {
+    "attempt": 276,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 EOS",
+    "word": [],
+    "topological_lm_eval": {
+      "valid": false,
+      "word": [],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    },
+    "refined_eval": {
+      "valid": false,
+      "word": [],
+      "reward": -10.0,
+      "validity_score": -1.0,
+      "length_score": -2.0,
+      "spectral_score": -10.0,
+      "stability_score": -10.0,
+      "diversity_score": 0.0,
+      "spectral_error": Infinity,
+      "self_adjoint_error": Infinity,
+      "primitive": false,
+      "hyperbolic": false,
+      "reason": "too_short"
+    }
+  },
+  {
+    "attempt": 278,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_4 <braid> SIGMA_2_MINUS SIGMA_1_PLUS SIGMA_8_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      -2,
+      1,
+      -8
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        1,
+        -8
+      ],
+      "reward": 1.8922974619063821,
+      "validity_score": 1.5,
+      "length_score": -0.6086359855786296,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.4345439423145185,
+      "trace": 25.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        1,
+        -8
+      ],
+      "reward": 1.8922974619063821,
+      "validity_score": 1.5,
+      "length_score": -0.6086359855786296,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.4345439423145185,
+      "trace": 25.0
+    }
+  },
+  {
+    "attempt": 279,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_2 <braid> SIGMA_6_MINUS SIGMA_3_MINUS SIGMA_5_PLUS SIGMA_1_MINUS </braid> <operator> <spectrum> SIGMA_4_MINUS SIGMA_5_PLUS SIGMA_7_MINUS <operator> <spectrum> SIGMA_10_MINUS </episode> EOS",
+    "word": [
+      -6,
+      -3,
+      5,
+      -1,
+      -4,
+      5,
+      -7,
+      -10
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        -3,
+        5,
+        -1,
+        -4,
+        5,
+        -7,
+        -10
+      ],
+      "reward": 1.1716154546956972,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.875,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 23.491468315794826,
+      "trace": 126214.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        -3,
+        5,
+        -1,
+        -4,
+        5
+      ],
+      "reward": 1.1632821213623639,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 15.07059283478347,
+      "trace": 1873.0
+    }
+  },
+  {
+    "attempt": 282,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_2 CLUSTER_7 <braid> </braid> <operator> <spectrum> SIGMA_1_PLUS SIGMA_8_PLUS SIGMA_4_PLUS SIGMA_2_MINUS <spectrum> SPECTRAL_ERROR_BIN_3 <reward> REWARD_BIN_28 </episode> EOS",
+    "word": [
+      1,
+      8,
+      4,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        8,
+        4,
+        -2
+      ],
+      "reward": 1.5661978525313731,
+      "validity_score": 1.5,
+      "length_score": -1.2608352043286484,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.043340817314593,
+      "trace": -92.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        8,
+        4,
+        -2
+      ],
+      "reward": 1.5661978525313731,
+      "validity_score": 1.5,
+      "length_score": -1.2608352043286484,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.043340817314593,
+      "trace": -92.0
+    }
+  },
+  {
+    "attempt": 287,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_0 <braid> SIGMA_1_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_6_MINUS SIGMA_7_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_26 </episode> EOS",
+    "word": [
+      1,
+      -2,
+      -1,
+      -6,
+      7
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -2,
+        -1,
+        -6,
+        7
+      ],
+      "reward": 1.6689642019927586,
+      "validity_score": 1.5,
+      "length_score": -1.055302505405877,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.221210021623508,
+      "trace": -61.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        -2,
+        -1,
+        -6,
+        7
+      ],
+      "reward": 1.6689642019927586,
+      "validity_score": 1.5,
+      "length_score": -1.055302505405877,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.221210021623508,
+      "trace": -61.0
+    }
+  },
+  {
+    "attempt": 289,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_0 <braid> SIGMA_3_MINUS SIGMA_7_PLUS SIGMA_2_MINUS SIGMA_3_PLUS SIGMA_2_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      -3,
+      7,
+      -2,
+      3,
+      2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        7,
+        -2,
+        3,
+        2
+      ],
+      "reward": 1.246088142716537,
+      "validity_score": 1.5,
+      "length_score": -1.9010546239583204,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 11.604218495833281,
+      "trace": 331.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -3,
+        7,
+        -2,
+        3,
+        2
+      ],
+      "reward": 1.246088142716537,
+      "validity_score": 1.5,
+      "length_score": -1.9010546239583204,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 11.604218495833281,
+      "trace": 331.0
+    }
+  },
+  {
+    "attempt": 290,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_3 <braid> SIGMA_3_PLUS SIGMA_5_MINUS SIGMA_8_MINUS SIGMA_6_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_27 </episode> EOS",
+    "word": [
+      3,
+      -5,
+      -8,
+      6
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        3,
+        -5,
+        -8,
+        6
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.177849170968766,
+      "trace": 727.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        3,
+        -5,
+        -8,
+        6
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.177849170968766,
+      "trace": 727.0
+    }
+  },
+  {
+    "attempt": 292,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_5 <braid> SIGMA_6_PLUS SIGMA_3_MINUS SIGMA_3_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_6 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      6,
+      -3,
+      -3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        6,
+        -3,
+        -3
+      ],
+      "reward": 1.5327885544054225,
+      "validity_score": 1.5,
+      "length_score": -0.9943204672472161,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.16666666666666663,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 7.9772818689888645,
+      "trace": 54.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        6,
+        -3,
+        3
+      ],
+      "reward": 1.6730987875376757,
+      "validity_score": 1.5,
+      "length_score": -1.0470333343160427,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.188133337264171,
+      "trace": -60.0
+    }
+  },
+  {
+    "attempt": 294,
+    "decoded_tokens": "BOS <episode> <state> SIGMA_5_PLUS CLUSTER_0 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      5,
+      4,
+      -2,
+      -1,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        5,
+        4,
+        -2,
+        -1,
+        -1
+      ],
+      "reward": 1.9481365062332876,
+      "validity_score": 1.5,
+      "length_score": -0.31695789692481924,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.55,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 5.267831587699277,
+      "trace": 14.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        5,
+        4,
+        -2,
+        -1,
+        1
+      ],
+      "reward": 1.664896920247917,
+      "validity_score": 1.5,
+      "length_score": -1.0634370688955608,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.253748275582243,
+      "trace": 62.0
+    }
+  },
+  {
+    "attempt": 295,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 <braid> <braid> SIGMA_6_PLUS SIGMA_8_MINUS SIGMA_8_PLUS SIGMA_3_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      6,
+      -8,
+      8,
+      -3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        6,
+        -8,
+        8,
+        -3
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.352507895033272,
+      "trace": 1308.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        6,
+        -8,
+        8,
+        -3
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 14.352507895033272,
+      "trace": 1308.0
+    }
+  },
+  {
+    "attempt": 304,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_2 SIGMA_4_PLUS <braid> SIGMA_1_MINUS SIGMA_7_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_PLUS SIGMA_4_MINUS </braid> <operator> <spectrum> </braid> <operator> SPECTRAL_ERROR_BIN_2 <reward> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      4,
+      -1,
+      7,
+      -2,
+      -1,
+      1,
+      -4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -1,
+        7,
+        -2,
+        -1,
+        1,
+        -4
+      ],
+      "reward": 1.1680440261242686,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8571428571428571,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 12.719141750799515,
+      "trace": 578.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -1,
+        7,
+        -2,
+        -1,
+        1
+      ],
+      "reward": 1.470628921791209,
+      "validity_score": 1.5,
+      "length_score": -1.3853063991423102,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.8333333333333334,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 9.541225596569241,
+      "trace": -118.0
+    }
+  },
+  {
+    "attempt": 306,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 CLUSTER_7 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_4_PLUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      4,
+      -2,
+      -1,
+      4
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        4
+      ],
+      "reward": 1.8138838165353839,
+      "validity_score": 1.5,
+      "length_score": -0.6654632763206265,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.75,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.661853105282506,
+      "trace": 28.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1,
+        4
+      ],
+      "reward": 1.8138838165353839,
+      "validity_score": 1.5,
+      "length_score": -0.6654632763206265,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.75,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 6.661853105282506,
+      "trace": 28.0
+    }
+  },
+  {
+    "attempt": 308,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_6 CLUSTER_7 <braid> SIGMA_1_MINUS SIGMA_7_MINUS SIGMA_4_MINUS SIGMA_2_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> REWARD_BIN_0 </episode> EOS",
+    "word": [
+      -1,
+      -7,
+      -4,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        -7,
+        -4,
+        -2
+      ],
+      "reward": 2.0568707104385426,
+      "validity_score": 1.5,
+      "length_score": -0.2794894885143093,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 5.117957954057237,
+      "trace": 13.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -1,
+        -7,
+        -4,
+        -2
+      ],
+      "reward": 2.0568707104385426,
+      "validity_score": 1.5,
+      "length_score": -0.2794894885143093,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 5.117957954057237,
+      "trace": 13.0
+    }
+  },
+  {
+    "attempt": 311,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 CLUSTER_2 <braid> <spectrum> SIGMA_2_MINUS SIGMA_1_MINUS SIGMA_1_PLUS SIGMA_7_MINUS SIGMA_2_PLUS SIGMA_4_MINUS SIGMA_3_PLUS REWARD_BIN_31 </episode> EOS",
+    "word": [
+      -2,
+      -1,
+      1,
+      -7,
+      2,
+      -4,
+      3
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        -1,
+        1,
+        -7,
+        2,
+        -4,
+        3
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 13.418605706089973,
+      "trace": 820.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -2,
+        -1,
+        1,
+        -7,
+        2,
+        -4
+      ],
+      "reward": 1.401177457914131,
+      "validity_score": 1.5,
+      "length_score": -1.5908759935631327,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 10.36350397425253,
+      "trace": 178.0
+    }
+  },
+  {
+    "attempt": 313,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_31 CLUSTER_1 <braid> SIGMA_4_PLUS SIGMA_2_MINUS SIGMA_1_MINUS EOS",
+    "word": [
+      4,
+      -2,
+      -1
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1
+      ],
+      "reward": 2.177827279755306,
+      "validity_score": 1.5,
+      "length_score": -0.03757634988078218,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 3.8496946004768713,
+      "trace": 7.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        4,
+        -2,
+        -1
+      ],
+      "reward": 2.177827279755306,
+      "validity_score": 1.5,
+      "length_score": -0.03757634988078218,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 3.8496946004768713,
+      "trace": 7.0
+    }
+  },
+  {
+    "attempt": 314,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_3 CLUSTER_4 <braid> SIGMA_6_MINUS SIGMA_7_PLUS SIGMA_2_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_26 </episode> EOS",
+    "word": [
+      -6,
+      7,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        7,
+        -2
+      ],
+      "reward": 1.5859872498352752,
+      "validity_score": 1.5,
+      "length_score": -1.2212564097208443,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.885025638883377,
+      "trace": 85.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        -6,
+        7,
+        -2
+      ],
+      "reward": 1.5859872498352752,
+      "validity_score": 1.5,
+      "length_score": -1.2212564097208443,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 8.885025638883377,
+      "trace": 85.0
+    }
+  },
+  {
+    "attempt": 316,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_0 CLUSTER_1 <braid> SIGMA_1_PLUS SIGMA_7_PLUS SIGMA_6_MINUS SIGMA_8_PLUS SIGMA_2_PLUS SIGMA_5_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_31 <reward> <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      1,
+      7,
+      -6,
+      8,
+      2,
+      -5
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        1,
+        7,
+        -6,
+        8,
+        2,
+        -5
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.48340618066342,
+      "trace": 3796.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        1,
+        7,
+        -6,
+        8,
+        2,
+        -5
+      ],
+      "reward": 1.1966154546956973,
+      "validity_score": 1.5,
+      "length_score": -2.0,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 1.0,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 16.48340618066342,
+      "trace": 3796.0
+    }
+  },
+  {
+    "attempt": 323,
+    "decoded_tokens": "BOS <episode> <state> ENERGY_BIN_5 CLUSTER_7 <braid> SIGMA_3_PLUS SIGMA_2_MINUS SIGMA_3_PLUS SIGMA_4_PLUS SIGMA_2_MINUS </braid> <operator> <spectrum> SPECTRAL_ERROR_BIN_0 <reward> REWARD_BIN_31 </episode> EOS",
+    "word": [
+      3,
+      -2,
+      3,
+      4,
+      -2
+    ],
+    "topological_lm_eval": {
+      "valid": true,
+      "word": [
+        3,
+        -2,
+        3,
+        4,
+        -2
+      ],
+      "reward": 1.2592838567679148,
+      "validity_score": 1.5,
+      "length_score": -1.714663195855565,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 10.85865278342226,
+      "trace": 228.0
+    },
+    "refined_eval": {
+      "valid": true,
+      "word": [
+        3,
+        -2,
+        3,
+        4,
+        -2
+      ],
+      "reward": 1.2592838567679148,
+      "validity_score": 1.5,
+      "length_score": -1.714663195855565,
+      "spectral_score": -0.003384545304302781,
+      "stability_score": 1.0,
+      "diversity_score": 0.6,
+      "spectral_error": 0.0033902793449763907,
+      "self_adjoint_error": 0.0,
+      "primitive": true,
+      "hyperbolic": true,
+      "reason": "ok",
+      "length": 10.85865278342226,
+      "trace": 228.0
+    }
+  }
+]

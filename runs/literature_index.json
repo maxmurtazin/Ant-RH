@@ -1,0 +1,252 @@
+{
+  "literature_dir": "/Users/machome/Documents/GitHub/Ant-RH/Docs/Literature",
+  "file_count": 8,
+  "files": [
+    {
+      "path": "/Users/machome/Documents/GitHub/Ant-RH/Docs/Literature/Artin Billiard, Quantum Chaos, and the Hilbert\u2013Po\u0301lya Program  A Research-Level Literature Review with DTES, RL, and ACO Perspectives.md",
+      "title": "Artin Billiard, Quantum Chaos, and the Hilbert\u2013P\u00f3lya Program",
+      "main_topic": "Selberg trace",
+      "key_concepts": [
+        "Selberg trace",
+        "Artin billiard",
+        "DTES",
+        "tropical geometry",
+        "quantum chaos",
+        "PDE"
+      ],
+      "formulas": [
+        "\\[ ds^2 = \\frac{dx^2 + dy^2}{y^2}, \\]",
+        "\\[ \\mathcal{F} = \\left\\{ z \\in \\mathcal{H} : |z| > 1,\\ |\\mathrm{Re}(z)| < \\tfrac{1}{2} \\right\\}, \\]",
+        "\\[ H(p,q) = \\frac{1}{2m} p_i p_j g^{ij}(q), \\]"
+      ],
+      "relevant_methods": [
+        "trace formula",
+        "spectral matching",
+        "ACO",
+        "RL"
+      ],
+      "connection_to_ant_rh": "Connects directly to the Artin/Selberg/operator side of Ant-RH. Relevant to DTES geometry and representation design.",
+      "implementation_ideas": [
+        "Use trace-formula-inspired regularizers or validation constraints.",
+        "Tie DTES state variables to operator or episode serialization.",
+        "Compare learned spectra against chaos/RMT diagnostics."
+      ],
+      "open_questions": [
+        "Which concepts here can become executable constraints rather than narrative motivation?",
+        "How should these ideas connect to operator discovery or PDE discovery in Ant-RH?"
+      ]
+    },
+    {
+      "path": "/Users/machome/Documents/GitHub/Ant-RH/Docs/Literature/Quantum Chaos, Random Matrix Theory, and the Riemann Zeta Function  A Graduate-Level Literature Review.md",
+      "title": "Quantum Chaos, Random Matrix Theory, and the Riemann Zeta Function",
+      "main_topic": "Riemann hypothesis",
+      "key_concepts": [
+        "Riemann hypothesis",
+        "random matrix theory",
+        "quantum chaos",
+        "operator theory"
+      ],
+      "formulas": [
+        "H = xp\\) proposal, Connes's noncommutative geometry approach, and the modern synthesis through the Sachdev\u2013Ye\u2013Kitaev (SYK) model, AdS/CFT, and out-of-time-order correlators (OTOCs). A dedicated section examines the log-gas as an interacting many-body system and the possibility of reformulating spectral statistics as an energy-based or operator-learning framework, including connections to Koopman operator theory. The review closes with a critical assessment of what is proven versus conjectural, the fundamental limitations, and the leading open problems.",
+        "\\[ P_{\\mathrm{GOE}}(s) = \\frac{\\pi}{2} s \\exp\\!\\left(-\\frac{\\pi}{4} s^2\\right), \\]",
+        "\\[ P_{\\mathrm{GUE}}(s) \\approx \\frac{32}{\\pi^2} s^2 \\exp\\!\\left(-\\frac{4}{\\pi} s^2\\right), \\]",
+        "\\[ f_X(H) = C_{X,\\beta} \\exp\\!\\left(-\\frac{\\beta}{2} \\operatorname{Tr}(H^\\dagger H)\\right), \\]"
+      ],
+      "relevant_methods": [
+        "trace formula"
+      ],
+      "connection_to_ant_rh": "Background theory that may guide operator-search heuristics.",
+      "implementation_ideas": [
+        "Compare learned spectra against chaos/RMT diagnostics."
+      ],
+      "open_questions": [
+        "Which concepts here can become executable constraints rather than narrative motivation?",
+        "How should these ideas connect to operator discovery or PDE discovery in Ant-RH?"
+      ]
+    },
+    {
+      "path": "/Users/machome/Documents/GitHub/Ant-RH/Docs/Literature/Ramsey-Colored-Braids-Operator-Theory.md",
+      "title": "Ramsey Theory, Colored Combinatorics, and Braid Groups: Structural Inevitability and Operator Theory",
+      "main_topic": "Riemann hypothesis",
+      "key_concepts": [
+        "Riemann hypothesis",
+        "braid groups",
+        "quantum chaos",
+        "operator theory"
+      ],
+      "formulas": [
+        "\\[ R(k, \\ell) \\;\\leq\\; R(k-1, \\ell) + R(k, \\ell-1), \\]",
+        "\\[ \\aleph_0 \\;\\longrightarrow\\; (\\aleph_0)_m^n, \\]",
+        "\\[ R(k, k) \\;\\geq\\; \\frac{1}{e\\sqrt{2}} \\cdot k \\cdot 2^{k/2}, \\]",
+        "\\[ R(k, k) \\;\\leq\\; (4 - \\varepsilon)^k \\]",
+        "\\[ R(s,s) \\;\\leq\\; \\bigl(4e^{-0.14e^{-1}}\\bigr)^{s + o(s)} \\approx 3.779^{s + o(s)}. \\]"
+      ],
+      "relevant_methods": [
+        "RL"
+      ],
+      "connection_to_ant_rh": "Relevant to braid/operator tokenization and Topological LLM ideas.",
+      "implementation_ideas": [
+        "Add braid-aware symbolic priors or token vocabularies.",
+        "Compare learned spectra against chaos/RMT diagnostics."
+      ],
+      "open_questions": [
+        "Which concepts here can become executable constraints rather than narrative motivation?",
+        "How should these ideas connect to operator discovery or PDE discovery in Ant-RH?"
+      ]
+    },
+    {
+      "path": "/Users/machome/Documents/GitHub/Ant-RH/Docs/Literature/Spectral Geometry and Arithmetic Chaos  A Unified Framework Connecting the Selberg Trace Formula, Gutzwiller Trace Formula, Hadamard Product, and the Hilbert\u2013Po\u0301lya Conjecture via the Artin Billiard.md",
+      "title": "Spectral Geometry and Arithmetic Chaos: A Unified Framework Connecting the Selberg Trace Formula, Gutzwiller Trace Formula, Hadamard Product, and the Hilbert\u2013P\u00f3lya Conjecture via the Artin Billiard",
+      "main_topic": "Hilbert-Polya",
+      "key_concepts": [
+        "Hilbert-Polya",
+        "Riemann hypothesis",
+        "Selberg trace",
+        "Artin billiard",
+        "random matrix theory",
+        "quantum chaos",
+        "spectral geometry"
+      ],
+      "formulas": [
+        "\\[ ds^2 = \\frac{dx^2 + dy^2}{y^2}, \\]",
+        "\\[ \\gamma \\cdot z = \\frac{az + b}{cz + d}, \\quad \\gamma = \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix} \\in \\mathrm{PSL}(2,\\mathbb{Z}). \\]",
+        "\\[ X = \\mathrm{PSL}(2,\\mathbb{Z}) \\backslash \\mathbb{H}. \\]",
+        "\\[ \\mathcal{F} = \\left\\{ z \\in \\mathbb{H} : |z| > 1,\\; |\\mathrm{Re}(z)| < \\tfrac{1}{2} \\right\\}, \\]",
+        "\\[ H(p, q) = \\frac{1}{2m} p_i p_j g^{ij}(q), \\]",
+        "\\[ \\ell(\\gamma) = 2 \\log \\lambda = \\log N(\\gamma). \\]",
+        "H=xp and the Riemann zeros. In Supersymmetry and Trace Formulae: Chaos and ...",
+        "H = xp gives ..."
+      ],
+      "relevant_methods": [
+        "trace formula",
+        "RL"
+      ],
+      "connection_to_ant_rh": "Connects directly to the Artin/Selberg/operator side of Ant-RH.",
+      "implementation_ideas": [
+        "Use trace-formula-inspired regularizers or validation constraints.",
+        "Compare learned spectra against chaos/RMT diagnostics."
+      ],
+      "open_questions": [
+        "Which concepts here can become executable constraints rather than narrative motivation?",
+        "How should these ideas connect to operator discovery or PDE discovery in Ant-RH?"
+      ]
+    },
+    {
+      "path": "/Users/machome/Documents/GitHub/Ant-RH/Docs/Literature/Symbolic Dynamics, Zeta Zeros, and Learnable Hilbert\u2013Po\u0301lya Operators  A Deep Technical Literature Review.md",
+      "title": "Symbolic Dynamics, Zeta Zeros, and Learnable Hilbert\u2013P\u00f3lya Operators: A Deep Technical Literature Review",
+      "main_topic": "DTES",
+      "key_concepts": [
+        "DTES",
+        "tropical geometry",
+        "quantum chaos",
+        "spectral geometry"
+      ],
+      "formulas": [
+        "\\[ \\hat{\\gamma} = \\hat{\\gamma}_{sc} \\]",
+        "\\[ (H\\psi)_n = \\psi_{n+1} + \\psi_{n-1} + V_n \\psi_n \\]"
+      ],
+      "relevant_methods": [
+        "ACO",
+        "RL"
+      ],
+      "connection_to_ant_rh": "Relevant to DTES geometry and representation design.",
+      "implementation_ideas": [
+        "Tie DTES state variables to operator or episode serialization.",
+        "Compare learned spectra against chaos/RMT diagnostics."
+      ],
+      "open_questions": [
+        "Which concepts here can become executable constraints rather than narrative motivation?",
+        "How should these ideas connect to operator discovery or PDE discovery in Ant-RH?"
+      ]
+    },
+    {
+      "path": "/Users/machome/Documents/GitHub/Ant-RH/Docs/Literature/The Hilbert\u2013Po\u0301lya Conjecture  Spectral Theory and the Riemann Hypothesis.md",
+      "title": "The Hilbert\u2013P\u00f3lya Conjecture: Spectral Theory and the Riemann Hypothesis",
+      "main_topic": "Riemann hypothesis",
+      "key_concepts": [
+        "Riemann hypothesis",
+        "random matrix theory"
+      ],
+      "formulas": [
+        "\\[ \\hat{H}\\,\\psi_n = \\gamma_n\\,\\psi_n, \\qquad \\text{where } \\zeta\\!\\left(\\tfrac{1}{2}+i\\gamma_n\\right)=0. \\tag{1} \\]",
+        "\\[ \\sigma(\\hat{H}) = \\left\\{\\gamma \\in \\mathbb{R} : \\zeta\\!\\left(\\tfrac{1}{2}+i\\gamma\\right)=0\\right\\}. \\tag{2} \\]",
+        "H = xp gives ..."
+      ],
+      "relevant_methods": [
+        "trace formula",
+        "RL"
+      ],
+      "connection_to_ant_rh": "Background theory that may guide operator-search heuristics.",
+      "implementation_ideas": [
+        "Compare learned spectra against chaos/RMT diagnostics."
+      ],
+      "open_questions": [
+        "Which concepts here can become executable constraints rather than narrative motivation?",
+        "How should these ideas connect to operator discovery or PDE discovery in Ant-RH?"
+      ]
+    },
+    {
+      "path": "/Users/machome/Documents/GitHub/Ant-RH/Docs/Literature/Topological Quantum Computing  Braid Groups, Non-Abelian Anyons, and Operator Representations \u2014 A Rigorous Literature Review.md",
+      "title": "Topological Quantum Computing: Braid Groups, Non-Abelian Anyons, and Operator Representations",
+      "main_topic": "tropical geometry",
+      "key_concepts": [
+        "tropical geometry",
+        "braid groups",
+        "topological quantum computing",
+        "non-Abelian anyons"
+      ],
+      "formulas": [
+        "\\[ \\Delta E \\sim e^{-\\alpha L}, \\quad \\alpha > 0 \\quad (1) \\]",
+        "\\[ \\pi_1\\!\\left(\\mathrm{Conf}_N(\\mathbb{R}^2)\\right) \\cong B_N \\quad (2) \\]",
+        "\\[ \\rho(\\sigma_i) : \\mathcal{V} \\to \\mathcal{V}, \\quad \\rho(\\sigma_i)\\rho(\\sigma_j) \\neq \\rho(\\sigma_j)\\rho(\\sigma_i) \\quad \\text{in general} \\quad (3) \\]",
+        "\\[ \\beta: \\{1,\\ldots,N\\} \\times [0,1] \\to \\mathbb{R}^2 \\times [0,1] \\quad (4) \\]",
+        "\\[ \\sigma_i \\sigma_{i+1} \\sigma_i = \\sigma_{i+1} \\sigma_i \\sigma_{i+1}, \\quad 1 \\leq i \\leq n-2 \\quad (5) \\]",
+        "\\[ \\sigma_i \\sigma_j = \\sigma_j \\sigma_i, \\quad |i-j| \\geq 2 \\quad (6) \\]"
+      ],
+      "relevant_methods": [
+        "ACO",
+        "RL"
+      ],
+      "connection_to_ant_rh": "Relevant to DTES geometry and representation design. Relevant to braid/operator tokenization and Topological LLM ideas.",
+      "implementation_ideas": [
+        "Add braid-aware symbolic priors or token vocabularies.",
+        "Tie DTES state variables to operator or episode serialization."
+      ],
+      "open_questions": [
+        "Which concepts here can become executable constraints rather than narrative motivation?",
+        "How should these ideas connect to operator discovery or PDE discovery in Ant-RH?"
+      ]
+    },
+    {
+      "path": "/Users/machome/Documents/GitHub/Ant-RH/Docs/Literature/Wavefunction Geometry, Pauli Exclusion Principle, Zeta Zeros, and the Hilbert\u2013Po\u0301lya Conjecture  Toward a DTES-Based Unification.md",
+      "title": "Wavefunction Geometry, Pauli Exclusion Principle, Zeta Zeros, and the Hilbert\u2013P\u00f3lya Conjecture: Toward a DTES-Based Unification",
+      "main_topic": "Riemann hypothesis",
+      "key_concepts": [
+        "Riemann hypothesis",
+        "Selberg trace",
+        "DTES",
+        "random matrix theory",
+        "quantum chaos"
+      ],
+      "formulas": [
+        "\\[ \\psi(x) = A(x)\\,e^{iS(x)/\\hbar}, \\qquad A(x) \\geq 0,\\; S(x) \\in \\mathbb{R}, \\tag{1} \\]",
+        "\\[ \\partial_t \\rho + \\nabla \\cdot (\\rho \\mathbf{v}) = 0, \\qquad \\rho = A^2, \\quad \\mathbf{v} = \\frac{\\nabla S}{m}, \\tag{2} \\]",
+        "\\[ m\\partial_t \\mathbf{v} + m(\\mathbf{v}\\cdot\\nabla)\\mathbf{v} = -\\nabla(V + Q), \\qquad Q = -\\frac{\\hbar^2}{2m}\\frac{\\Delta A}{A}. \\tag{3} \\]"
+      ],
+      "relevant_methods": [
+        "trace formula",
+        "RL"
+      ],
+      "connection_to_ant_rh": "Connects directly to the Artin/Selberg/operator side of Ant-RH. Relevant to DTES geometry and representation design.",
+      "implementation_ideas": [
+        "Use trace-formula-inspired regularizers or validation constraints.",
+        "Tie DTES state variables to operator or episode serialization.",
+        "Compare learned spectra against chaos/RMT diagnostics."
+      ],
+      "open_questions": [
+        "Which concepts here can become executable constraints rather than narrative motivation?",
+        "How should these ideas connect to operator discovery or PDE discovery in Ant-RH?"
+      ]
+    }
+  ]
+}

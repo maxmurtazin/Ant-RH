@@ -37,16 +37,16 @@
   ],
   "aco": {
     "path": "runs/artin_aco_history.csv",
-    "n": 5,
+    "n": 80,
     "best_loss_stats": {
-      "last": 88526.29283751908,
-      "mean_tail": 88526.27611088028,
-      "min": 88526.26236534242
+      "last": 44.26582210592661,
+      "mean_tail": 44.26582210637984,
+      "min": 44.265055820713435
     },
     "mean_loss_stats": {
-      "last": 88526.29409759532,
-      "mean_tail": 88526.27702374448,
-      "min": 88526.2631509048
+      "last": 44.26977518570102,
+      "mean_tail": 44.27042418838859,
+      "min": 44.267637285993125
     },
     "best_loss_trend": "increasing",
     "mean_loss_trend": "increasing"
@@ -76,9 +76,9 @@
   "selberg": {
     "path": "runs/selberg_trace_report.json",
     "S_spec": 1.6636469522697837,
-    "S_geo": -0.044032277507084876,
-    "loss": 2.916168351811319,
-    "relative_error": 1.0264673145839847
+    "S_geo": -0.22619783534412619,
+    "loss": 3.5715133212714636,
+    "relative_error": 1.135965039743477
   }
 }
 ```

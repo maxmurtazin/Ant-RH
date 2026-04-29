@@ -1,0 +1,8 @@
+{
+  "dataset": "/Users/machome/Documents/GitHub/Ant-RH/runs/topological_lm_dataset.jsonl",
+  "epochs": 20,
+  "batch_size": 32,
+  "seq_len": 128,
+  "device": "mps",
+  "num_records": 128
+}

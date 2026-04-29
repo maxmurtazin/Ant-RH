@@ -1,0 +1,91 @@
+{
+  "operator_distance_mean": 5.708596834822546e-07,
+  "operator_distance_max": 1.3134782066205587e-06,
+  "spectrum_distance_mean": 4.854866148342216e-05,
+  "spectrum_distance_max": 0.0001131624861319262,
+  "loss_std": 1.2781602090464718e-05,
+  "loss_range": 3.6006397324150896e-05,
+  "diagnosis": "Artin words barely affect operator. Spectrum insensitive to word changes.",
+  "set_reports": [
+    {
+      "set_index": 0,
+      "set_type": "random_words_small",
+      "n_words": 50,
+      "n_geodesics": 26,
+      "fro_norm": 833.6118450505564,
+      "loss": 7.685682101614504,
+      "builder": "structured",
+      "eigh_success": true
+    },
+    {
+      "set_index": 1,
+      "set_type": "random_words_large",
+      "n_words": 50,
+      "n_geodesics": 49,
+      "fro_norm": 833.6118448273288,
+      "loss": 7.68564609521718,
+      "builder": "structured",
+      "eigh_success": true
+    },
+    {
+      "set_index": 2,
+      "set_type": "planner_like_words",
+      "n_words": 50,
+      "n_geodesics": 30,
+      "fro_norm": 833.611844832293,
+      "loss": 7.685646471964643,
+      "builder": "structured",
+      "eigh_success": true
+    },
+    {
+      "set_index": 3,
+      "set_type": "repeated_words",
+      "n_words": 50,
+      "n_geodesics": 2,
+      "fro_norm": 833.6118448273288,
+      "loss": 7.68564609521718,
+      "builder": "structured",
+      "eigh_success": true
+    },
+    {
+      "set_index": 4,
+      "set_type": "shuffled_words",
+      "n_words": 50,
+      "n_geodesics": 48,
+      "fro_norm": 833.6118448273288,
+      "loss": 7.68564609521718,
+      "builder": "structured",
+      "eigh_success": true
+    },
+    {
+      "set_index": 5,
+      "set_type": "random_words_small",
+      "n_words": 50,
+      "n_geodesics": 27,
+      "fro_norm": 833.6118450733852,
+      "loss": 7.685666587615442,
+      "builder": "structured",
+      "eigh_success": true
+    },
+    {
+      "set_index": 6,
+      "set_type": "random_words_large",
+      "n_words": 50,
+      "n_geodesics": 48,
+      "fro_norm": 833.6118448273288,
+      "loss": 7.68564609521718,
+      "builder": "structured",
+      "eigh_success": true
+    },
+    {
+      "set_index": 7,
+      "set_type": "planner_like_words",
+      "n_words": 50,
+      "n_geodesics": 29,
+      "fro_norm": 833.611844832293,
+      "loss": 7.685646471964643,
+      "builder": "structured",
+      "eigh_success": true
+    }
+  ]
+}

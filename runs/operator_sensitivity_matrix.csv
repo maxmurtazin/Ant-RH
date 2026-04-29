@@ -1,0 +1,9 @@
+set_index,set_type,n_words,n_geodesics,fro_norm,loss,builder,eigh_success
+0,random_words_small,50,26,833.6118450505564,7.685682101614504,structured,True
+1,random_words_large,50,49,833.6118448273288,7.68564609521718,structured,True
+2,planner_like_words,50,30,833.611844832293,7.685646471964643,structured,True
+3,repeated_words,50,2,833.6118448273288,7.68564609521718,structured,True
+4,shuffled_words,50,48,833.6118448273288,7.68564609521718,structured,True
+5,random_words_small,50,27,833.6118450733852,7.685666587615442,structured,True
+6,random_words_large,50,48,833.6118448273288,7.68564609521718,structured,True
+7,planner_like_words,50,29,833.611844832293,7.685646471964643,structured,True

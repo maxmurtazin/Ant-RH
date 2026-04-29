@@ -228,6 +228,30 @@ def main() -> None:
                 # Never crash pipeline on analysis.
                 timings[stage] = 0.0
 
+        elif stage == "analysis_journal":
+            cmd = [py, "analysis/gemma_lab_journal.py"]
+            try:
+                timings[stage] = _run_stage(stage, cmd, logs_dir)
+            except Exception:
+                # Never crash pipeline on journal analysis.
+                timings[stage] = 0.0
+
+        elif stage == "paper":
+            cmd = [py, "analysis/gemma_paper_writer.py"]
+            try:
+                timings[stage] = _run_stage(stage, cmd, logs_dir)
+            except Exception:
+                # Never crash pipeline on paper writing.
+                timings[stage] = 0.0
+
+        elif stage == "pde":
+            cmd = [py, "analysis/operator_pde_discovery.py"]
+            try:
+                timings[stage] = _run_stage(stage, cmd, logs_dir)
+            except Exception:
+                # Never crash pipeline on PDE discovery.
+                timings[stage] = 0.0
+
         else:
             raise SystemExit(f"unknown stage: {stage}")
 

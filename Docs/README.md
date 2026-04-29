@@ -1,45 +1,34 @@
-# Ant-RH documentation
+# Ant-RH Documentation
 
-Extended documentation for the **Ant-RH** repository: DTES-guided exploration of Riemann zeta zeros on the critical line \(\mathrm{Re}(s)=\tfrac12\).
+Ant-RH is a research codebase for zeta-zero and Hilbert-Polya style operator experiments. The repository combines symbolic Artin-word generation, Selberg-style constraints, operator construction, ACO/RL search, stability checks, and Gemma-based reporting.
 
-## Contents
+## Current status
 
-| Document | Description |
-|----------|-------------|
-| [Getting started](getting-started.md) | Dependencies, layout, running the full pipeline |
-| [Repository layout](repository-layout.md) | Folders, main modules, which script to use when |
-| [CLI reference](cli-reference.md) | Command-line flags for runners and tools |
-| [Data formats](data-formats.md) | JSON shapes for truth, candidates, hybrid output |
-| [Pipeline and algorithms](pipeline-and-algorithms.md) | End-to-end flow and relation to the math in `README.md` |
+- ACO remains unstable or plateaued.
+- Operator sensitivity to Artin words is weak in the current implementation.
+- TopologicalLM can generate valid candidates, but mode collapse is present.
+- The current TopologicalLM report shows deduplicated mean reward below the random baseline.
 
-## Root README
+## Read first
 
-The project abstract, formulas, hybrid recovery sketch, and complexity notes live in the repository root: [../README.md](../README.md).
+- `Architecture/overview.md`
+- `Architecture/pipeline.md`
+- `Architecture/data_flow.md`
+- `Reports/current_state.md`
 
-## DTES Spectral Operator Validation
+## Sections
 
-The repository includes an experimental DTES spectral diagnostic that maps an ACO pheromone graph into a symmetric graph operator:
+- `Architecture/`: system layout, pipeline, modules, and data flow.
+- `Concepts/`: DTES, Artin billiard, Selberg-style constraints, operator search, and TopologicalLM.
+- `Experiments/`: grounded summaries of V12, V13, V13.2 PDE, and VNext TopologicalLM.
+- `Guides/`: quickstart, command reference, and debugging notes.
+- `Reports/`: current state, bottlenecks, and prioritized next steps.
 
-- `core/dtes_spectral_operator.py` builds a self-adjoint operator `H = L + diag(V)` from a symmetrized pheromone matrix and a zeta-derived potential.
-- `validation/dtes_spectral_validation.py` compares the unfolded operator spectrum with unfolded Riemann zeta zeros and reports global spectral alignment metrics.
-- ETA ACO runs export `spectral_ready_result.json` with `t_grid`, `zeta_abs`, `pheromone_matrix`, `true_zeros`, and `spectral_ready=true`.
-
-Run it directly after a spectral-ready ACO export:
-
-```bash
-python3 validation/dtes_spectral_validation.py \
-  --input fractal_dtes_aco_eta_output/spectral_ready_result.json \
-  --out fractal_dtes_aco_eta_output/spectral_report.json \
-  --k 50 \
-  --potential-mode neglog
-```
-
-Or enable it in the ETA figure runner:
+## Core commands
 
 ```bash
-python3 run_with_result_figures.py --spectral-validation --spectral-k 50
+make run-v12
+make analyze-gemma
+make topo-all
+make help-chat
 ```
-
-Expected outputs include `spectral_report.json`, `spectral_ready_result.json`, `spectral_eigenvalues.json`, a CSV of eigenvalues from the validation CLI, and optional plots when `matplotlib` is available.
-
-This is a numerical Hilbert-Polya inspired diagnostic, not a proof of the Riemann Hypothesis. Keep local zero recovery metrics separate from global spectral alignment metrics.

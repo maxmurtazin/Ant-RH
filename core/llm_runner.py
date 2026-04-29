@@ -5,7 +5,9 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
+from typing import Iterator
 
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -22,11 +24,7 @@ class LLMRunner:
     n_gpu_layers: int = 0
     timeout_s: float = 60.0
 
-    def generate(self, prompt: str, max_tokens: int = 256, temperature: float = 0.7) -> str:
-        prompt = str(prompt)
-        if not prompt:
-            return ""
-
+    def _resolve_llama_cli(self) -> str:
         llama_cli_str = str(self.llama_cli)
         resolved_llama_cli = None
         if os.sep in llama_cli_str or (os.altsep and os.altsep in llama_cli_str):
@@ -40,18 +38,17 @@ class LLMRunner:
                 f"llama.cpp binary not found on PATH: {self.llama_cli}. "
                 "Install llama.cpp (brew install llama.cpp) or set --llama_cli to a full path."
             )
+        return str(resolved_llama_cli)
 
-        cmd = [
-            str(resolved_llama_cli),
+    def _build_cmd(self, prompt: str, max_tokens: int, temperature: float) -> list[str]:
+        return [
+            self._resolve_llama_cli(),
             "-m",
             str(self.model_path),
             "-p",
-            prompt,
+            str(prompt),
             "-n",
             str(int(max_tokens)),
-        ]
-        # best-effort perf knobs (supported by most llama.cpp builds)
-        cmd += [
             "--temp",
             str(float(temperature)),
             "--ctx-size",
@@ -62,34 +59,89 @@ class LLMRunner:
             str(int(self.n_gpu_layers)),
         ]
 
+    def generate(self, prompt: str, max_tokens: int = 256, temperature: float = 0.7) -> str:
+        prompt = str(prompt)
+        if not prompt:
+            return ""
         try:
-            p = subprocess.run(
-                cmd,
+            result = subprocess.run(
+                [
+                    self._resolve_llama_cli(),
+                    "-m",
+                    str(self.model_path),
+                    "-p",
+                    prompt,
+                    "-n",
+                    str(int(max_tokens)),
+                ],
                 capture_output=True,
                 text=True,
-                timeout=float(self.timeout_s),
-                check=False,
+                timeout=120,
             )
         except subprocess.TimeoutExpired:
             return ""
         except Exception:
             return ""
+        return (result.stdout or "").strip()
 
-        if p.returncode != 0:
-            return ""
+    def generate_stream(self, prompt, max_tokens: int = 256, temperature: float = 0.3) -> Iterator[str]:
+        prompt = str(prompt)
+        if not prompt:
+            return
 
-        out = (p.stdout or "").strip()
-        if not out:
-            return ""
+        cmd = self._build_cmd(prompt, max_tokens=max_tokens, temperature=temperature)
+        try:
+            p = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=1,
+            )
+        except Exception:
+            return
 
-        # Many llama-cli builds echo the prompt; remove it if present.
-        if out.startswith(prompt):
-            out = out[len(prompt) :].lstrip()
+        start = time.time()
+        prompt_removed = False
+        stdout = p.stdout
+        if stdout is None:
+            try:
+                p.kill()
+            except Exception:
+                pass
+            return
 
-        # Some builds echo "prompt:" lines; remove the first exact prompt occurrence.
-        pos = out.find(prompt)
-        if 0 <= pos < 20:
-            out = out[pos + len(prompt) :].lstrip()
+        try:
+            prompt_idx = 0
+            prompt_removed = False
+            while True:
+                if float(self.timeout_s) > 0 and (time.time() - start) > float(self.timeout_s):
+                    try:
+                        p.kill()
+                    except Exception:
+                        pass
+                    break
 
-        return out.strip()
+                ch = stdout.read(1)
+                if ch == "":
+                    if p.poll() is not None:
+                        break
+                    continue
+
+                frag = ch
+                if not prompt_removed:
+                    if prompt_idx < len(prompt) and frag == prompt[prompt_idx]:
+                        prompt_idx += 1
+                        continue
+                    prompt_removed = True
+                yield frag
+        finally:
+            try:
+                if p.poll() is None:
+                    p.wait(timeout=1.0)
+            except Exception:
+                try:
+                    p.kill()
+                except Exception:
+                    pass
 

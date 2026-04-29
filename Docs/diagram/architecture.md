@@ -1,319 +1,206 @@
-# Ant-RH — архитектура репозитория
+# Ant-RH — актуальные диаграммы
 
-Ниже — обзор модулей и типичного потока данных (полный пайплайн через [`run_full_pipeline.sh`](../../run_full_pipeline.sh)). **Таблицы по функциям и методам** вынесены в [code-reference.md](code-reference.md).
+Ниже собраны актуальные схемы по текущему состоянию репозитория: основной пайплайн, расширение через TopologicalLM, поток данных и место Gemma-агентов. Диаграммы отражают реальное состояние системы, включая слабые места: plateau в ACO, низкую чувствительность оператора и mode collapse в TopologicalLM.
 
-## Структура каталогов и роли
+## 1. Архитектура репозитория
 
 ```mermaid
 flowchart TB
-  subgraph root["Корень репозитория"]
-    R_README["README.md"]
-    R_REQ["requirements.txt"]
-    R_PIPE["run_full_pipeline.sh"]
-    R_TRUTH["fractal_dtes_aco_zeta_all_zeros_scan.py"]
-    R_METRICS["fractal_dtes_aco_zeta_metrics.py"]
-    R_VISUAL["fractal_dtes_aco_zeta_visual.py"]
-    R_ETA["fractal_dtes_aco_zeta_eta.py"]
-    R_CC["fractal_dtes_aco_zeta_crosschannel.py"]
-    R_RUN_V2["run_crosschannel_live_v2.py"]
-    R_RUN_OLD["run_crosschannel_live.py / run_crosschannel_fixed.py"]
-    R_FIG["run_with_result_figures.py"]
+  subgraph CORE["core/"]
+    ARTIN["artin_symbolic_billiard.py"]
+    OP["artin_operator.py / artin_operator_structured.py"]
+    ACO["artin_aco.py"]
+    RLENV["artin_rl_env.py"]
+    RLPOL["artin_rl_policy.py"]
+    STAB["spectral_stabilization.py"]
+    DSL["dtes_braid_dsl.py"]
+    TOK["braid_tokenizer.py"]
+    TLM["topological_llm.py"]
+    EXEC["dtes_braid_executor.py"]
+    LLMRUN["llm_runner.py"]
+    GPLAN["gemma_planner.py"]
   end
 
-  subgraph core["core/"]
-    C_EXPLORE["fractal_dtes_crosschannel_explore_eta_clean.py\n(дефолт DTES в пайплайне)"]
+  subgraph VALID["validation/"]
+    SEL["selberg_trace_loss.py"]
+    RL["artin_rl_train.py"]
+    OREP["operator_stability_report.py"]
+    SENS["operator_sensitivity_test.py"]
+    TTRAIN["train_topological_llm.py"]
+    TEVAL["eval_topological_llm.py"]
   end
 
-  subgraph hybrid["hybrid/"]
-    H_SCAN["hybrid_dtes_guided_scan.py"]
+  subgraph ANALYSIS["analysis/"]
+    GAN["gemma_analyzer.py"]
+    JOUR["gemma_lab_journal.py"]
+    PSTUDY["gemma_project_study.py"]
+    LSTUDY["gemma_literature_study.py"]
+    PDE["operator_pde_discovery.py"]
+    TREPORT["topological_llm_report.py"]
+    DOCS["gemma_docs_builder.py"]
   end
 
-  subgraph refinement["refinement/"]
-    REF_COLORS["colored_ants_engine.py"]
-    REF_GAP["gap_detector.py"]
-    REF_ROADS["dynamic_roads.py"]
+  subgraph HELP["help/"]
+    HAGENT["gemma_help_agent.py"]
+    TTS["local_tts.py / local_tts_pyttsx3.py"]
   end
 
-  subgraph validation["validation/"]
-    V_DIST["distance_analysis.py"]
-    V_FIG["figures_from_results.py"]
-    V_VAL["validate_zeros_and_spacing_eta.py"]
-    V_TRUTH["fractal_dtes_aco_zeta_all_zeros_scan.py"]
+  subgraph RUNS["runs/"]
+    RART["artin_*.csv / json"]
+    RRL["artin_rl/"]
+    ROP["operator_*.json / md"]
+    RTLM["topological_lm/"]
+    RMEM["project/literature/help memory"]
   end
 
-  subgraph runs["runs/"]
-    RUN_OUT["Артефакты экспериментов\n(truth, JSON, отчёты)"]
-  end
-
-  subgraph archive["archive_old/"]
-    ARC["Исторические снимки\n(не часть поддерживаемого пайплайна)"]
-  end
-
-  R_PIPE --> core
-  R_PIPE --> hybrid
-  R_PIPE --> refinement
-  R_PIPE --> validation
-  R_PIPE --> runs
-  R_METRICS --> R_VISUAL
-  R_METRICS --> R_ETA
-  R_METRICS --> R_CC
+  ARTIN --> SEL
+  ARTIN --> OP
+  OP --> ACO
+  OP --> RL
+  OP --> OREP
+  STAB --> OREP
+  ACO --> RART
+  RL --> RRL
+  OREP --> ROP
+  DSL --> TOK
+  TOK --> TLM
+  TLM --> EXEC
+  EXEC --> TEVAL
+  TTRAIN --> RTLM
+  TEVAL --> RTLM
+  GAN --> RMEM
+  JOUR --> RMEM
+  PSTUDY --> RMEM
+  LSTUDY --> RMEM
+  PDE --> ROP
+  TREPORT --> RTLM
+  DOCS --> RMEM
+  LLMRUN --> GPLAN
+  LLMRUN --> GAN
+  LLMRUN --> HAGENT
+  RMEM --> HAGENT
+  HAGENT --> TTS
 ```
 
-## Поток полного пайплайна (`run_full_pipeline.sh`)
+## 2. Основной пайплайн Ant-RH
+
+```mermaid
+flowchart LR
+  A["Artin words\ncore/artin_symbolic_billiard.py"]
+  S["Selberg-style loss\nvalidation/selberg_trace_loss.py"]
+  O["Operator construction\ncore/artin_operator.py"]
+  C["ACO search\ncore/artin_aco.py"]
+  R["RL training\nvalidation/artin_rl_train.py"]
+  E["Spectral / stability eval\nvalidation/operator_stability_report.py"]
+  L["Logging to runs/\nCSV + JSON + MD"]
+  G["Gemma agents\nanalyzer / journal / study / help"]
+
+  A --> S
+  A --> O
+  S --> C
+  O --> C
+  O --> R
+  C --> E
+  R --> E
+  E --> L
+  L --> G
+```
+
+## 3. Расширенный пайплайн TopologicalLM
+
+```mermaid
+flowchart LR
+  LOGS["ACO logs / journal\nruns/artin_aco_history.csv\nruns/artin_aco_best.json"]
+  DSL["DTES-Braid DSL\ncore/dtes_braid_dsl.py"]
+  TOK["Tokenizer\ncore/braid_tokenizer.py"]
+  TRAIN["Tiny Transformer\ncore/topological_llm.py\nvalidation/train_topological_llm.py"]
+  GEN["Candidate generation\nvalidation/eval_topological_llm.py"]
+  EXEC["DTES executor\ncore/dtes_braid_executor.py"]
+  REFINE["ACO refinement placeholder"]
+  REP["Topological report\nanalysis/topological_llm_report.py"]
+
+  LOGS --> DSL
+  DSL --> TOK
+  TOK --> TRAIN
+  TRAIN --> GEN
+  GEN --> EXEC
+  EXEC --> REFINE
+  EXEC --> REP
+```
+
+## 4. Поток данных
 
 ```mermaid
 flowchart TD
-  S0["Шаг 0: эталонные нули\nfractal_dtes_aco_zeta_all_zeros_scan.py"]
-  S1["Шаг 1: DTES core\ncore/fractal_dtes_crosschannel_explore_eta_clean.py"]
-  S2["Шаг 2: цветные муравьи\nrefinement/colored_ants_engine.py"]
-  S3["Шаг 3: детектор разрывов\nrefinement/gap_detector.py"]
-  S4a["Шаг 4: distance — core DTES\nvalidation/distance_analysis.py"]
-  S4b["Шаг 5: distance — colored\nvalidation/distance_analysis.py"]
-  S6["Шаг 6: гибридное сканирование\nhybrid/hybrid_dtes_guided_scan.py"]
-  S7["Шаг 7: distance — hybrid\nvalidation/distance_analysis.py"]
-  OUT["runs/run_* / RUN_SUMMARY.md"]
+  H["runs/artin_aco_history.csv"]
+  B["runs/artin_aco_best.json"]
+  J["runs/lab_journal.jsonl\n(if present)"]
+  D["Serialized DSL episodes"]
+  T["Token ids"]
+  M["TopologicalTinyLM"]
+  C["Decoded token sequences"]
+  W["Artin words"]
+  X["Executor metrics\nvalidity / length / spectral / stability / diversity"]
+  R["reward + dedup stats"]
+  O["eval_report.json\nbaseline_comparison.csv\nreport.md"]
 
-  S0 -->|truth.json| S1
-  S1 -->|dtes_candidates.json, edge-aware, metrics| S2
-  S2 -->|colored_candidates.json| S3
-  S1 --> S4a
-  S2 --> S4b
-  S2 --> S6
-  S6 -->|hybrid_colored.json| S7
-  S0 --> S4a
-  S0 --> S4b
-  S0 --> S7
-  S4a --> OUT
-  S4b --> OUT
-  S6 --> OUT
-  S7 --> OUT
-  S3 --> OUT
+  H --> D
+  B --> D
+  J --> D
+  D --> T
+  T --> M
+  M --> C
+  C --> W
+  W --> X
+  X --> R
+  R --> O
 ```
 
-## Альтернативный трек: полный Fractal + ACO (вне `run_full_pipeline.sh`)
+## 5. Контур Gemma-агентов
 
 ```mermaid
-flowchart LR
-  M["fractal_dtes_aco_zeta_metrics.py"]
-  V2["run_crosschannel_live_v2.py\n(предпочтительный CLI)"]
-  M --> V2
-  M --> CC["fractal_dtes_aco_zeta_crosschannel.py"]
-  CC --> ETA["fractal_dtes_aco_zeta_eta.py"]
-  M --> VIS["fractal_dtes_aco_zeta_visual.py"]
+flowchart TB
+  RUNS["runs/*.csv / *.json / *.md"]
+  ANALYZER["gemma_analyzer.py"]
+  JOURNAL["gemma_lab_journal.py"]
+  PROJECT["gemma_project_study.py"]
+  LIT["gemma_literature_study.py"]
+  DOCS["gemma_docs_builder.py"]
+  HELP["gemma_help_agent.py"]
+  MEM["project_memory.md\nliterature_memory.md\nhelp_memory.jsonl"]
+
+  RUNS --> ANALYZER
+  RUNS --> JOURNAL
+  RUNS --> PROJECT
+  RUNS --> DOCS
+  RUNS --> HELP
+  ANALYZER --> MEM
+  JOURNAL --> MEM
+  PROJECT --> MEM
+  LIT --> MEM
+  MEM --> HELP
+  MEM --> DOCS
 ```
 
-## `fractal_dtes_aco_zeta_metrics.py` — модель данных
+## 6. Диаграмма проблемных мест
 
 ```mermaid
-classDiagram
-  direction TB
-  class ZetaSearchConfig {
-    +t_min: float
-    +t_max: float
-    +n_grid: int
-    +tree_depth: int
-    +n_ants: int
-    +n_iterations: int
-    +ant_types: tuple
-    +mp_dps: int
-    +top_candidate_nodes: int
-    +__post_init__()
-  }
-  class FractalNode {
-    +node_id: int
-    +level: int
-    +interval: tuple
-    +point_ids: list
-    +signature: ndarray
-    +energy: float
-    +min_log_abs: float
-    +center(): float
-    +width(): float
-  }
-  class AntPath {
-    +node_ids: list
-    +score: float
-    +agent_type: str
-  }
-  class DTESAnt {
-    +agent_id: int
-    +agent_type: str
-    +memory_node_id: optional
-  }
-  class FractalDTESACOZeta {
-    -nodes: dict
-    -pheromones: dict
-    -pheromone_channels: dict
-    +run() list
-  }
-  FractalDTESACOZeta --> ZetaSearchConfig: cfg
-  FractalDTESACOZeta "1" o-- "many" FractalNode
-  FractalDTESACOZeta ..> AntPath: создаёт
-  FractalDTESACOZeta ..> DTESAnt: make_ant
+flowchart TD
+  ACO["ACO"]
+  OP["Operator sensitivity"]
+  TLM["TopologicalLM"]
+  EXEC["Executor reward"]
+  DOC["Reports / Help"]
+
+  ACO -->|"plateau / unstable learning"| OP
+  OP -->|"word changes barely affect operator"| TLM
+  TLM -->|"mode collapse\nunique_candidate_ratio = 0.25"| EXEC
+  EXEC -->|"reward bounded but proxy-based"| DOC
 ```
 
-> `ZetaSearchConfig` — большой набор весов (энергия, барьеры, pheromone, cross-channel, `w_*`, `lambda_*`, `gamma_*` и т.д.); в диаграмме перечислены только «якорные» поля.
+## 7. Ключевые наблюдения
 
-## `FractalDTESACOZeta` — методы по этапам (метрики + ACO)
-
-```mermaid
-classDiagram
-  class FractalDTESACOZeta {
-    <<основной класс>>
-    +__init__(cfg)
-    +run() List
-    +evaluate_grid()
-    +compute_multiscale_features()
-    +build_dyadic_tree()
-    +aggregate_node_statistics()
-    +compute_node_energy(node)
-    +build_graph()
-    +add_undirected_edge(a, b)
-    +initialize_pheromones()
-    +run_aco()
-    +sample_ant_path(start, ant)
-    +make_ant(ant_id)
-    +reinforce_pheromones(paths)
-    +evaporate_pheromones()
-    +rank_candidate_nodes()
-    +refine_candidates(nodes)
-    +local_refinement(interval)
-    +verify_zero_candidate(t)
-    +merge_close_candidates(cands, tol)
-    +evaluate_path(node_ids, agent_type)
-    +mixed_pheromone(agent, a, b)
-    +cross_channel_pheromone(agent, a, b)
-  }
-  note for FractalDTESACOZeta "Служебные/стат.: _make_node, _split_node_recursive, path_coherence, …; внизу модуля — _gini, _safe_corr, … (полный список: code-reference.md)"
-```
-
-Полная таблица категорий/методов `FractalDTESACOZeta` и заметка о дубликате в `fractal_dtes_aco_zeta_crosschannel.py` — [code-reference: FractalDTESACOZeta](code-reference.md#fractaldtesacozeta).
-
-## Наследование: live runner, визуализация, ETA
-
-```mermaid
-classDiagram
-  direction TB
-  class FractalDTESACOZeta
-  class LiveFractalDTESACOZeta
-  class StageTimer
-  class VisualFractalDTESACOZeta
-  class ETALogger
-  class ETAFractalDTESACOZeta
-  FractalDTESACOZeta <|-- LiveFractalDTESACOZeta : run_crosschannel_live_v2
-  FractalDTESACOZeta <|-- VisualFractalDTESACOZeta : visual
-  VisualFractalDTESACOZeta <|-- ETAFractalDTESACOZeta : eta
-  LiveFractalDTESACOZeta o-- StageTimer
-  ETAFractalDTESACOZeta o-- ETALogger
-  class LiveFractalDTESACOZeta {
-    +__init__(cfg, timer, ...)
-    +time_stage(name, fn, ...)
-    +run() list
-    +run_aco()
-    +current_best_energy()
-  }
-  class VisualFractalDTESACOZeta {
-    +plot_energy_landscape()
-    +plot_tree_energy_by_level()
-    +plot_pheromone_distribution()
-    +plot_channel_summary()
-    +plot_ramsey_coloring()
-    +plot_agent_path_scores()
-    +generate_visualizations()
-    +visual_run()
-  }
-  class ETALogger {
-    +emit(stage, message, data)
-  }
-  class ETAFractalDTESACOZeta {
-    +run()
-    +run_aco()
-    +refine_candidates(nodes)
-    +plot_aco_history()
-    +plot_all()
-  }
-  class StageTimer {
-    +log(stage, message)
-  }
-```
-
-`run_crosschannel_live_v2`: `make_edge_anchors`, `clean_candidates`, `save_candidates`, `save_metrics`, `main`.
-
-`run_crosschannel_live` (v1) — близкие `StageTimer` / `LiveFractalDTESACOZeta` / `add_edge_anchors` (другой JSON метрик).
-
-## `core/fractal_dtes_crosschannel_explore_eta_clean.py` — сетка без дерева/ACO
-
-Сетка, отбор кандидатов и JSON (класс `Timer`, перечень функций): [code-reference: Core module](code-reference.md#core-module).
-
-```mermaid
-flowchart LR
-  A[evaluate_grid] --> B[build_candidate_pool]
-  B --> C[select_with_exploration]
-  C --> D[refine_candidates]
-  D --> E[merge_close]
-  E --> F[make_edge_anchors]
-  F --> G[save_candidate_json / save_edgeaware_json]
-  G --> H[json_dump metrics]
-```
-
-## `refinement/colored_ants_engine.py`
-
-```mermaid
-classDiagram
-  class ColoredAnt
-  class RoadEdge
-  class ColoredAntConfig
-  class ColoredGroupedAntEngine
-  ColoredAntConfig *-- ColoredGroupedAntEngine
-  ColoredAnt ..> ColoredGroupedAntEngine : run_group
-  ColoredGroupedAntEngine o-- RoadEdge : edges
-  class ColoredAnt {
-    +ant_id: int
-    +color: str
-    +memory: list
-  }
-  class RoadEdge {
-    +i: int
-    +j: int
-    +distance: float
-    +barrier: float
-  }
-  class ColoredAntConfig {
-    +groups: int
-    +ants_per_group: int
-    +iterations_per_group: int
-    +target_count: int
-    +evaporation: float
-    +k_neighbors: int
-  }
-  class ColoredGroupedAntEngine {
-    +_build_roads()
-    +road_value(color, i, j)
-    +color_bonus()
-    +gap_bonus(t)
-    +choose_next(ant, current)
-    +path_score()
-    +reinforce() / evaporate()
-    +run_group(color, idx)
-    +run() list
-  }
-```
-
-Модульные: `load_points`, `save_candidates`, `main`.
-
-`refinement/dynamic_roads.py` — только **текстовая спецификация** формул R_t^color; исполняемой логики нет (см. комментарий в файле).  
-`refinement/gap_detector.py`: `load_ts`, `main` — детекция больших зазоров в отсортированных кандидатах.
-
-## `hybrid/hybrid_dtes_guided_scan.py`
-
-Окна, скан по Hardy Z, класс `ETA`, CLI: [code-reference: Hybrid module](code-reference.md#hybrid-module).
-
-## `validation/`
-
-- Сравнение с эталоном и эталонный скан: [Validation distance](code-reference.md#validation-distance) (включает цепочку `distance_analysis` и `all_zeros_scan`).
-- Рисунки из JSON-метрик: [Validation figures](code-reference.md#validation-figures).
-- Внешняя проверка нулей/шага: [Validation ETA](code-reference.md#validation-eta).
-
----
-
-Детали модулей и форматов данных: [`repository-layout.md`](../repository-layout.md), [`pipeline-and-algorithms.md`](../pipeline-and-algorithms.md).
+- ACO сейчас не показывает устойчивого улучшения.
+- Оператор численно стабилен, но слабо реагирует на изменение Artin words.
+- TopologicalLM умеет генерировать валидные кандидаты, но diversity низкая.
+- Исполнитель TopologicalLM стал стабильнее по reward, но это всё ещё proxy-оценка.

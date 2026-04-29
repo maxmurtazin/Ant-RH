@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from typing import Any, Dict, List, Optional
 
@@ -16,51 +17,59 @@ if ROOT not in sys.path:
 from core.llm_runner import LLMRunner
 
 
-def _extract_json_list(text: str) -> Optional[Any]:
+def clean_llm_json(text: str) -> Optional[Any]:
     if not text:
         return None
-    # Prefer first [...] block.
-    i = text.find("[")
-    j = text.rfind("]")
-    if i == -1 or j == -1 or j <= i:
+    cleaned = str(text).replace("```json", "").replace("```", "").strip()
+    i = cleaned.find("[")
+    j = cleaned.rfind("]")
+    if i == -1:
         return None
-    blob = text[i : j + 1]
+    if j == -1 or j < i:
+        blob = cleaned[i:].strip() + "]"
+    else:
+        blob = cleaned[i : j + 1].strip()
+    if blob.count("[") > blob.count("]"):
+        blob = blob + ("]" * (blob.count("[") - blob.count("]")))
     try:
         return json.loads(blob)
     except Exception:
+        pass
+
+    matches = re.findall(r"\[\s*-?\d+(?:\s*,\s*-?\d+)+\s*\]", cleaned)
+    if not matches:
         return None
-
-
-def _validate_words(words: Any, *, min_len: int = 3, max_len: int = 8, max_power: int = 6) -> List[List[int]]:
     out: List[List[int]] = []
-    if not isinstance(words, list):
-        return out
-    for w in words:
-        if not isinstance(w, list):
+    for m in matches:
+        try:
+            vals = [int(x) for x in re.findall(r"-?\d+", m)]
+        except Exception:
             continue
-        if len(w) < int(min_len) or len(w) > int(max_len):
-            continue
-        ww: List[int] = []
-        ok = True
-        last: Optional[int] = None
-        for a in w:
-            try:
-                ai = int(a)
-            except Exception:
-                ok = False
-                break
-            if ai == 0 or abs(ai) > int(max_power):
-                ok = False
-                break
-            # avoid immediate repetition
-            if last is not None and ai == last:
-                ok = False
-                break
-            ww.append(ai)
-            last = ai
-        if ok:
-            out.append(ww)
-    return out
+        if vals:
+            out.append(vals)
+    return out or None
+
+
+def validate_word(word: Any, max_length: int, max_power: int) -> bool:
+    if not isinstance(word, list):
+        return False
+    if len(word) < 3 or len(word) > int(max_length):
+        return False
+    vals: List[int] = []
+    for a in word:
+        if not isinstance(a, int):
+            return False
+        if a == 0 or abs(a) > int(max_power):
+            return False
+        vals.append(int(a))
+    for i in range(1, len(vals)):
+        if vals[i] == vals[i - 1]:
+            return False
+    if len(vals) >= 4:
+        for size in range(1, (len(vals) // 2) + 1):
+            if vals[-size:] == vals[-2 * size : -size]:
+                return False
+    return True
 
 
 class GemmaPlanner:
@@ -75,6 +84,10 @@ class GemmaPlanner:
         self.backend = str(backend)
         self.max_length = int(max_length)
         self.max_power = int(max_power)
+        self.last_raw_response: str = ""
+        self.last_parsed_words: List[List[int]] = []
+        self.last_valid_words: List[List[int]] = []
+        self.last_rejected_count: int = 0
         self.runner = LLMRunner(
             model_path=str(model_path),
             llama_cli=str(llama_cli),
@@ -87,6 +100,10 @@ class GemmaPlanner:
     def suggest_words(self, context_dict: Dict[str, Any]) -> List[List[int]]:
         if str(self.backend).lower() not in ("llama_cpp", "llama.cpp", "llama"):
             return []
+        self.last_raw_response = ""
+        self.last_parsed_words = []
+        self.last_valid_words = []
+        self.last_rejected_count = 0
 
         best_words = context_dict.get("best_words", [])
         recent_losses = context_dict.get("recent_losses", [])
@@ -103,21 +120,56 @@ class GemmaPlanner:
             "[[1,-1,2], [2,-2,1], ...]\n"
         )
 
+        fallback_words = [[1, -1, 2], [2, -1, 1], [-1, 2, -2]]
         try:
             text = self.runner.generate(prompt, max_tokens=128, temperature=0.7)
-            parsed = _extract_json_list(text)
-            words = _validate_words(
-                parsed,
-                min_len=3,
-                max_len=int(self.max_length),
-                max_power=int(self.max_power),
-            )
-            if words:
-                return words
+            self.last_raw_response = str(text or "")
+            parsed = clean_llm_json(text)
+            parsed_words = parsed if isinstance(parsed, list) else []
+            self.last_parsed_words = [list(w) for w in parsed_words if isinstance(w, list)]
+            valid_words: List[List[int]] = []
+            seen = set()
+            for w in parsed_words:
+                if not isinstance(w, list):
+                    continue
+                cleaned = []
+                ok = True
+                for a in w:
+                    try:
+                        ai = int(a)
+                    except Exception:
+                        ok = False
+                        break
+                    if ai == 0:
+                        ok = False
+                        break
+                    cleaned.append(ai)
+                if not ok:
+                    continue
+                if not validate_word(cleaned, self.max_length, self.max_power):
+                    continue
+                key = tuple(cleaned)
+                if key in seen:
+                    continue
+                seen.add(key)
+                valid_words.append(cleaned)
+            self.last_valid_words = [list(w) for w in valid_words]
+            self.last_rejected_count = max(0, len(self.last_parsed_words) - len(self.last_valid_words))
+            if valid_words:
+                return valid_words
         except Exception:
-            return []
+            pass
 
-        return []
+        deduped_fallback: List[List[int]] = []
+        seen = set()
+        for w in fallback_words:
+            if validate_word(w, self.max_length, self.max_power):
+                key = tuple(w)
+                if key not in seen:
+                    seen.add(key)
+                    deduped_fallback.append(list(w))
+        self.last_valid_words = [list(w) for w in deduped_fallback]
+        return deduped_fallback
 
 
 def main() -> None:

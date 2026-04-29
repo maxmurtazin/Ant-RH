@@ -60,6 +60,23 @@ def _word_key(a_list: List[int]) -> Tuple[int, ...]:
     return tuple(int(a) for a in a_list)
 
 
+def _is_valid_action_word(word: List[int], max_length: int, max_power: int) -> bool:
+    if not isinstance(word, list):
+        return False
+    if len(word) < 3 or len(word) > int(max_length):
+        return False
+    vals: List[int] = []
+    for a in word:
+        try:
+            ai = int(a)
+        except Exception:
+            return False
+        if ai == 0 or abs(ai) > int(max_power):
+            return False
+        vals.append(ai)
+    return True
+
+
 @dataclass(frozen=True)
 class Candidate:
     a_list: Tuple[int, ...]
@@ -103,7 +120,10 @@ class ArtinACO:
         self.best_k_ants = int(max(1, best_k_ants))
         self.q = float(q)
 
-        self.a_vals = np.arange(-self.max_power, self.max_power + 1, dtype=np.int32)
+        self.a_vals = np.array(
+            [a for a in range(-self.max_power, self.max_power + 1) if a != 0],
+            dtype=np.int32,
+        )
         self.heuristic_vals = (1.0 / (1.0 + np.abs(self.a_vals).astype(_DTF))).astype(_DTF)
         self._heur_log = np.log(np.maximum(self.heuristic_vals, 1e-18))
 
@@ -118,6 +138,40 @@ class ArtinACO:
         self._bank: Dict[Tuple[int, ...], Candidate] = {}
         self._op_cache: Dict[Tuple[Tuple[int, ...], ...], float] = {}
 
+    def _assign_rewards(
+        self,
+        scored: List[Candidate],
+        *,
+        reward_mode: str,
+        loss_clip: float,
+        rank_temperature: float,
+    ) -> List[Candidate]:
+        mode = str(reward_mode).lower()
+        clip_value = float(loss_clip)
+        temp = max(float(rank_temperature), 1e-8)
+        updated: List[Candidate] = []
+        for idx, c in enumerate(scored, start=1):
+            safe_loss = float(c.loss)
+            if not np.isfinite(safe_loss):
+                safe_loss = clip_value
+            safe_loss = min(safe_loss, clip_value)
+            if mode == "inverse":
+                reward = 1.0 / (safe_loss + 1e-8)
+            elif mode == "soft_rank":
+                reward = float(math.exp(-float(idx) / temp))
+            else:
+                reward = 1.0 / float(idx)
+            updated.append(
+                Candidate(
+                    a_list=c.a_list,
+                    length=float(c.length),
+                    trace=float(c.trace),
+                    reward=float(reward),
+                    loss=float(safe_loss),
+                )
+            )
+        return updated
+
     def _tau(self, prev_a: int, next_a: int) -> float:
         return float(self.pheromone.get((int(prev_a), int(next_a)), 1.0))
 
@@ -125,8 +179,8 @@ class ArtinACO:
         self.pheromone[(int(prev_a), int(next_a))] = _clip(value, self.tau_min, self.tau_max)
 
     def sample_word(self) -> List[int]:
-        L = int(self.rng.integers(2, self.max_length + 1))
-        a1 = int(self.rng.integers(-self.max_power, self.max_power + 1))
+        L = int(self.rng.integers(3, self.max_length + 1))
+        a1 = int(self.rng.choice(self.a_vals))
         word = [a1]
         prev = a1
 
@@ -146,6 +200,8 @@ class ArtinACO:
         return word
 
     def _validate_and_length(self, a_list: List[int]) -> Tuple[bool, float, float]:
+        if not _is_valid_action_word(a_list, self.max_length, self.max_power):
+            return (False, float("nan"), float("nan"))
         key = _word_key(a_list)
         cached = self._word_cache.get(key)
         if cached is not None:
@@ -246,6 +302,9 @@ class ArtinACO:
         op_sigma: float,
         op_eps: float,
         op_top_k_geodesics: int,
+        reward_mode: str,
+        loss_clip: float,
+        rank_temperature: float,
     ) -> Tuple[List[Candidate], Dict[str, float]]:
         # Update bank with newly found valid geodesics (placeholder losses/rewards for ranking)
         for a_list, ell, tr in candidates:
@@ -283,10 +342,19 @@ class ArtinACO:
         for a_list, ell, tr in candidates:
             reg = 1e-3 * float(ell)
             loss = float(L_total_global + reg)
-            reward = 1.0 / (loss + 1e-8) if np.isfinite(loss) else 0.0
-            reward = min(float(reward), 1e6)
-            c = Candidate(a_list=_word_key(a_list), length=float(ell), trace=float(tr), reward=float(reward), loss=float(loss))
+            if not np.isfinite(loss):
+                loss = float(loss_clip)
+            c = Candidate(a_list=_word_key(a_list), length=float(ell), trace=float(tr), reward=0.0, loss=float(loss))
             scored.append(c)
+
+        scored.sort(key=lambda c: c.loss)
+        scored = self._assign_rewards(
+            scored,
+            reward_mode=reward_mode,
+            loss_clip=float(loss_clip),
+            rank_temperature=float(rank_temperature),
+        )
+        for c in scored:
             self._bank[c.a_list] = c
 
         # Prune bank by reward then loss
@@ -343,8 +411,11 @@ class ArtinACO:
         planner_inject_frac: float = 0.2,
         planner_log_path: str = "runs/gemma_planner_log.jsonl",
         planner_replace_frac: float = 0.2,
-    ) -> Tuple[Dict[str, Any], List[Tuple[int, float, float]]]:
-        history: List[Tuple[int, float, float]] = []
+        reward_mode: str = "rank",
+        loss_clip: float = 1000.0,
+        rank_temperature: float = 1.0,
+    ) -> Tuple[Dict[str, Any], List[Tuple[int, float, float, float, float, str]]]:
+        history: List[Tuple[int, float, float, float, float, str]] = []
         best_snapshot: Dict[str, Any] = {"best_loss": float("inf"), "best_words": [], "best_lengths": []}
         recent_losses: List[float] = []
 
@@ -375,8 +446,13 @@ class ArtinACO:
             # planner injection
             if planner is not None:
                 try:
+                    planner_best_words = [
+                        w
+                        for w in self.best_words
+                        if _is_valid_action_word(w, self.max_length, self.max_power)
+                    ]
                     ctx = {
-                        "best_words": self.best_words,
+                        "best_words": planner_best_words,
                         "recent_losses": recent_losses[-20:],
                         "iteration": int(it),
                         "stats": {
@@ -385,13 +461,32 @@ class ArtinACO:
                             "best_loss": float(last_best_loss),
                         },
                     }
-                    proposals = planner.suggest_words(ctx)
+                    raw_proposals = planner.suggest_words(ctx)
+                    parsed_words = [
+                        list(w) for w in raw_proposals if isinstance(w, list)
+                    ]
+                    proposals = [
+                        list(w)
+                        for w in parsed_words
+                        if _is_valid_action_word(list(w), self.max_length, self.max_power)
+                    ]
+                    valid_seen = set()
+                    valid_words: List[List[int]] = []
+                    for w in proposals:
+                        key = tuple(int(a) for a in w)
+                        if key in valid_seen:
+                            continue
+                        valid_seen.add(key)
+                        valid_words.append(w)
+                    proposals = valid_words
+                    rejected_count = max(0, len(parsed_words) - len(valid_words))
                     used = False
                     if proposals:
                         n_replace = int(min(len(population), max(1, int(float(self.num_ants) * float(planner_inject_frac)))))
                         n_use = min(n_replace, len(proposals))
                         for j in range(n_use):
-                            population[j] = proposals[j]
+                            if _is_valid_action_word(proposals[j], self.max_length, self.max_power):
+                                population[j] = proposals[j]
                         used = n_use > 0
 
                     try:
@@ -401,6 +496,10 @@ class ArtinACO:
                                 json.dumps(
                                     {
                                         "iteration": int(it),
+                                        "raw_response": getattr(planner, "last_raw_response", ""),
+                                        "parsed_words": getattr(planner, "last_parsed_words", parsed_words),
+                                        "valid_words": getattr(planner, "last_valid_words", valid_words),
+                                        "rejected_count": int(getattr(planner, "last_rejected_count", rejected_count)),
                                         "planner_words": proposals,
                                         "used": bool(used),
                                     }
@@ -415,13 +514,15 @@ class ArtinACO:
             # validate
             valids: List[Tuple[List[int], float, float]] = []
             for w in population:
+                if not _is_valid_action_word(w, self.max_length, self.max_power):
+                    continue
                 ok, ell, tr = self._validate_and_length(w)
                 if ok:
                     valids.append((w, ell, tr))
 
             if not valids:
                 self.evaporate()
-                history.append((it, float("inf"), float("inf")))
+                history.append((it, float("inf"), float("inf"), 0.0, 0.0, str(reward_mode)))
                 print(
                     f"[{it}] best=inf mean=inf valid=0 avg_ell=nan bank={len(self._bank)}",
                     flush=True,
@@ -441,11 +542,16 @@ class ArtinACO:
                 op_sigma=float(op_sigma),
                 op_eps=float(op_eps),
                 op_top_k_geodesics=int(op_top_k_geodesics),
+                reward_mode=str(reward_mode),
+                loss_clip=float(loss_clip),
+                rank_temperature=float(rank_temperature),
             )
 
             scored.sort(key=lambda c: c.loss)
             best = scored[0]
             mean_loss = float(np.mean([c.loss for c in scored])) if scored else float("inf")
+            best_reward = float(scored[0].reward) if scored else 0.0
+            mean_reward = float(np.mean([c.reward for c in scored])) if scored else 0.0
             avg_ell = float(np.mean([c.length for c in scored])) if scored else float("nan")
             valid_rate = float(len(scored)) / float(max(1, self.num_ants))
 
@@ -461,7 +567,7 @@ class ArtinACO:
             self.evaporate()
             self.reinforce(scored[: self.best_k_ants])
 
-            history.append((it, float(best.loss), float(mean_loss)))
+            history.append((it, float(best.loss), float(mean_loss), float(best_reward), float(mean_reward), str(reward_mode)))
             recent_losses.append(float(best.loss))
             last_valid_rate = float(valid_rate)
             last_mean_loss = float(mean_loss)
@@ -475,18 +581,19 @@ class ArtinACO:
             print(
                 f"[{it}] best={best.loss:.6g} mean={mean_loss:.6g} valid={len(scored)} "
                 f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
-                f"L_sel={stats['L_selberg']:.3g} L_spec={stats['L_spec']:.3g} dt={dt:.3g}s :: {top_words_s}",
+                f"L_sel={stats['L_selberg']:.3g} L_spec={stats['L_spec']:.3g} "
+                f"best_r={best_reward:.3g} mean_r={mean_reward:.3g} mode={reward_mode} dt={dt:.3g}s :: {top_words_s}",
                 flush=True,
             )
 
         return best_snapshot, history
 
 
-def _write_history_csv(path: Path, history: Iterable[Tuple[int, float, float]]) -> None:
+def _write_history_csv(path: Path, history: Iterable[Tuple[int, float, float, float, float, str]]) -> None:
     with open(path, "w", encoding="utf-8") as f:
-        f.write("iter,best_loss,mean_loss\n")
-        for it, b, m in history:
-            f.write(f"{int(it)},{float(b)},{float(m)}\n")
+        f.write("iter,best_loss,mean_loss,best_reward,mean_reward,reward_mode\n")
+        for it, b, m, br, mr, mode in history:
+            f.write(f"{int(it)},{float(b)},{float(m)},{float(br)},{float(mr)},{mode}\n")
 
 
 def main() -> None:
@@ -524,6 +631,9 @@ def main() -> None:
     ap.add_argument("--planner_model", type=str, default="/Users/machome/models/gemma/gemma-3-1b-it-Q4_K_M.gguf")
     ap.add_argument("--planner_inject_frac", type=float, default=0.2)
     ap.add_argument("--planner_replace_frac", type=float, default=0.2)
+    ap.add_argument("--reward_mode", type=str, default="rank", choices=["inverse", "rank", "soft_rank"])
+    ap.add_argument("--loss_clip", type=float, default=1000.0)
+    ap.add_argument("--rank_temperature", type=float, default=1.0)
     args = ap.parse_args()
 
     zeros = load_zeros(args.zeros)
@@ -568,6 +678,9 @@ def main() -> None:
         planner_inject_frac=float(args.planner_inject_frac),
         planner_log_path=str(Path("runs") / "gemma_planner_log.jsonl"),
         planner_replace_frac=float(args.planner_replace_frac),
+        reward_mode=str(args.reward_mode),
+        loss_clip=float(args.loss_clip),
+        rank_temperature=float(args.rank_temperature),
     )
     dt = time.perf_counter() - t0
 
