@@ -165,7 +165,7 @@ export function getGemmaHealth() {
   return apiGet<GemmaHealthResponse>("/health/gemma");
 }
 
-export type JobStatus = "running" | "done" | "failed";
+export type JobStatus = "queued" | "running" | "paused" | "done" | "failed" | "cancelled";
 
 export type Job = {
   id: string;
@@ -192,7 +192,12 @@ export async function getJobs() {
 }
 
 export async function getJobsSummary() {
-  return await apiGet<{ running_count: number; latest_by_name: Record<string, any> }>("/jobs/summary");
+  return await apiGet<{
+    running_count: number;
+    latest_by_name: Record<string, any>;
+    max_concurrent_jobs?: number;
+    low_resource_mode?: boolean;
+  }>("/jobs/summary");
 }
 
 export async function stopJob(jobId: string) {
@@ -201,6 +206,69 @@ export async function stopJob(jobId: string) {
 
 export async function resumeJob(jobId: string) {
   return await apiPost<{ status: string }>(`/jobs/${encodeURIComponent(jobId)}/resume`, {});
+}
+
+export async function pauseJob(jobId: string) {
+  return await apiPost<{ status: string }>(`/jobs/${encodeURIComponent(jobId)}/pause`, {});
+}
+
+export type SystemMetrics = {
+  cpu_percent: number;
+  memory_percent: number;
+  memory_used_gb: number;
+  memory_total_gb: number;
+  process_cpu_percent: number;
+  process_memory_mb: number;
+  gpu: { available: boolean; type: "mps" | "cuda" | "none"; usage_percent?: number | null; note?: string };
+  timestamp: string;
+};
+
+export async function getSystemMetrics() {
+  return await apiGet<SystemMetrics>("/system/metrics");
+}
+
+export type JobQueueResponse = {
+  running: any[];
+  queued: any[];
+  done_recent: any[];
+};
+
+export async function getJobQueue() {
+  return await apiGet<JobQueueResponse>("/jobs/queue");
+}
+
+export async function cancelJob(jobId: string) {
+  return await apiPost<{ status: string }>(`/jobs/${encodeURIComponent(jobId)}/cancel`, {});
+}
+
+export async function moveJobUp(jobId: string) {
+  return await apiPost<{ status: string }>(`/jobs/${encodeURIComponent(jobId)}/move-up`, {});
+}
+
+export async function moveJobDown(jobId: string) {
+  return await apiPost<{ status: string }>(`/jobs/${encodeURIComponent(jobId)}/move-down`, {});
+}
+
+export type RunCompareRow = {
+  id: string;
+  label: string;
+  timestamp: string;
+  aco_best_loss: number | null;
+  aco_mean_loss: number | null;
+  topo_reward_mean: number | null;
+  topo_advantage_over_random: number | null;
+  self_adjoint_error: number | null;
+  r_mean: number | null;
+  operator_sensitivity: number | null;
+  source: string;
+};
+
+export async function getRunComparison() {
+  return await apiGet<{ runs: RunCompareRow[] }>("/runs/compare");
+}
+
+export async function saveScreenshot(name: string, image_base64: string) {
+  return await apiPost<{ status: string; path: string }>(`/screenshots/save`, { name, image_base64 });
 }
 
 export async function getJob(jobId: string) {

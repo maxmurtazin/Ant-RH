@@ -1,5 +1,6 @@
 SHELL := /bin/bash
 .PHONY: install smoke-v12 run-v12 full-v12 artin selberg operator aco rl stability clean-v12 gemma-test gemma-planner-test gemma-analyzer-test aco-gemma analyze-gemma lab-journal paper pde sensitivity topo-dataset topo-train topo-eval topo-report topo-all topo-ppo topo-ppo-report literature docs help install-tts voices help-voice-v2 help-stream help-chat help-chat-memory clear-help-memory study refresh-help gemma-health dashboard-api dashboard-next dashboard-next-no-reload web-install web checkpoint exports
+.PHONY: dashboard-light dashboard-next-light
 
 PY := python3
 PIP := pip3
@@ -233,7 +234,7 @@ dashboard-8081:
 	python3 scripts/run_dashboard.py --port 8081 --reload True
 
 api-install:
-	python3 -m pip install fastapi uvicorn pydantic
+	python3 -m pip install fastapi uvicorn pydantic psutil
 
 gemma-health:
 	python3 analysis/gemma_health_check.py \
@@ -244,6 +245,7 @@ gemma-health:
 
 web-install:
 	cd web && npm install
+	cd web && npm install recharts html2canvas
 
 web:
 	cd web && npm run dev
@@ -253,6 +255,9 @@ dashboard-api:
 		--port 8084 \
 		--reload True \
 		--write_port_file runs/dashboard_port.txt
+
+dashboard-light:
+	LOW_RESOURCE_MODE=True python3 scripts/run_dashboard.py --port 8084 --reload False
 
 dashboard-next:
 	@echo "Starting Ant-RH dashboard..."
@@ -277,6 +282,15 @@ dashboard-next-no-reload:
 		PORT=$$(cat runs/dashboard_port.txt); \
 		cd web && NEXT_PUBLIC_API_BASE=http://127.0.0.1:$$PORT npm run dev
 
+dashboard-next-light:
+	@mkdir -p runs
+	@rm -f runs/dashboard_port.txt
+	@trap 'kill 0' INT TERM EXIT; \
+		LOW_RESOURCE_MODE=True python3 scripts/run_dashboard.py --port 8084 --reload False --write_port_file runs/dashboard_port.txt & \
+		while [ ! -f runs/dashboard_port.txt ]; do sleep 0.2; done; \
+		PORT=$$(cat runs/dashboard_port.txt); \
+		cd web && NEXT_PUBLIC_API_BASE=http://127.0.0.1:$$PORT npm run dev
+
 full-dashboard:
 	$(MAKE) dashboard-next
 
@@ -287,4 +301,7 @@ checkpoint:
 
 exports:
 	curl http://127.0.0.1:$$(cat runs/dashboard_port.txt)/exports
+
+screenshots:
+	ls -lh runs/screenshots
 

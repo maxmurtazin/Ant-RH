@@ -8,7 +8,12 @@ type StreamEvent =
   | { status: string; returncode?: number; error?: string }
   | { error: string };
 
-export function LogStream(props: { jobId: string | null; enabled?: boolean }) {
+export function LogStream(props: {
+  jobId: string | null;
+  enabled?: boolean;
+  disabledReason?: string;
+  onEnable?: () => void;
+}) {
   const [lines, setLines] = useState<string[]>([]);
   const [status, setStatus] = useState<string>("—");
   const [error, setError] = useState<string>("");
@@ -96,7 +101,14 @@ export function LogStream(props: { jobId: string | null; enabled?: boolean }) {
           <div className="hint">Live stream disabled</div>
         </div>
         <div className="cardBody">
-          <div className="terminalBox mono muted">Enable live log streaming to view output.</div>
+          <div className="low-resource-note mono muted">{props.disabledReason || "Live stream disabled."}</div>
+          {props.onEnable ? (
+            <div className="action-row" style={{ marginTop: 10 }}>
+              <button className="btn" onClick={props.onEnable}>
+                Enable logs for this job
+              </button>
+            </div>
+          ) : null}
         </div>
       </section>
     );

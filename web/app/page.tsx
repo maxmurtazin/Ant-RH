@@ -23,6 +23,11 @@ import { RewardHistogram } from "@/components/RewardHistogram";
 import { SpectralSpacingChart } from "@/components/SpectralSpacingChart";
 import { TopologicalLmMetrics } from "@/components/TopologicalLmMetrics";
 import { StatusBadge } from "@/components/StatusBadge";
+import { LowResourceToggle } from "@/components/LowResourceToggle";
+import { SystemMonitor } from "@/components/SystemMonitor";
+import { JobQueuePanel } from "@/components/JobQueuePanel";
+import { MultiRunComparison } from "@/components/MultiRunComparison";
+import { ScreenshotButton } from "@/components/ScreenshotButton";
 import type {
   AcoMetricsResponse,
   GemmaHealthResponse,
@@ -36,6 +41,9 @@ import type {
 } from "@/lib/api";
 import {
   API_BASE,
+  getJobQueue,
+  getSystemMetrics,
+  getRunComparison,
   createExport,
   exportData,
   getAcoHistory,
@@ -85,19 +93,24 @@ export default function Page() {
   const [progress, setProgress] = useState<any | null>(null);
   const [jobs, setJobs] = useState<any[]>([]);
   const [jobsSummary, setJobsSummary] = useState<any | null>(null);
+  const [systemMetrics, setSystemMetrics] = useState<any | null>(null);
+  const [jobQueue, setJobQueue] = useState<any | null>(null);
+  const [runCompare, setRunCompare] = useState<any | null>(null);
 
   const refreshInFlightRef = useRef(false);
 
   useEffect(() => {
     try {
-      const v = window.localStorage.getItem("ant_rh_low_resource_mode");
-      const on = v === "1" || v === "true";
+      const v = window.localStorage.getItem("ant_low_resource_mode");
+      const on = String(v || "").trim().toLowerCase() === "true";
       setLowResourceMode(on);
       setLogsEnabled(!on);
     } catch {
       // ignore
     }
   }, []);
+
+  const pollInterval = lowResourceMode ? 20_000 : 5_000;
 
   const summary = useMemo(() => {
     if (!status) return "—";
@@ -136,15 +149,13 @@ export default function Page() {
     setActiveJobId(res.job_id);
   }
 
-  const refreshAll = useCallback(
-    async (kind: "auto" | "manual" = "manual") => {
+  const refreshAll = useCallback(async () => {
     if (refreshInFlightRef.current) return;
     refreshInFlightRef.current = true;
     setIsRefreshing(true);
 
     const nextErrors: Partial<Record<EndpointKey, string>> = {};
     let anySuccess = false;
-    const includeHeavy = !lowResourceMode || kind === "manual";
 
     try {
       const results = await Promise.allSettled([
@@ -171,36 +182,30 @@ export default function Page() {
         nextErrors["aco"] = a.reason instanceof Error ? a.reason.message : String(a.reason);
       }
 
-      if (includeHeavy) {
-        try {
-          const history = await getAcoHistory(300);
-          setAcoHistory(Array.isArray(history) ? history : []);
-          setErrors((prev) => ({ ...prev, acoHistory: undefined }));
-        } catch (e) {
-          setErrors((prev) => ({ ...prev, acoHistory: String(e) }));
-          nextErrors["aco-history"] = e instanceof Error ? e.message : String(e);
-        }
+      try {
+        const history = await getAcoHistory(300);
+        setAcoHistory(Array.isArray(history) ? history : []);
+        setErrors((prev) => ({ ...prev, acoHistory: undefined }));
+      } catch (e) {
+        setErrors((prev) => ({ ...prev, acoHistory: String(e) }));
+        nextErrors["aco-history"] = e instanceof Error ? e.message : String(e);
       }
 
       // TopologicalLM history (best-effort; keep last good data on failure)
-      if (includeHeavy) {
-        try {
-          const th = await getTopoHistory(300);
-          setTopoHistory(Array.isArray(th.points) ? th.points : []);
-          setTopoRewardSamples(Array.isArray(th.reward_samples) ? th.reward_samples : []);
-        } catch (e) {
-          nextErrors["topological-lm"] = nextErrors["topological-lm"] || (e instanceof Error ? e.message : String(e));
-        }
+      try {
+        const th = await getTopoHistory(300);
+        setTopoHistory(Array.isArray(th.points) ? th.points : []);
+        setTopoRewardSamples(Array.isArray(th.reward_samples) ? th.reward_samples : []);
+      } catch (e) {
+        nextErrors["topological-lm"] = nextErrors["topological-lm"] || (e instanceof Error ? e.message : String(e));
       }
 
       // Physics history (best-effort; keep last good data on failure)
-      if (includeHeavy) {
-        try {
-          const ph = await getPhysicsHistory(300);
-          setPhysicsHistory(Array.isArray(ph.points) ? ph.points : []);
-        } catch (e) {
-          nextErrors["physics"] = nextErrors["physics"] || (e instanceof Error ? e.message : String(e));
-        }
+      try {
+        const ph = await getPhysicsHistory(300);
+        setPhysicsHistory(Array.isArray(ph.points) ? ph.points : []);
+      } catch (e) {
+        nextErrors["physics"] = nextErrors["physics"] || (e instanceof Error ? e.message : String(e));
       }
 
       if (t.status === "fulfilled") {
@@ -230,15 +235,13 @@ export default function Page() {
       setIsRefreshing(false);
       refreshInFlightRef.current = false;
     }
-    },
-    [lowResourceMode]
-  );
+  }, []);
 
   useEffect(() => {
-    refreshAll("manual");
-    const id = window.setInterval(() => refreshAll("auto"), lowResourceMode ? 20_000 : 5_000);
+    refreshAll();
+    const id = window.setInterval(refreshAll, pollInterval);
     return () => window.clearInterval(id);
-  }, [refreshAll, lowResourceMode]);
+  }, [refreshAll, pollInterval]);
 
   useEffect(() => {
     let cancelled = false;
@@ -251,12 +254,66 @@ export default function Page() {
       }
     }
     refreshSummary();
-    const id = window.setInterval(refreshSummary, lowResourceMode ? 10_000 : 3_000);
+    const id = window.setInterval(refreshSummary, pollInterval);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [pollInterval]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function refreshSystem() {
+      try {
+        const d = await getSystemMetrics();
+        if (!cancelled) setSystemMetrics(d);
+      } catch (e: any) {
+        if (!cancelled) setSystemMetrics({ error: "system_metrics_error", message: e?.message || String(e) });
+      }
+    }
+    refreshSystem();
+    const id = window.setInterval(refreshSystem, pollInterval);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [pollInterval]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function refreshQueue() {
+      try {
+        const q = await getJobQueue();
+        if (!cancelled) setJobQueue(q);
+      } catch {
+        // ignore
+      }
+    }
+    refreshQueue();
+    const id = window.setInterval(refreshQueue, lowResourceMode ? 5_000 : 3_000);
     return () => {
       cancelled = true;
       window.clearInterval(id);
     };
   }, [lowResourceMode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function refreshCompare() {
+      try {
+        const d = await getRunComparison();
+        if (!cancelled) setRunCompare(d);
+      } catch {
+        // keep last good
+      }
+    }
+    refreshCompare();
+    const id = window.setInterval(refreshCompare, 20_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -269,12 +326,12 @@ export default function Page() {
       }
     }
     refreshJobs();
-    const id = window.setInterval(refreshJobs, lowResourceMode ? 10_000 : 5_000);
+    const id = window.setInterval(refreshJobs, pollInterval);
     return () => {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [lowResourceMode]);
+  }, [pollInterval]);
 
   const runningJobs = useMemo(() => jobs.filter((j) => j && j.status === "running"), [jobs]);
   const anyRunning = runningJobs.length > 0;
@@ -290,12 +347,12 @@ export default function Page() {
       }
     }
     refreshProgress();
-    const id = window.setInterval(refreshProgress, lowResourceMode ? 20_000 : 5_000);
+    const id = window.setInterval(refreshProgress, pollInterval);
     return () => {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [lowResourceMode]);
+  }, [pollInterval]);
 
   useEffect(() => {
     let cancelled = false;
@@ -308,12 +365,12 @@ export default function Page() {
       }
     }
     refreshSpectral();
-    const id = window.setInterval(refreshSpectral, lowResourceMode ? 60_000 : 20_000);
+    const id = window.setInterval(refreshSpectral, pollInterval);
     return () => {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [lowResourceMode]);
+  }, [pollInterval]);
 
   useEffect(() => {
     let cancelled = false;
@@ -329,12 +386,12 @@ export default function Page() {
       }
     }
     refreshOperator();
-    const id = window.setInterval(refreshOperator, lowResourceMode ? 30_000 : 10_000);
+    const id = window.setInterval(refreshOperator, pollInterval);
     return () => {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [lowResourceMode]);
+  }, [pollInterval]);
 
   const endpointBadges = useMemo(() => {
     const mk = (key: EndpointKey, hasData: boolean) => {
@@ -354,44 +411,42 @@ export default function Page() {
   }, [endpointErrors, status, aco, acoHistory.length, topo, physics, gemmaHealth]);
 
   return (
-    <div className="dashboardPage">
-      <div className="dashboardHeader">
-        <div className="dashboardHeaderLeft">
-          <div className="dashboardTitle">Ant-RH Control Dashboard</div>
-          <div className="mono muted dashboardSub">
+    <div className="dashboardPage" id="dashboard-root">
+      <header className="dashboard-header">
+        <div>
+          <h1 className="dashboardTitle">Ant-RH Control Dashboard</h1>
+          <div className="header-meta mono muted">
             <span className="badge mono">Live: ON</span>
             <span className="badge mono">API base: {API_BASE}</span>
             <span className="badge mono">Last updated: {lastUpdated}</span>
           </div>
         </div>
-        <div className="dashboardHeaderRight">
+        <div className="header-actions">
           {isRefreshing ? <span className="spinner" aria-label="Refreshing" /> : null}
-          <label className="mono muted" style={{ display: "inline-flex", alignItems: "center", gap: 8, marginRight: 10 }}>
-            <input
-              type="checkbox"
-              checked={lowResourceMode}
-              onChange={(e) => {
-                const on = e.target.checked;
-                setLowResourceMode(on);
-                setLogsEnabled(!on);
-                try {
-                  window.localStorage.setItem("ant_rh_low_resource_mode", on ? "1" : "0");
-                } catch {
-                  // ignore
-                }
-              }}
-            />
-            Low Resource Mode
-          </label>
-          <button className="btn btnPrimary" onClick={() => refreshAll("manual")} disabled={isRefreshing}>
+          <LowResourceToggle
+            enabled={lowResourceMode}
+            onChange={(on) => {
+              setLowResourceMode(on);
+              setLogsEnabled(!on);
+              try {
+                window.localStorage.setItem("ant_low_resource_mode", on ? "true" : "false");
+              } catch {
+                // ignore
+              }
+            }}
+          />
+          <button className="btn btnPrimary" onClick={() => refreshAll()} disabled={isRefreshing}>
             Refresh
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="dashboardGrid">
+      <SystemMonitor data={systemMetrics} compact />
+
+      <div className="dashboard-grid">
         <div className="resultsCol">
           <div className="sectionTitle">Results &amp; Diagnostics</div>
+          <div className="results-grid">
 
           <section className="card">
         <div className="cardHeader">
@@ -424,31 +479,55 @@ export default function Page() {
             </div>
           </div>
           <div className="divider" />
-          <div className="mono muted">Auto-refresh every 5s</div>
+          <div className="mono muted">Auto-refresh every {lowResourceMode ? "20s" : "5s"}</div>
         </div>
           </section>
 
       <AcoMetrics data={aco} />
-      <AcoLiveCharts points={acoHistory} />
+      <div id="aco-live-charts">
+        <AcoLiveCharts points={acoHistory} />
+      </div>
       <AcoCharts points={acoHistory} />
       <OperatorCharts
         operatorDistanceMean={operatorAnalysis?.sensitivity?.operator_distance_mean ?? null}
         lossStd={operatorAnalysis?.sensitivity?.loss_std ?? null}
       />
-      <SpectralSpacingChart data={spectralSpacing} />
+      <div id="spectral-spacing-chart">
+        <SpectralSpacingChart data={spectralSpacing} />
+      </div>
       <RewardHistogram samples={topoRewardSamples} />
       <PhysicsCharts points={physicsHistory} />
       <TopologicalLmMetrics data={topo} />
       <PhysicsDiagnostics data={physics} />
-      <OperatorAnalysis data={operatorAnalysis} />
+      <div id="operator-analysis">
+        <OperatorAnalysis data={operatorAnalysis} />
+      </div>
+      <MultiRunComparison runs={Array.isArray(runCompare?.runs) ? runCompare.runs : []} />
+          </div>
         </div>
 
         <div className="controlsCol">
-          <div className="controlsSticky">
+          <div className="controls-column">
             <div className="sectionTitle">Run Controls</div>
 
             <QuickGuide onRunJob={startJob} jobsSummary={jobsSummary} />
-            <NextStepAdvisor onRunJob={startJob} onStartFullPipeline={startPipeline} jobsSummary={jobsSummary} />
+            <section className="card span2">
+              <div className="cardHeader">
+                <div className="cardTitle">Screenshots</div>
+                <div className="hint">Saved to runs/screenshots</div>
+              </div>
+              <div className="cardBody">
+                <div className="row" style={{ flexWrap: "wrap" }}>
+                  <ScreenshotButton targetId="dashboard-root" name="dashboard" label="Save Dashboard" />
+                  <ScreenshotButton targetId="aco-live-charts" name="aco_chart" label="Save ACO Chart" />
+                  <ScreenshotButton targetId="spectral-spacing-chart" name="spectral_spacing" label="Save Spectral Spacing" />
+                  <ScreenshotButton targetId="operator-analysis" name="operator_analysis" label="Save Operator Analysis" />
+                  <ScreenshotButton targetId="multi-run-comparison" name="multi_run_comparison" label="Save Run Comparison" />
+                </div>
+              </div>
+            </section>
+          <JobQueuePanel data={jobQueue} onRefresh={async () => setJobQueue(await getJobQueue())} />
+        <NextStepAdvisor onRunJob={startJob} onStartFullPipeline={startPipeline} jobsSummary={jobsSummary} lowResourceMode={lowResourceMode} />
             <FullPipelinePanel onStart={startPipeline} activeJobId={activeJobId} jobsSummary={jobsSummary} />
             <ProgressTracker data={progress} onRunJob={startJob} jobsSummary={jobsSummary} />
             <JobControlPanel
@@ -512,7 +591,18 @@ export default function Page() {
               </div>
             </section>
 
-            <LogStream jobId={activeJobId} />
+        <LogStream
+          jobId={activeJobId}
+          enabled={logsEnabled}
+          disabledReason={lowResourceMode ? "Live logs disabled in Low Resource Mode." : "Live logs disabled."}
+          onEnable={
+            lowResourceMode
+              ? () => {
+                  setLogsEnabled(true);
+                }
+              : undefined
+          }
+        />
           </div>
         </div>
       </div>

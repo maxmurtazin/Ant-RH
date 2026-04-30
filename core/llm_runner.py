@@ -76,7 +76,8 @@ class LLMRunner:
                 ],
                 capture_output=True,
                 text=True,
-                timeout=120,
+                timeout=float(self.timeout_s) if float(self.timeout_s) > 0 else None,
+                check=False,
             )
         except subprocess.TimeoutExpired:
             return ""

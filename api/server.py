@@ -16,6 +16,7 @@ from datetime import datetime
 from collections import deque
 from pathlib import Path
 from typing import Any, Dict, Optional, List, Mapping
+import base64
 
 from fastapi import Body, FastAPI, HTTPException, Request, Response, Query, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
@@ -62,7 +63,6 @@ _RESP_CACHE: Dict[str, Any] = {}
 _RESP_CACHE_TS: Dict[str, float] = {}
 CACHE_TTL_S = 8.0 if LOW_RESOURCE_MODE else 5.0
 
-
 def _cache_get(key: str) -> Optional[Any]:
     try:
         ts = float(_RESP_CACHE_TS.get(key, 0.0))
@@ -98,6 +98,245 @@ _STATIC_DIR = Path(__file__).resolve().parent / "static"
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 # -----------------------------------------------------------------------------
+# System metrics (optional dependency: psutil)
+# -----------------------------------------------------------------------------
+
+
+@app.get("/system/metrics")
+def system_metrics() -> JSONResponse:
+    """
+    Lightweight system + process metrics for the dashboard.
+    If psutil is missing, return a clear error (no crash).
+    """
+    try:
+        import psutil  # type: ignore
+    except Exception:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": "psutil_missing",
+                "message": "psutil is not installed. Install it with: pip install psutil",
+                "timestamp": _now_iso(),
+            },
+        )
+
+    # CPU / RAM (system)
+    try:
+        cpu_percent = float(psutil.cpu_percent(interval=None))
+    except Exception:
+        cpu_percent = 0.0
+
+    try:
+        vm = psutil.virtual_memory()
+        memory_percent = float(getattr(vm, "percent", 0.0) or 0.0)
+        memory_used_gb = float(getattr(vm, "used", 0) or 0) / (1024**3)
+        memory_total_gb = float(getattr(vm, "total", 0) or 0) / (1024**3)
+    except Exception:
+        memory_percent = 0.0
+        memory_used_gb = 0.0
+        memory_total_gb = 0.0
+
+    # Process metrics
+    try:
+        p = psutil.Process(os.getpid())
+        process_cpu_percent = float(p.cpu_percent(interval=None))
+        rss = float(p.memory_info().rss) if p.memory_info() else 0.0
+        process_memory_mb = rss / (1024**2)
+    except Exception:
+        process_cpu_percent = 0.0
+        process_memory_mb = 0.0
+
+    # GPU probe (best-effort; usage may be unavailable on macOS MPS)
+    gpu: Dict[str, Any] = {"available": False, "type": "none", "note": "GPU not detected"}
+    try:
+        import torch  # type: ignore
+
+        try:
+            if hasattr(torch, "backends") and hasattr(torch.backends, "mps") and torch.backends.mps.is_available():  # type: ignore
+                gpu = {
+                    "available": True,
+                    "type": "mps",
+                    "usage_percent": None,
+                    "note": "MPS available, detailed usage not exposed",
+                }
+            elif hasattr(torch, "cuda") and torch.cuda.is_available():  # type: ignore
+                gpu = {
+                    "available": True,
+                    "type": "cuda",
+                    "usage_percent": None,
+                    "note": "CUDA available, detailed usage not exposed",
+                }
+            else:
+                gpu = {"available": False, "type": "none", "note": "torch available; no GPU backend detected"}
+        except Exception:
+            gpu = {"available": False, "type": "none", "note": "torch available; GPU probe failed"}
+    except Exception:
+        gpu = {"available": False, "type": "none", "note": "torch not installed"}
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "cpu_percent": cpu_percent,
+            "memory_percent": memory_percent,
+            "memory_used_gb": round(memory_used_gb, 3),
+            "memory_total_gb": round(memory_total_gb, 3),
+            "process_cpu_percent": process_cpu_percent,
+            "process_memory_mb": round(process_memory_mb, 1),
+            "gpu": gpu,
+            "timestamp": _now_iso(),
+        },
+    )
+
+
+@app.get("/runs/compare")
+def runs_compare() -> JSONResponse:
+    """
+    Compare current run to saved checkpoints in runs/exports/index.json.
+    Never crashes; missing metrics become null.
+    """
+
+    def _to_float(v: Any) -> Optional[float]:
+        try:
+            if v is None:
+                return None
+            f = float(v)
+            if f != f or abs(f) == float("inf"):
+                return None
+            return float(f)
+        except Exception:
+            return None
+
+    # Current run metrics (best-effort from live artifacts)
+    cur_aco_best = None
+    cur_aco_mean = None
+    try:
+        rows = read_csv_rows_rel_runs("artin_aco_history.csv")
+        m = aco_metrics_from_history(rows or [])
+        cur_aco_best = _to_float(m.get("best_loss"))
+        cur_aco_mean = _to_float(m.get("mean_loss"))
+    except Exception:
+        pass
+
+    topo_reward_mean = None
+    topo_adv = None
+    r_mean = None
+    try:
+        report = read_json_rel_runs("topological_lm/eval_report.json") or {}
+        mt = topological_lm_metrics_from_eval_report(report)
+        topo_reward_mean = _to_float(mt.get("topological_lm_mean_reward") or mt.get("mean_reward"))
+        topo_adv = _to_float(mt.get("advantage_over_random"))
+        r_mean = _to_float(mt.get("r_mean"))
+    except Exception:
+        pass
+
+    self_adjoint_error = None
+    try:
+        osr = read_json_rel_runs("operator_stability_report.json") or {}
+        if isinstance(osr, dict):
+            self_adjoint_error = _to_float(osr.get("self_adjoint_error_after") or osr.get("symmetry_error_after"))
+    except Exception:
+        pass
+
+    operator_sensitivity = None
+    try:
+        sens = read_json_rel_runs("operator_sensitivity_report.json") or {}
+        if isinstance(sens, dict):
+            operator_sensitivity = _to_float(sens.get("operator_distance_mean") or sens.get("loss_std"))
+    except Exception:
+        pass
+
+    runs: List[Dict[str, Any]] = [
+        {
+            "id": "current",
+            "label": "Current",
+            "timestamp": _now_iso(),
+            "aco_best_loss": cur_aco_best,
+            "aco_mean_loss": cur_aco_mean,
+            "topo_reward_mean": topo_reward_mean,
+            "topo_advantage_over_random": topo_adv,
+            "self_adjoint_error": self_adjoint_error,
+            "r_mean": r_mean,
+            "operator_sensitivity": operator_sensitivity,
+            "source": "current",
+        }
+    ]
+
+    # Checkpoints from exports index
+    try:
+        idx = _load_exports_index()
+        ex = idx.get("exports", []) if isinstance(idx, dict) else []
+        if isinstance(ex, list):
+            for entry in ex:
+                if not isinstance(entry, dict):
+                    continue
+                ms = entry.get("metrics_summary") if isinstance(entry.get("metrics_summary"), dict) else {}
+                rid = str(entry.get("id") or "")
+                if not rid:
+                    continue
+                runs.append(
+                    {
+                        "id": rid,
+                        "label": str(entry.get("name") or rid),
+                        "timestamp": str(entry.get("timestamp") or ""),
+                        "aco_best_loss": _to_float(ms.get("aco_best_loss")),
+                        "aco_mean_loss": _to_float(ms.get("aco_mean_loss")),
+                        "topo_reward_mean": _to_float(ms.get("topo_reward_mean")),
+                        "topo_advantage_over_random": _to_float(ms.get("topo_advantage_over_random")),
+                        "self_adjoint_error": _to_float(ms.get("self_adjoint_error")),
+                        "r_mean": _to_float(ms.get("r_mean")),
+                        "operator_sensitivity": _to_float(ms.get("operator_sensitivity")),
+                        "source": "checkpoint",
+                    }
+                )
+    except Exception:
+        pass
+
+    return JSONResponse(status_code=200, content={"runs": runs})
+
+
+@app.post("/screenshots/save")
+def screenshots_save(payload: Dict[str, Any] = Body(...)) -> JSONResponse:
+    """
+    Save a PNG data URL to runs/screenshots/{timestamp}_{safe_name}.png
+    Safety:
+      - only data:image/png;base64,...
+      - max decoded size 20MB
+      - sanitize name; no traversal
+    """
+    name = str((payload or {}).get("name") or "").strip() or "screenshot"
+    data_url = str((payload or {}).get("image_base64") or "")
+
+    if not data_url.startswith("data:image/png;base64,"):
+        raise HTTPException(status_code=400, detail="Only PNG data URLs are supported.")
+
+    b64 = data_url.split(",", 1)[1].strip()
+    try:
+        raw = base64.b64decode(b64, validate=True)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid base64.")
+
+    if len(raw) > 20 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Image too large (max 20MB).")
+
+    safe = re.sub(r"[^a-zA-Z0-9_-]+", "_", name).strip("_")
+    if not safe:
+        safe = "screenshot"
+    safe = safe[:60]
+
+    out_dir = (REPO_ROOT / "runs" / "screenshots").resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    ts = _now_ts()
+    rel = Path("runs") / "screenshots" / f"{ts}_{safe}.png"
+    out_path = (REPO_ROOT / rel).resolve()
+    # Ensure path stays within repo
+    if REPO_ROOT.resolve() not in out_path.parents:
+        raise HTTPException(status_code=400, detail="Invalid path.")
+
+    out_path.write_bytes(raw)
+    return JSONResponse(status_code=200, content={"status": "ok", "path": rel.as_posix()})
+
+# -----------------------------------------------------------------------------
 # Jobs (whitelisted commands only)
 # -----------------------------------------------------------------------------
 
@@ -113,7 +352,26 @@ EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
 EXPORTS_INDEX_PATH = EXPORTS_DIR / "index.json"
 
 # In-memory job store (simple, local-only API).
-JOBS: Dict[str, Dict[str, Any]] = {}
+JOBS: Dict[str, Dict[str, Any]] = globals().get("JOBS", {})  # type: ignore[assignment]
+if not isinstance(JOBS, dict):
+    JOBS = {}
+JOB_QUEUE: List[str] = []  # list of job_ids in queued order
+
+
+def _job_list() -> List[Dict[str, Any]]:
+    try:
+        return [j for j in list(JOBS.values()) if isinstance(j, dict)]
+    except Exception:
+        return []
+
+
+def _refresh_jobs_safe() -> None:
+    fn = globals().get("refresh_job_statuses") or globals().get("_refresh_job_statuses")
+    if callable(fn):
+        try:
+            fn()
+        except Exception:
+            pass
 
 ALLOWED_SIMPLE_JOBS = {
     "topo-train": {"name": "TopologicalLM Train", "kind": "make", "target": "topo-train"},
@@ -365,6 +623,65 @@ def _running_jobs_count() -> int:
     return sum(1 for j in JOBS.values() if j.get("status") == "running")
 
 
+def _active_jobs_count() -> int:
+    return sum(1 for j in JOBS.values() if j.get("status") in {"running", "paused"})
+
+
+def maybe_start_next_job() -> None:
+    """
+    Queue worker: if capacity allows, start the next queued job.
+    Called after enqueue, after job ends, and on queue reads.
+    """
+    _jobs_watchdog()
+    # Don't start new jobs if we have active ones occupying capacity.
+    if _active_jobs_count() >= MAX_CONCURRENT_JOBS:
+        return
+    # Find next queued job_id
+    next_id = None
+    while JOB_QUEUE:
+        cand = str(JOB_QUEUE[0])
+        j = JOBS.get(cand)
+        if not j or str(j.get("status")) != "queued":
+            JOB_QUEUE.pop(0)
+            continue
+        next_id = cand
+        break
+    if not next_id:
+        return
+
+    job = JOBS.get(next_id)
+    if not job:
+        return
+    try:
+        job["status"] = "running"
+        job["started_at"] = _now_iso()
+        job["started_ts"] = time.time()
+        job["ended_at"] = None
+        job["ended_ts"] = None
+
+        # Pipeline jobs run in-process via a stored runner.
+        runner = job.get("_runner")
+        if callable(runner):
+            t = threading.Thread(target=runner, daemon=True)
+            t.start()
+            return
+
+        cmd = list(job.get("command") or [])
+        log_path = Path(str(job.get("log_path") or ""))
+        if not cmd or not str(log_path):
+            _mark_job_ended(job, status="failed", returncode=-1, error="invalid_job_spec")
+            return
+        proc = _start_job_process(next_id, cmd, log_path)
+        t = threading.Thread(target=_watch_job, args=(next_id, proc), daemon=True)
+        t.start()
+    finally:
+        try:
+            if next_id in JOB_QUEUE:
+                JOB_QUEUE.remove(next_id)
+        except Exception:
+            pass
+
+
 def _running_jobs_summary() -> List[Dict[str, Any]]:
     out = []
     for j in JOBS.values():
@@ -477,6 +794,7 @@ def _job_public(job: Mapping[str, Any]) -> Dict[str, Any]:
     out = dict(job)
     out.pop("_log_fh", None)
     out.pop("_proc", None)
+    out.pop("_runner", None)
     # normalize name -> job key for UI
     out["name"] = job_key
     out["elapsed_seconds"] = float(_job_elapsed_seconds(job))
@@ -698,6 +1016,12 @@ def _watch_job(job_id: str, proc: subprocess.Popen) -> None:
                 job["snapshot_id"] = entry.get("id")
             except Exception as e:
                 job["snapshot_warning"] = str(e)
+    except Exception:
+        pass
+
+    # Try starting next queued job (best-effort).
+    try:
+        maybe_start_next_job()
     except Exception:
         pass
 
@@ -1229,8 +1553,11 @@ def recommend_next_step(use_gemma: bool = Query(False)) -> JSONResponse:
             "priority": "low",
         }
 
-    # In LOW_RESOURCE_MODE, only use Gemma when explicitly requested (?use_gemma=true).
-    use_gemma = bool(use_gemma) if LOW_RESOURCE_MODE else True
+    # Gemma is opt-in: only run llama-cli when explicitly requested (?use_gemma=true).
+    use_gemma = bool(use_gemma)
+
+    if not use_gemma:
+        return JSONResponse(status_code=200, content=rule_fallback())
 
     # Try Gemma via llama-cli (optional).
     llama_cli = shutil.which("llama-cli")
@@ -1271,8 +1598,7 @@ def recommend_next_step(use_gemma: bool = Query(False)) -> JSONResponse:
 
 @app.post("/jobs/start-full-pipeline")
 def jobs_start_full_pipeline(payload: Dict[str, Any] = Body(...)) -> JSONResponse:
-    if _running_jobs_count() >= MAX_CONCURRENT_JOBS:
-        raise HTTPException(status_code=429, detail=f"Too many running jobs (max {MAX_CONCURRENT_JOBS}).")
+    # Enqueue full pipeline job; the queue worker will start it when capacity is free.
 
     include_ppo = bool((payload or {}).get("include_ppo", False))
     continue_on_failure = bool((payload or {}).get("continue_on_failure", True))
@@ -1299,9 +1625,9 @@ def jobs_start_full_pipeline(payload: Dict[str, Any] = Body(...)) -> JSONRespons
         "job": "full-pipeline",
         "name": "Full pipeline",
         "command": [s["name"] for s in stages],
-        "status": "running",
-        "started_at": _now_iso(),
-        "started_ts": time.time(),
+        "status": "queued",
+        "started_at": None,
+        "started_ts": None,
         "timeout_seconds": int(JOB_TIMEOUT_S.get("full-pipeline", 0) or 0),
         "ended_at": None,
         "ended_ts": None,
@@ -1362,9 +1688,15 @@ def jobs_start_full_pipeline(payload: Dict[str, Any] = Body(...)) -> JSONRespons
             job["ended_at"] = _now_iso()
             job["ended_ts"] = time.time()
             job["status"] = "done" if rc_total == 0 else "failed"
+            try:
+                maybe_start_next_job()
+            except Exception:
+                pass
 
-    t = threading.Thread(target=_runner, daemon=True)
-    t.start()
+    # Store runner so the queue worker can start it.
+    JOBS[job_id]["_runner"] = _runner
+    JOB_QUEUE.append(job_id)
+    maybe_start_next_job()
 
     return JSONResponse(status_code=200, content={"job_id": job_id})
 
@@ -1758,27 +2090,6 @@ def jobs_start(payload: Dict[str, Any] = Body(...)) -> JSONResponse:
     if job_key not in ALLOWED_JOBS:
         raise HTTPException(status_code=400, detail="Job not allowed.")
 
-    # Prevent duplicate starts for the same job key.
-    if any(j.get("status") in {"running", "paused"} and str(j.get("job")) == job_key for j in JOBS.values()):
-        return JSONResponse(
-            status_code=409,
-            content={
-                "error": "job_conflict",
-                "message": "A conflicting job is already running or paused.",
-                "running_jobs": _running_jobs_summary(),
-            },
-        )
-
-    if _running_jobs_count() >= MAX_CONCURRENT_JOBS:
-        return JSONResponse(
-            status_code=429,
-            content={
-                "error": "too_many_jobs",
-                "message": "Too many jobs are already running. Wait for current jobs to finish.",
-                "running_jobs": _running_jobs_summary(),
-            },
-        )
-
     job_id = uuid.uuid4().hex[:12]
     log_path = LOGS_DIR / f"{job_id}.log"
 
@@ -1800,19 +2111,17 @@ def jobs_start(payload: Dict[str, Any] = Body(...)) -> JSONResponse:
         "job": job_key,
         "name": name,
         "command": cmd,
-        "status": "running",
-        "started_at": _now_iso(),
-        "started_ts": time.time(),
+        "status": "queued",
+        "started_at": None,
+        "started_ts": None,
         "timeout_seconds": int(JOB_TIMEOUT_S.get(job_key, 0) or 0),
         "ended_at": None,
         "ended_ts": None,
         "log_path": str(log_path),
         "returncode": None,
     }
-
-    proc = _start_job_process(job_id, cmd, log_path)
-    t = threading.Thread(target=_watch_job, args=(job_id, proc), daemon=True)
-    t.start()
+    JOB_QUEUE.append(job_id)
+    maybe_start_next_job()
 
     return JSONResponse(status_code=200, content={"job_id": job_id})
 
@@ -1820,6 +2129,7 @@ def jobs_start(payload: Dict[str, Any] = Body(...)) -> JSONResponse:
 @app.get("/jobs")
 def jobs_list() -> JSONResponse:
     _jobs_watchdog()
+    maybe_start_next_job()
     items = [_job_public(j) for j in JOBS.values()]
     items.sort(key=lambda j: str(j.get("started_at") or ""), reverse=True)
     return JSONResponse(status_code=200, content={"jobs": items})
@@ -1835,21 +2145,25 @@ def jobs_get(job_id: str) -> JSONResponse:
 
 @app.get("/jobs/summary")
 def jobs_summary() -> JSONResponse:
-    _jobs_watchdog()
-    items = [_job_public(j) for j in JOBS.values()]
-    running = [j for j in items if j.get("status") == "running"]
+    _refresh_jobs_safe()
+    jobs = _job_list()
     latest_by_name: Dict[str, Any] = {}
-    for j in items:
-        name = str(j.get("name") or "")
-        if not name:
-            continue
+    running_count = 0
+
+    for job in jobs:
+        name = job.get("name") or job.get("job") or "unknown"
+        status = job.get("status", "unknown")
+        if status == "running":
+            running_count += 1
+
         prev = latest_by_name.get(name)
-        if not prev:
-            latest_by_name[name] = j
-            continue
-        if str(j.get("started_at") or "") > str(prev.get("started_at") or ""):
-            latest_by_name[name] = j
-    return JSONResponse(status_code=200, content={"running_count": len(running), "latest_by_name": latest_by_name})
+        if prev is None or str(job.get("started_at", "")) > str(prev.get("started_at", "")):
+            latest_by_name[name] = job
+
+    return JSONResponse(
+        status_code=200,
+        content={"running_count": running_count, "latest_by_name": latest_by_name, "total_jobs": len(jobs)},
+    )
 
 
 @app.post("/jobs/{job_id}/stop")
@@ -1870,6 +2184,10 @@ def jobs_stop(job_id: str) -> JSONResponse:
         job["returncode"] = -15
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    try:
+        maybe_start_next_job()
+    except Exception:
+        pass
     return JSONResponse(status_code=200, content={"status": "ok"})
 
 
@@ -1887,6 +2205,119 @@ def jobs_resume(job_id: str) -> JSONResponse:
         os.kill(int(pid), signal.SIGCONT)
         if job.get("status") == "paused":
             job["status"] = "running"
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return JSONResponse(status_code=200, content={"status": "ok"})
+
+
+@app.post("/jobs/{job_id}/pause")
+def jobs_pause(job_id: str) -> JSONResponse:
+    job = JOBS.get(str(job_id))
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found.")
+    pid = job.get("pid")
+    if not pid:
+        raise HTTPException(status_code=400, detail="Job has no PID (cannot pause).")
+    try:
+        import signal
+
+        os.kill(int(pid), signal.SIGSTOP)
+        job["status"] = "paused"
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return JSONResponse(status_code=200, content={"status": "ok"})
+
+
+@app.get("/jobs/queue")
+def jobs_queue() -> JSONResponse:
+    _refresh_jobs_safe()
+    jobs = _job_list()
+    return JSONResponse(
+        status_code=200,
+        content={
+            "running": [j for j in jobs if j.get("status") == "running"],
+            "queued": [j for j in jobs if j.get("status") == "queued"],
+            "paused": [j for j in jobs if j.get("status") == "paused"],
+            "done_recent": [j for j in jobs if j.get("status") in ["done", "failed", "cancelled"]][-10:],
+        },
+    )
+
+
+@app.post("/jobs/{job_id}/cancel")
+def jobs_cancel(job_id: str) -> JSONResponse:
+    jid = str(job_id)
+    job = JOBS.get(jid)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found.")
+
+    st = str(job.get("status") or "")
+    if st == "queued":
+        try:
+            if jid in JOB_QUEUE:
+                JOB_QUEUE.remove(jid)
+        except Exception:
+            pass
+        job["status"] = "cancelled"
+        job["ended_at"] = _now_iso()
+        job["ended_ts"] = time.time()
+        job["returncode"] = -2
+        _close_job_log(job)
+        job.pop("_proc", None)
+        job.pop("_runner", None)
+        maybe_start_next_job()
+        return JSONResponse(status_code=200, content={"status": "ok"})
+
+    if st in {"running", "paused"}:
+        pid = job.get("pid")
+        try:
+            import signal
+
+            if pid:
+                os.kill(int(pid), signal.SIGTERM)
+        except Exception:
+            pass
+        job["status"] = "cancelled"
+        job["ended_at"] = _now_iso()
+        job["ended_ts"] = time.time()
+        job["returncode"] = -15
+        _close_job_log(job)
+        job.pop("_proc", None)
+        job.pop("_runner", None)
+        maybe_start_next_job()
+        return JSONResponse(status_code=200, content={"status": "ok"})
+
+    return JSONResponse(status_code=200, content={"status": "ok"})
+
+
+@app.post("/jobs/{job_id}/move-up")
+def jobs_move_up(job_id: str) -> JSONResponse:
+    jid = str(job_id)
+    job = JOBS.get(jid)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found.")
+    if str(job.get("status")) != "queued":
+        raise HTTPException(status_code=400, detail="Job is not queued.")
+    try:
+        idx = JOB_QUEUE.index(jid)
+        if idx > 0:
+            JOB_QUEUE[idx - 1], JOB_QUEUE[idx] = JOB_QUEUE[idx], JOB_QUEUE[idx - 1]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return JSONResponse(status_code=200, content={"status": "ok"})
+
+
+@app.post("/jobs/{job_id}/move-down")
+def jobs_move_down(job_id: str) -> JSONResponse:
+    jid = str(job_id)
+    job = JOBS.get(jid)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found.")
+    if str(job.get("status")) != "queued":
+        raise HTTPException(status_code=400, detail="Job is not queued.")
+    try:
+        idx = JOB_QUEUE.index(jid)
+        if idx < (len(JOB_QUEUE) - 1):
+            JOB_QUEUE[idx + 1], JOB_QUEUE[idx] = JOB_QUEUE[idx], JOB_QUEUE[idx + 1]
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     return JSONResponse(status_code=200, content={"status": "ok"})
@@ -1917,7 +2348,7 @@ def health_gemma() -> JSONResponse:
         if not path.exists():
             return JSONResponse(
                 status_code=200,
-                content={"status": "unknown", "message": "Run make gemma-health first."},
+                content={"status": "unknown", "message": "Run Gemma Health manually."},
             )
         loaded = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(loaded, dict):

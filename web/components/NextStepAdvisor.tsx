@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MetricCard } from "@/components/MetricCard";
 import { getNextRecommendation, type NextStepRecommendation } from "@/lib/api";
 import { JobButton } from "@/components/JobButton";
@@ -15,9 +15,8 @@ export function NextStepAdvisor(props: {
   const [rec, setRec] = useState<NextStepRecommendation | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [useGemma, setUseGemma] = useState(false);
 
-  async function refresh() {
+  async function refresh(useGemma: boolean) {
     setBusy(true);
     setError("");
     try {
@@ -29,14 +28,6 @@ export function NextStepAdvisor(props: {
       setBusy(false);
     }
   }
-
-  useEffect(() => {
-    if (props.lowResourceMode) return;
-    refresh();
-    const id = window.setInterval(refresh, 30_000);
-    return () => window.clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.lowResourceMode, useGemma]);
 
   const pr = rec?.priority || "low";
   const prCls = pr === "high" ? "priority-high" : pr === "medium" ? "priority-medium" : "priority-low";
@@ -62,7 +53,7 @@ export function NextStepAdvisor(props: {
     >
       {error ? <div className="errorBox mono">{error}</div> : null}
       {!rec ? (
-        <div className="mono muted">No recommendation yet.</div>
+        <div className="mono muted">Click Get Recommendation to ask Gemma.</div>
       ) : (
         <div className="mono">
           <div style={{ fontWeight: 750, marginBottom: 6 }}>{rec.next_step}</div>
@@ -75,15 +66,12 @@ export function NextStepAdvisor(props: {
       )}
 
       <div className="action-row" style={{ marginTop: 12 }}>
-        <button className="btn" disabled={busy} onClick={refresh}>
-          Refresh Recommendation
+        <button className="btn" disabled={busy} onClick={() => refresh(false)}>
+          Get Rule Recommendation
         </button>
-        {props.lowResourceMode ? (
-          <label className="mono muted" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <input type="checkbox" checked={useGemma} onChange={(e) => setUseGemma(e.target.checked)} />
-            use Gemma
-          </label>
-        ) : null}
+        <button className="btn btnPrimary" disabled={busy || Boolean(props.lowResourceMode)} onClick={() => refresh(true)}>
+          Ask Gemma Recommendation
+        </button>
         {rec ? (
           <JobButton
             label="Run Recommended Action"

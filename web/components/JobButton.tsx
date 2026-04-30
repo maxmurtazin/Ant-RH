@@ -25,7 +25,8 @@ export function JobButton(props: {
   const status = String(job?.status || "idle");
   const eta = typeof job?.eta_seconds === "number" ? job.eta_seconds : null;
   const runningCount = Number(props.jobsSummary?.running_count ?? 0);
-  const globalCapReached = runningCount >= 2;
+  const maxConcurrent = Number(props.jobsSummary?.max_concurrent_jobs ?? 2);
+  const globalCapReached = runningCount >= maxConcurrent;
 
   const { text, disabled, badge } = useMemo(() => {
     if (status === "running") {
