@@ -1,5 +1,4 @@
-const BASE = process.env.NEXT_PUBLIC_API_BASE?.trim() || "http://127.0.0.1:8084";
-export const API_BASE = BASE;
+export const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8084";
 
 export type StatusResponse = {
   ok: boolean;
@@ -43,11 +42,7 @@ export type AcoHistoryPoint = {
   reward_mode: string | null;
 };
 
-export type AcoHistoryResponse = {
-  points: AcoHistoryPoint[];
-  n: number;
-  source?: string;
-};
+export type AcoHistoryResponse = { points: AcoHistoryPoint[]; n: number; source?: string };
 
 export type TopoMetricsResponse = {
   random_mean_reward: number | null;
@@ -103,32 +98,41 @@ export type RunResultResponse = {
 export type GemmaHelpRequest = { question: string; voice: boolean };
 export type GemmaHelpResponse = { answer: string };
 
-async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const url = `${BASE}${path}`;
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 12_000);
-  try {
-    const res = await fetch(url, { ...init, signal: controller.signal });
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      throw new Error(`${init?.method || "GET"} ${path} failed (${res.status}): ${txt}`);
+export async function fetchJson(path: string, options?: RequestInit) {
+  const url = `${API_BASE}${path}`;
+  const res = await fetch(url, { cache: "no-store", ...(options || {}) });
+  if (!res.ok) {
+    let body: any = null;
+    try {
+      body = await res.json();
+    } catch {
+      try {
+        body = await res.text();
+      } catch {
+        body = null;
+      }
     }
-    return (await res.json()) as T;
-  } finally {
-    window.clearTimeout(timeout);
+    const err: any = new Error(`${res.status} ${res.statusText}: ${url}`);
+    err.status = res.status;
+    err.body = body;
+    throw err;
   }
+  return await res.json();
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  return await fetchJson<T>(path, { method: "GET" });
+  const url = `${API_BASE}${path}`;
+  const res = await fetch(url, { method: "GET", cache: "no-store" });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${url}`);
+  return (await res.json()) as T;
 }
 
 export async function apiPost<T>(path: string, body: unknown): Promise<T> {
-  return await fetchJson<T>(path, {
+  return (await fetchJson(path, {
     method: "POST",
+    body: JSON.stringify(body ?? {}),
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body ?? {})
-  });
+  })) as T;
 }
 
 export function getStatus() {
@@ -140,7 +144,13 @@ export function getAcoMetrics() {
 }
 
 export async function getAcoHistory(limit = 300) {
-  return await fetchJson<AcoHistoryResponse>(`/metrics/aco/history?limit=${limit}`);
+  const data = (await fetchJson(`/metrics/aco/history?limit=${limit}`)) as unknown;
+  // Temporary debug
+  // eslint-disable-next-line no-console
+  console.log("ACO history response", data);
+  if (Array.isArray(data)) return data as any[];
+  if (data && typeof data === "object" && Array.isArray((data as any).points)) return (data as any).points as any[];
+  return [];
 }
 
 export function getTopoMetrics() {
@@ -153,5 +163,198 @@ export function getPhysicsMetrics() {
 
 export function getGemmaHealth() {
   return apiGet<GemmaHealthResponse>("/health/gemma");
+}
+
+export type JobStatus = "running" | "done" | "failed";
+
+export type Job = {
+  id: string;
+  name: string;
+  command: string[];
+  status: JobStatus;
+  started_at: string;
+  ended_at: string | null;
+  log_path: string;
+  returncode: number | null;
+  pid?: number;
+};
+
+export async function startJob(job: string, params?: Record<string, any>) {
+  return (await fetchJson("/jobs/start", {
+    method: "POST",
+    body: JSON.stringify({ job, params: params || {} }),
+    headers: { "Content-Type": "application/json" },
+  })) as { job_id: string };
+}
+
+export async function getJobs() {
+  return await apiGet<{ jobs: Job[] }>("/jobs");
+}
+
+export async function getJobsSummary() {
+  return await apiGet<{ running_count: number; latest_by_name: Record<string, any> }>("/jobs/summary");
+}
+
+export async function stopJob(jobId: string) {
+  return await apiPost<{ status: string }>(`/jobs/${encodeURIComponent(jobId)}/stop`, {});
+}
+
+export async function resumeJob(jobId: string) {
+  return await apiPost<{ status: string }>(`/jobs/${encodeURIComponent(jobId)}/resume`, {});
+}
+
+export async function getJob(jobId: string) {
+  return await apiGet<Job>(`/jobs/${encodeURIComponent(jobId)}`);
+}
+
+export async function getJobLog(jobId: string, lines = 200) {
+  const q = `?lines=${encodeURIComponent(String(lines))}`;
+  return await apiGet<{ job_id: string; lines: string[] }>(`/jobs/${encodeURIComponent(jobId)}/log${q}`);
+}
+
+export type OperatorAnalysisResponse = {
+  formula_tex: string | null;
+  formula_text: string | null;
+  pde_report_excerpt: string | null;
+  active_terms: { term: string; coefficient: number; abs_coefficient: number }[];
+  stability: { self_adjoint_error: number | null; eigh_success: boolean | null; spectral_loss: number | null };
+  sensitivity: {
+    operator_distance_mean: number | null;
+    spectrum_distance_mean: number | null;
+    loss_std: number | null;
+    diagnosis: string | null;
+  };
+  structured_operator: {
+    final_loss: number | null;
+    spectral_loss: number | null;
+    spacing_loss: number | null;
+    top_weights: any[];
+  };
+  source_files: string[];
+};
+
+export async function getOperatorAnalysis() {
+  return await apiGet<OperatorAnalysisResponse>("/operator/analysis");
+}
+
+export type TopoHistoryPoint = {
+  iter: number;
+  mean_reward: number | null;
+  unique_candidate_ratio: number | null;
+};
+
+export type TopoHistoryResponse = {
+  points: TopoHistoryPoint[];
+  reward_samples: number[];
+  n: number;
+  source: string | null;
+};
+
+export async function getTopoHistory(limit = 300) {
+  return await apiGet<TopoHistoryResponse>(`/metrics/topological-lm/history?limit=${encodeURIComponent(String(limit))}`);
+}
+
+export type PhysicsHistoryPoint = {
+  iter: number;
+  r_mean: number | null;
+  self_adjoint_error: number | null;
+};
+
+export type PhysicsHistoryResponse = {
+  points: PhysicsHistoryPoint[];
+  n: number;
+  source: string | null;
+};
+
+export async function getPhysicsHistory(limit = 300) {
+  return await apiGet<PhysicsHistoryResponse>(`/metrics/physics/history?limit=${encodeURIComponent(String(limit))}`);
+}
+
+export type SpectralSpacingResponse = {
+  hist_bins: number[];
+  operator_spacing_hist: number[];
+  zeta_spacing_hist: number[];
+  gue_curve: number[];
+  poisson_curve: number[];
+  operator_r_mean: number | null;
+  zeta_r_mean: number | null;
+  source: string | null;
+};
+
+export async function getSpectralSpacing() {
+  return await apiGet<SpectralSpacingResponse>("/metrics/spectral/spacing");
+}
+
+export function exportData() {
+  window.open(`${API_BASE}/export`, "_blank");
+}
+
+export async function importData(file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${API_BASE}/import`, {
+    method: "POST",
+    body: form,
+  });
+  return await res.json();
+}
+
+export type ExportEntry = {
+  id: string;
+  timestamp: string;
+  name: string;
+  reason: string;
+  path: string;
+  size_bytes: number;
+  files_count: number;
+  metrics_summary?: { aco_best_loss?: number | null; topo_reward_mean?: number | null; spectral_loss?: number | null };
+};
+
+export async function getExports() {
+  return (await apiGet<{ exports: ExportEntry[] }>("/exports")).exports || [];
+}
+
+export async function createExport(name: string, reason: string) {
+  return await apiPost<ExportEntry>("/exports/create", { name, reason });
+}
+
+export function downloadExport(id: string) {
+  window.open(`${API_BASE}/exports/${encodeURIComponent(id)}/download`, "_blank");
+}
+
+export async function deleteExport(id: string) {
+  const url = `${API_BASE}/exports/${encodeURIComponent(id)}`;
+  const res = await fetch(url, { method: "DELETE" });
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${url}`);
+  return await res.json();
+}
+
+export type ExperimentProgressResponse = {
+  steps: { id: string; title: string; status: "done" | "running" | "pending" | "failed"; eta_seconds: number; evidence: string; command: string }[];
+  overall_progress: number;
+  estimated_remaining_seconds: number;
+};
+
+export async function getExperimentProgress() {
+  return await apiGet<ExperimentProgressResponse>("/experiment/progress");
+}
+
+export type NextStepRecommendation = {
+  source: "gemma" | "rules";
+  next_step: string;
+  reason: string;
+  command: string;
+  dashboard_action: string;
+  priority: "low" | "medium" | "high";
+};
+
+export async function getNextRecommendation(opts?: { use_gemma?: boolean }) {
+  const useGemma = Boolean(opts?.use_gemma);
+  const qs = useGemma ? "?use_gemma=true" : "";
+  return await apiGet<NextStepRecommendation>(`/recommend/next-step${qs}`);
+}
+
+export async function startFullPipeline(options: { continue_on_failure: boolean; include_ppo: boolean }) {
+  return await apiPost<{ job_id: string }>("/jobs/start-full-pipeline", options);
 }
 

@@ -250,14 +250,35 @@ def main() -> None:
     ap.add_argument("--planner_model", type=str, required=True)
     ap.add_argument("--analyzer_model", type=str, required=True)
     ap.add_argument("--timeout", type=int, default=60)
+    ap.add_argument("--global_timeout", type=int, default=180)
     args = ap.parse_args()
 
     timeout_s = int(args.timeout)
+    global_timeout_s = int(args.global_timeout)
     llama_cli = str(args.llama_cli)
     planner_model = str(args.planner_model)
     analyzer_model = str(args.analyzer_model)
 
     checks: List[CheckResult] = []
+    global_start = time.time()
+    hit_global_timeout = False
+
+    def _global_ok() -> bool:
+        return (time.time() - global_start) <= global_timeout_s
+
+    def _stop_if_global_timeout() -> bool:
+        nonlocal hit_global_timeout
+        if _global_ok():
+            return False
+        hit_global_timeout = True
+        return True
+
+    def _write_and_exit_partial() -> None:
+        overall = "degraded"
+        payload = {"overall_status": overall, "checks": [c.to_dict() for c in checks]}
+        _write_json(RUNS_DIR / "gemma_health_check.json", payload)
+        _write_text(RUNS_DIR / "gemma_health_check.md", render_md(overall, checks))
+        raise SystemExit(0)
 
     checks.append(check_llama_cli(llama_cli, timeout_s=timeout_s))
     checks.append(check_model_file("planner_model", planner_model))
@@ -267,20 +288,32 @@ def main() -> None:
     analyzer_exists = Path(analyzer_model).exists()
     cli_ok = next((c for c in checks if c.name == "llama-cli"), None)
 
+    if _stop_if_global_timeout():
+        _write_and_exit_partial()
+
     if cli_ok and cli_ok.status == "ok" and planner_exists:
         checks.append(check_direct_llama(llama_cli, planner_model, timeout_s=timeout_s))
     else:
         checks.append(CheckResult("direct_llama", "failed", 0.0, "skipped (llama-cli or planner model missing)"))
+
+    if _stop_if_global_timeout():
+        _write_and_exit_partial()
 
     if cli_ok and cli_ok.status == "ok" and planner_exists:
         checks.append(check_planner(llama_cli, planner_model, timeout_s=timeout_s))
     else:
         checks.append(CheckResult("planner", "failed", 0.0, "skipped (llama-cli or planner model missing)"))
 
+    if _stop_if_global_timeout():
+        _write_and_exit_partial()
+
     if cli_ok and cli_ok.status == "ok" and analyzer_exists:
         checks.append(check_analyzer(llama_cli, analyzer_model, timeout_s=timeout_s))
     else:
         checks.append(CheckResult("analyzer", "failed", 0.0, "skipped (llama-cli or analyzer model missing)"))
+
+    if _stop_if_global_timeout():
+        _write_and_exit_partial()
 
     if cli_ok and cli_ok.status == "ok" and planner_exists:
         checks.append(check_help(llama_cli, planner_model, timeout_s=timeout_s))
@@ -288,12 +321,19 @@ def main() -> None:
         checks.append(CheckResult("help", "failed", 0.0, "skipped (llama-cli or planner model missing)"))
 
     # Optional checks as requested (non-fatal if unsupported)
-    checks.append(_optional_agent_check("lab_journal", ["python3", "analysis/gemma_lab_journal.py", "--dry_run"], timeout_s=timeout_s))
-    checks.append(_optional_agent_check("paper_writer", ["python3", "analysis/gemma_paper_writer.py", "--dry_run"], timeout_s=timeout_s))
-    checks.append(_optional_agent_check("docs_builder", ["python3", "analysis/gemma_docs_builder.py", "--dry_run"], timeout_s=timeout_s))
-    checks.append(_optional_agent_check("literature_study", ["python3", "analysis/gemma_literature_study.py", "--dry_run"], timeout_s=timeout_s))
+    if not _stop_if_global_timeout():
+        checks.append(_optional_agent_check("lab_journal", ["python3", "analysis/gemma_lab_journal.py", "--dry_run"], timeout_s=timeout_s))
+    if not _stop_if_global_timeout():
+        checks.append(_optional_agent_check("paper_writer", ["python3", "analysis/gemma_paper_writer.py", "--dry_run"], timeout_s=timeout_s))
+    if not _stop_if_global_timeout():
+        checks.append(_optional_agent_check("docs_builder", ["python3", "analysis/gemma_docs_builder.py", "--dry_run"], timeout_s=timeout_s))
+    if not _stop_if_global_timeout():
+        checks.append(_optional_agent_check("literature_study", ["python3", "analysis/gemma_literature_study.py", "--dry_run"], timeout_s=timeout_s))
 
-    overall = overall_status(checks)
+    if hit_global_timeout:
+        overall = "degraded"
+    else:
+        overall = overall_status(checks)
 
     # Print CSV table
     print("agent,status,latency_s,message")

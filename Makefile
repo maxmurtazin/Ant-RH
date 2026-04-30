@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: install smoke-v12 run-v12 full-v12 artin selberg operator aco rl stability clean-v12 gemma-test gemma-planner-test gemma-analyzer-test aco-gemma analyze-gemma lab-journal paper pde sensitivity topo-dataset topo-train topo-eval topo-report topo-all topo-ppo topo-ppo-report literature docs help install-tts voices help-voice-v2 help-stream help-chat help-chat-memory clear-help-memory study refresh-help gemma-health dashboard-api dashboard-next dashboard-next-no-reload web-install web
+.PHONY: install smoke-v12 run-v12 full-v12 artin selberg operator aco rl stability clean-v12 gemma-test gemma-planner-test gemma-analyzer-test aco-gemma analyze-gemma lab-journal paper pde sensitivity topo-dataset topo-train topo-eval topo-report topo-all topo-ppo topo-ppo-report literature docs help install-tts voices help-voice-v2 help-stream help-chat help-chat-memory clear-help-memory study refresh-help gemma-health dashboard-api dashboard-next dashboard-next-no-reload web-install web checkpoint exports
 
 PY := python3
 PIP := pip3
@@ -279,4 +279,12 @@ dashboard-next-no-reload:
 
 full-dashboard:
 	$(MAKE) dashboard-next
+
+checkpoint:
+	curl -X POST http://127.0.0.1:$$(cat runs/dashboard_port.txt)/exports/create \
+	  -H "Content-Type: application/json" \
+	  -d '{"name":"manual_cli_checkpoint","reason":"manual_cli"}'
+
+exports:
+	curl http://127.0.0.1:$$(cat runs/dashboard_port.txt)/exports
 

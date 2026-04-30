@@ -92,6 +92,111 @@ body {
   gap: 14px;
 }
 
+.dashboardPage {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dashboardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 2px;
+}
+
+.dashboardTitle {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-size: 18px;
+}
+
+.dashboardSub {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.dashboardHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.resultsCol,
+.controlsCol {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.controlsSticky {
+  position: sticky;
+  top: 76px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.86);
+  margin: 6px 2px;
+}
+
+.quickGuideList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quickGuideStep {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.quickGuideStepActive {
+  border-color: rgba(94, 234, 212, 0.28);
+  background: rgba(94, 234, 212, 0.06);
+}
+
+.quickGuideNum {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.quickGuideTitle {
+  font-weight: 750;
+}
+
+.quickGuideDesc {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
 .span2 {
   grid-column: span 2;
 }
@@ -102,6 +207,15 @@ body {
   }
   .span2 {
     grid-column: span 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+  .controlsSticky {
+    position: static;
   }
 }
 
@@ -168,6 +282,167 @@ body {
   border-radius: 12px;
   margin: 0;
   white-space: pre-wrap;
+}
+
+.formulaBox {
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+  margin: 0;
+  white-space: pre;
+  overflow: auto;
+  max-height: 260px;
+}
+
+.compactTable td {
+  padding: 8px 8px;
+}
+
+.compactTable thead td {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-button.secondary {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.progressBarOuter {
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.progressBarInner {
+  height: 100%;
+  background: rgba(94, 234, 212, 0.55);
+  border-right: 1px solid rgba(94, 234, 212, 0.35);
+}
+
+.progressList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.progressRow {
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.progressStatus {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  display: inline-flex;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.progressStatusDone {
+  color: var(--good);
+  border-color: rgba(52, 211, 153, 0.25);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.progressStatusRunning {
+  color: var(--accent);
+  border-color: rgba(94, 234, 212, 0.25);
+  background: rgba(94, 234, 212, 0.08);
+}
+
+.progressStatusPending {
+  color: var(--muted);
+}
+
+.progressStatusFailed {
+  color: var(--bad);
+  border-color: rgba(251, 113, 133, 0.25);
+  background: rgba(251, 113, 133, 0.08);
+}
+
+.progressTitle {
+  font-weight: 750;
+}
+
+.progressMeta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.progressActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.priority-high {
+  color: var(--bad);
+  border-color: rgba(251, 113, 133, 0.25);
+  background: rgba(251, 113, 133, 0.08);
+}
+
+.priority-medium {
+  color: var(--warn);
+  border-color: rgba(251, 191, 36, 0.25);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.priority-low {
+  color: var(--muted);
+}
+
+.jobButtonWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.job-button.running {
+  border-color: rgba(251, 191, 36, 0.28);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.job-button.done {
+  border-color: rgba(52, 211, 153, 0.22);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.job-button.failed {
+  border-color: rgba(251, 113, 133, 0.22);
+  background: rgba(251, 113, 133, 0.08);
+}
+
+.job-badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .divider {
@@ -318,6 +593,30 @@ body {
   gap: 10px;
   flex-wrap: wrap;
   align-items: center;
+}
+
+.terminalBox {
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 12px;
+  padding: 12px;
+  max-height: 400px;
+  overflow: auto;
+}
+
+.terminalLine {
+  color: rgba(160, 174, 192, 0.92);
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.terminalLine:not(:last-child) {
+  margin-bottom: 2px;
+}
+
+.terminalBox .terminalLine:first-child {
+  color: rgba(52, 211, 153, 0.92);
 }
 
 .spinner {
