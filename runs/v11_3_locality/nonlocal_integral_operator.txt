@@ -1,7 +1,0 @@
-Symbolic locality diagnostic — not proof of RH
-
-The kernel is classified as nonlocal. Use the integral operator form:
-
-(Hf)(t) = integral K(t,s) f(s) ds
-
-This is an operator diagnostic, not a proof of RH.

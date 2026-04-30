@@ -161,6 +161,19 @@ def main() -> None:
             )
     else:
         lines.append("- No top candidates recorded.")
+    lines.extend(["", "## Physics Diagnostics", "", "For each baseline (dedup if available):"])
+    if baselines:
+        for name, stats in baselines.items():
+            mode_stats = stats.get("dedup", stats.get("raw", {})) or {}
+            lines.append(
+                f"- `{name}`: self_adjoint_status=`{mode_stats.get('self_adjoint_status', 'n/a')}` "
+                f"spectral_status=`{mode_stats.get('spectral_status', 'n/a')}` "
+                f"otoc_indicator=`{mode_stats.get('otoc_indicator', 'n/a')}` "
+                f"r_mean=`{mode_stats.get('r_mean', 'n/a')}`"
+            )
+    else:
+        lines.append("- No physics diagnostics available.")
+
     lines.extend(
         [
             "",
@@ -174,6 +187,7 @@ def main() -> None:
             "- Replace proxy executor terms with full structured operator evaluation.",
             "- Add ACO/RL refinement loop over generated candidates.",
             "- Track whether advantage_over_random improves after each executor or dataset revision.",
+            "- Track physics diagnostics (self-adjointness, spectral non-degeneracy, r-statistic) across baselines and over time.",
             "",
         ]
     )

@@ -1,4 +1,0 @@
-Symbolic kernel candidate — not a proof of RH
-
-InputForm[(-4033.92579008 - 3244.07343497*Delta)*Delta + 4946.67728807/(1 + Delta) + 2046.53093397*Cos[2*Delta] - 2362.8709576*Cos[3*Delta] - 6174.24225494*Cos[4*Delta] - 3912.66454253*Cos[5*Delta] - 2755.71265631*Cos[7*Delta] - 3299.91929037*Cos[8*Delta] + 5946.94708299*Cos[9*Delta] + 8752.04668265*Cos[10.*Delta] - 7557.53173389*Cos[11.*Delta] - 3694.51904241*Log[1 + Delta] - 2942.88567733*Sin[Delta] - 3251.25574773*Sin[4*Delta] - 4316.4408533*Sin[5*Delta] + 7469.56413635*Sin[7*Delta] + 3979.36302526*Sin[8*Delta] - 6912.90512291*Sin[11.*Delta] + 2667.30528*Sin[12.*Delta]]
-Null

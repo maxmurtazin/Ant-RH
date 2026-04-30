@@ -57,6 +57,68 @@ def _safe_stats(values: List[float]) -> Dict[str, float]:
     }
 
 
+def _mode(items: List[str]) -> str:
+    if not items:
+        return "n/a"
+    counts: Dict[str, int] = {}
+    for x in items:
+        k = str(x)
+        counts[k] = counts.get(k, 0) + 1
+    return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+
+
+def _physics_summary(results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    valid = [r for r in results if r.get("valid")]
+    pool = valid if valid else results
+
+    sa_errors = []
+    sa_statuses = []
+    spectral_statuses = []
+    r_means = []
+    for r in pool:
+        try:
+            sa_errors.append(float(r.get("self_adjoint_error", float("inf"))))
+        except Exception:
+            pass
+        if r.get("self_adjoint_status") is not None:
+            sa_statuses.append(str(r.get("self_adjoint_status")))
+        if r.get("spectral_status") is not None:
+            spectral_statuses.append(str(r.get("spectral_status")))
+        try:
+            rv = r.get("r_mean", None)
+            if rv is not None:
+                r_means.append(float(rv))
+        except Exception:
+            pass
+
+    sa_err_mean = float(sum(sa_errors) / len(sa_errors)) if sa_errors else float("inf")
+    if sa_err_mean < 1e-6:
+        sa_status = "ok"
+    elif sa_err_mean < 1e-3:
+        sa_status = "approx"
+    else:
+        sa_status = "broken"
+
+    spectral_status = _mode(spectral_statuses) if spectral_statuses else "degenerate"
+
+    r_mean = float(sum(r_means) / len(r_means)) if r_means else None
+    if r_mean is None:
+        otoc = "integrable"
+    elif r_mean < 0.4:
+        otoc = "integrable"
+    elif r_mean < 0.5:
+        otoc = "intermediate"
+    else:
+        otoc = "chaotic"
+
+    return {
+        "self_adjoint_status": sa_status,
+        "spectral_status": spectral_status,
+        "otoc_indicator": otoc,
+        "r_mean": r_mean,
+    }
+
+
 def _summarize_one(results: List[Dict[str, Any]]) -> Dict[str, Any]:
     valid = [r for r in results if r.get("valid")]
     rejected = [r for r in results if not r.get("valid")]
@@ -83,6 +145,7 @@ def _summarize_one(results: List[Dict[str, Any]]) -> Dict[str, Any]:
         "component_means": component_means,
         "top_10_candidates": top_10_candidates,
     }
+    summary.update(_physics_summary(results))
     summary.update(_safe_stats(rewards))
     return summary
 

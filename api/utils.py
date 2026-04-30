@@ -158,12 +158,25 @@ def topological_lm_metrics_from_eval_report(report: Mapping[str, Any]) -> Dict[s
     if topo_mean is not None and random_mean is not None:
         advantage = topo_mean - random_mean
 
+    # Physics diagnostics (prefer dedup if present)
+    topo_dedup = topo_node.get("dedup", {}) if isinstance(topo_node.get("dedup"), dict) else {}
+    topo_raw = topo_node.get("raw", {}) if isinstance(topo_node.get("raw"), dict) else {}
+    phys_src = topo_dedup if topo_dedup else topo_raw
+    self_adjoint_status = phys_src.get("self_adjoint_status") if isinstance(phys_src, dict) else None
+    spectral_status = phys_src.get("spectral_status") if isinstance(phys_src, dict) else None
+    otoc_indicator = phys_src.get("otoc_indicator") if isinstance(phys_src, dict) else None
+    r_mean = to_float(phys_src.get("r_mean")) if isinstance(phys_src, dict) else None
+
     return {
         "random_mean_reward": random_mean,
         "topological_lm_mean_reward": topo_mean,
         "advantage_over_random": advantage,
         "unique_candidate_ratio": unique_ratio,
         "valid_braid_ratio": valid_ratio,
+        "self_adjoint_status": (str(self_adjoint_status) if self_adjoint_status is not None else None),
+        "spectral_status": (str(spectral_status) if spectral_status is not None else None),
+        "otoc_indicator": (str(otoc_indicator) if otoc_indicator is not None else None),
+        "r_mean": r_mean,
     }
 
 

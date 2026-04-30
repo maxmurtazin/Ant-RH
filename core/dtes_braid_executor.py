@@ -24,6 +24,58 @@ from core.artin_symbolic_billiard import (
 from core.spectral_stabilization import safe_eigh
 
 
+def _physics_diagnostics(H_raw: np.ndarray, eigvals: np.ndarray) -> Dict[str, Any]:
+    # 1) Self-adjoint diagnostics
+    hn = float(np.linalg.norm(H_raw, ord="fro"))
+    hdiff = float(np.linalg.norm(H_raw - H_raw.T, ord="fro")) / (hn + 1e-8)
+    if hdiff < 1e-6:
+        sa_status = "ok"
+    elif hdiff < 1e-3:
+        sa_status = "approx"
+    else:
+        sa_status = "broken"
+
+    # 2) Spectral diagnostics
+    eig = np.asarray(eigvals)
+    imag_max = float(np.max(np.abs(np.imag(eig)))) if eig.size else float("inf")
+    spectrum_real = bool(imag_max < 1e-8)
+    eig_sorted = np.sort(np.real(eig)) if eig.size else np.array([], dtype=np.float64)
+    spacing = np.diff(eig_sorted) if eig_sorted.size >= 2 else np.array([], dtype=np.float64)
+    spacing_std = float(np.std(spacing)) if spacing.size else 0.0
+    spectral_status = "ok" if (spectrum_real and spacing_std > 0.0) else "degenerate"
+
+    # 3) OTOC-like proxy via r-statistic
+    r_mean = None
+    otoc_indicator = "integrable"
+    if spacing.size >= 3:
+        s = np.asarray(spacing, dtype=np.float64)
+        s0 = np.abs(s[:-1])
+        s1 = np.abs(s[1:])
+        denom = np.maximum(np.maximum(s0, s1), 1e-12)
+        r = np.minimum(s0, s1) / denom
+        r_mean_val = float(np.mean(r)) if r.size else None
+        r_mean = r_mean_val
+        if r_mean_val is None:
+            otoc_indicator = "integrable"
+        elif r_mean_val < 0.4:
+            otoc_indicator = "integrable"
+        elif r_mean_val < 0.5:
+            otoc_indicator = "intermediate"
+        else:
+            otoc_indicator = "chaotic"
+    else:
+        r_mean = None
+        otoc_indicator = "integrable"
+
+    return {
+        "self_adjoint_error": float(hdiff),
+        "self_adjoint_status": sa_status,
+        "spectral_status": spectral_status,
+        "otoc_indicator": otoc_indicator,
+        "r_mean": (float(r_mean) if isinstance(r_mean, (int, float)) else None),
+    }
+
+
 def braid_tokens_to_artin_word(tokens) -> list[int]:
     word: List[int] = []
     for tok in tokens:
@@ -54,6 +106,10 @@ def evaluate_braid_candidate(word: list[int], seen_words: Optional[Set[Tuple[int
         "diversity_score": 0.0,
         "spectral_error": float("inf"),
         "self_adjoint_error": float("inf"),
+        "self_adjoint_status": "broken",
+        "spectral_status": "degenerate",
+        "otoc_indicator": "integrable",
+        "r_mean": None,
         "primitive": False,
         "hyperbolic": False,
         "reason": "",
@@ -86,19 +142,19 @@ def evaluate_braid_candidate(word: list[int], seen_words: Optional[Set[Tuple[int
         z = sample_domain(64, seed=42)
         L, _, _ = build_laplacian(z, eps=0.6)
         K, _ = build_geodesic_kernel(z, geodesics, sigma=0.3)
-        H = (-L + K).astype(np.float64, copy=False)
-        H = 0.5 * (H + H.T)
-        fro_sym = float(np.linalg.norm(H - H.T, ord="fro"))
+        H_raw = (-L + K).astype(np.float64, copy=False)
+        H = 0.5 * (H_raw + H_raw.T)
         eigvals, _, erep = safe_eigh(H, stabilize=True, seed=42)
+        phys = _physics_diagnostics(H_raw, eigvals)
         spectral_error = float(np.std(eigvals[: min(16, len(eigvals))])) if len(eigvals) else float("inf")
         target_length = 4.0
         validity_score = 1.0 + (0.5 if primitive else 0.0)
         length_score = max(-2.0, min(1.0, -abs(float(length) - target_length) / target_length))
         spectral_score = -math.log1p(max(float(spectral_error), 0.0)) if np.isfinite(spectral_error) else -10.0
-        if fro_sym < 1e-6:
+        if float(phys.get("self_adjoint_error", float("inf"))) < 1e-6:
             stability_score = 1.0
         else:
-            stability_score = -math.log1p(max(fro_sym, 0.0))
+            stability_score = -math.log1p(max(float(phys.get("self_adjoint_error", 0.0)), 0.0))
         repetition_count = sum(1 for i in range(1, len(clean)) if clean[i] == clean[i - 1])
         diversity_ratio = len(set(clean)) / max(len(clean), 1)
         diversity_score = max(0.0, min(1.0, diversity_ratio - repetition_count / max(len(clean) - 1, 1)))
@@ -123,7 +179,11 @@ def evaluate_braid_candidate(word: list[int], seen_words: Optional[Set[Tuple[int
                 "trace": float(tr),
                 "primitive": bool(primitive),
                 "spectral_error": float(spectral_error),
-                "self_adjoint_error": float(fro_sym),
+                "self_adjoint_error": float(phys.get("self_adjoint_error", float("inf"))),
+                "self_adjoint_status": str(phys.get("self_adjoint_status", "broken")),
+                "spectral_status": str(phys.get("spectral_status", "degenerate")),
+                "otoc_indicator": str(phys.get("otoc_indicator", "integrable")),
+                "r_mean": phys.get("r_mean", None),
                 "validity_score": float(validity_score),
                 "length_score": float(length_score),
                 "spectral_score": float(spectral_score),

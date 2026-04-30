@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ant-RH Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">Ant-RH</div>
+        <div class="subtitle">Local Control Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div id="healthBadge" class="badge badge-warn">checking…</div>
+        <button id="btnRefresh" class="btn btn-primary">Refresh</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="grid">
+        <div class="card span-2">
+          <div class="card-header">
+            <div class="card-title">Project Status</div>
+            <div id="statusBadge" class="badge badge-muted">unknown</div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div>
+                <div class="label">Current state</div>
+                <div id="statusSummary" class="mono block">—</div>
+              </div>
+              <div>
+                <div class="label">Missing artifacts</div>
+                <div id="missingList" class="mono block">—</div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="two-col">
+              <div>
+                <div class="label">Bottlenecks</div>
+                <ul id="bottlenecks" class="list mono">
+                  <li>—</li>
+                </ul>
+              </div>
+              <div>
+                <div class="label">Next actions</div>
+                <ul id="nextActions" class="list mono">
+                  <li>—</li>
+                </ul>
+              </div>
+            </div>
+
+            <details class="details">
+              <summary class="details-summary">Project memory (head)</summary>
+              <pre id="projectMemory" class="pre mono">—</pre>
+            </details>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">ACO Metrics</div>
+            <div id="acoTrendBadge" class="badge badge-muted">—</div>
+          </div>
+          <div class="card-body">
+            <table class="table mono">
+              <tbody>
+                <tr>
+                  <td class="k">best_loss (last)</td>
+                  <td id="acoBest" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">mean_loss (last)</td>
+                  <td id="acoMean" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">trend</td>
+                  <td id="acoTrend" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">n_rows</td>
+                  <td id="acoRows" class="v">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Topological LLM Metrics</div>
+            <div id="topoBadge" class="badge badge-muted">—</div>
+          </div>
+          <div class="card-body">
+            <table class="table mono">
+              <tbody>
+                <tr>
+                  <td class="k">random mean_reward</td>
+                  <td id="topoRandom" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">TopologicalLM mean_reward</td>
+                  <td id="topoMean" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">advantage_over_random</td>
+                  <td id="topoAdv" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">unique_candidate_ratio</td>
+                  <td id="topoUnique" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">valid_braid_ratio</td>
+                  <td id="topoValid" class="v">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Physics Diagnostics</div>
+            <div class="card-header-right">
+              <div id="physSource" class="badge badge-muted">—</div>
+              <button id="btnRefreshPhysics" class="btn">Refresh</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div>
+                <div class="label">Self-adjoint</div>
+                <div class="row">
+                  <span id="physSelfAdjBadge" class="status status-unknown">UNKNOWN</span>
+                  <span class="muted mono">error:</span>
+                  <span id="physSelfAdjErr" class="mono">—</span>
+                </div>
+              </div>
+              <div>
+                <div class="label">Spectrum</div>
+                <div class="row">
+                  <span id="physSpecBadge" class="status status-unknown">UNKNOWN</span>
+                  <span class="muted mono">spacing_std:</span>
+                  <span id="physSpacingStd" class="mono">—</span>
+                </div>
+                <div class="row">
+                  <span class="muted mono">spectrum_real:</span>
+                  <span id="physSpectrumReal" class="mono">—</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div>
+              <div class="label">OTOC / Chaos proxy</div>
+              <div class="row">
+                <span id="physOtocBadge" class="status status-unknown">UNKNOWN</span>
+                <span class="muted mono">r_mean:</span>
+                <span id="physRMean" class="mono">—</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="actions">
+              <button class="btn" data-stage="topo-eval" data-refresh-physics="true">Run topo-eval</button>
+              <button class="btn" data-stage="stability" data-refresh-physics="true">Run stability</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card span-2">
+          <div class="card-header">
+            <div class="card-title">Actions</div>
+            <div class="hint">Whitelisted local actions only</div>
+          </div>
+          <div class="card-body">
+            <div class="actions">
+              <button class="btn" data-stage="study">Run study</button>
+              <button class="btn" data-stage="analyze">Run analyze-gemma</button>
+              <button class="btn" data-stage="journal">Run lab-journal</button>
+              <button class="btn" data-stage="topo-eval">Run topo-eval</button>
+              <button class="btn" data-stage="docs">Run docs</button>
+            </div>
+            <div class="runbox">
+              <div class="label">Last run</div>
+              <div id="runMeta" class="mono block">—</div>
+              <div class="two-col">
+                <div>
+                  <div class="label">stdout</div>
+                  <pre id="runStdout" class="pre mono">—</pre>
+                </div>
+                <div>
+                  <div class="label">stderr</div>
+                  <pre id="runStderr" class="pre mono">—</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Gemma Agents Health</div>
+            <div id="gemmaHealthBadge" class="badge badge-muted">unknown</div>
+          </div>
+          <div class="card-body">
+            <div class="actions">
+              <button class="btn" data-stage="gemma-health">Run Gemma Health Check</button>
+            </div>
+            <table class="table mono">
+              <tbody>
+                <tr>
+                  <td class="k">overall_status</td>
+                  <td id="gemmaOverall" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">planner</td>
+                  <td id="gemmaPlanner" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">analyzer</td>
+                  <td id="gemmaAnalyzer" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">help</td>
+                  <td id="gemmaHelp" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">journal</td>
+                  <td id="gemmaJournal" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">paper</td>
+                  <td id="gemmaPaper" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">docs</td>
+                  <td id="gemmaDocs" class="v">—</td>
+                </tr>
+                <tr>
+                  <td class="k">literature</td>
+                  <td id="gemmaLiterature" class="v">—</td>
+                </tr>
+              </tbody>
+            </table>
+            <details class="details">
+              <summary class="details-summary">Raw report</summary>
+              <pre id="gemmaHealthRaw" class="pre mono">—</pre>
+            </details>
+          </div>
+        </div>
+
+        <div class="card span-2">
+          <div class="card-header">
+            <div class="card-title">Gemma Help</div>
+            <div class="hint">Local model; may be slow</div>
+          </div>
+          <div class="card-body">
+            <div class="gemma">
+              <textarea id="gemmaQuestion" class="textarea mono" rows="3" placeholder="Ask a natural-language question…"></textarea>
+              <div class="gemma-row">
+                <label class="checkbox mono">
+                  <input id="gemmaVoice" type="checkbox" />
+                  voice
+                </label>
+                <button id="btnGemma" class="btn btn-primary">Ask Gemma</button>
+              </div>
+              <div class="label">Answer</div>
+              <pre id="gemmaAnswer" class="pre mono">—</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer mono">
+      <span>Local only ·</span>
+      <span id="lastUpdated">never updated</span>
+    </footer>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
+

@@ -30,6 +30,11 @@ class StatusResponse(BaseModel):
     topo_topological_lm_mean_reward: Optional[float] = None
     topo_unique_candidate_ratio: Optional[float] = None
     topo_valid_braid_ratio: Optional[float] = None
+    physics_self_adjoint_status: Optional[str] = None
+    physics_spectral_status: Optional[str] = None
+    physics_otoc_indicator: Optional[str] = None
+    physics_r_mean: Optional[float] = None
+    physics_source: Optional[str] = None
 
     project_memory_head: Optional[str] = None
 
@@ -47,6 +52,10 @@ class TopologicalLmMetricsResponse(BaseModel):
     advantage_over_random: Optional[float] = None
     unique_candidate_ratio: Optional[float] = None
     valid_braid_ratio: Optional[float] = None
+    self_adjoint_status: Optional[str] = None
+    spectral_status: Optional[str] = None
+    otoc_indicator: Optional[str] = None
+    r_mean: Optional[float] = None
 
 
 class GemmaHelpRequest(BaseModel):
@@ -58,7 +67,7 @@ class GemmaHelpResponse(BaseModel):
     answer: str
 
 
-AllowedStage = Literal["study", "analyze", "journal", "docs", "topo-eval", "topo-report"]
+AllowedStage = Literal["study", "analyze", "journal", "docs", "topo-eval", "topo-report", "gemma-health", "stability"]
 
 
 class RunStageRequest(BaseModel):
