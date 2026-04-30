@@ -220,3 +220,9 @@ refresh-help:
 clean-v12:
 	rm -rf runs/artin_* runs/selberg_* runs/operator_* logs/v12
 
+api:
+	uvicorn api.server:app --host 127.0.0.1 --port 8080
+
+api-install:
+	python3 -m pip install fastapi uvicorn pydantic
+
