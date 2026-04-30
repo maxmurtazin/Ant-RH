@@ -12,7 +12,7 @@ function toneFromTrend(trend?: string | null) {
 export function AcoMetrics({ data }: { data: AcoMetricsResponse | null }) {
   const badge = toneFromTrend(data?.trend ?? null);
   return (
-    <MetricCard title="ACO Metrics" right={<StatusBadge tone={badge.tone} label={badge.label} />}>
+    <MetricCard title="ACO Metrics" right={<StatusBadge tone={badge.tone} label={badge.label} />} className="result-card span-1">
       <table className="table mono">
         <tbody>
           <tr>

@@ -5,12 +5,12 @@ export function PhysicsCharts({ points }: { points: any[] }) {
   const safe = Array.isArray(points) ? points : [];
 
   return (
-    <MetricCard title="Physics Diagnostics (history)" span2>
+    <MetricCard title="Physics Diagnostics (history)" className="result-card span-2">
       {safe.length === 0 ? (
         <div className="mono muted">No data yet</div>
       ) : (
         <div style={{ display: "grid", gap: 12 }}>
-          <div style={{ height: 200 }}>
+          <div className="chart-shell">
             <div className="label">r_mean over time</div>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={safe} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
@@ -28,7 +28,7 @@ export function PhysicsCharts({ points }: { points: any[] }) {
             </ResponsiveContainer>
           </div>
 
-          <div style={{ height: 200 }}>
+          <div className="chart-shell">
             <div className="label">self_adjoint_error over time</div>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={safe} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>

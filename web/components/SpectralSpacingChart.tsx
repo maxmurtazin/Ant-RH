@@ -26,7 +26,8 @@ export function SpectralSpacingChart({ data }: { data: SpectralSpacingResponse |
   return (
     <MetricCard
       title="GUE vs Zeta spacing overlay"
-      span2
+      className="result-card span-2"
+      id="spectral-spacing-chart"
       right={
         <div className="row">
           <span className="badge mono">operator r̄≈{data?.operator_r_mean?.toFixed?.(3) ?? "—"}</span>
@@ -43,7 +44,7 @@ export function SpectralSpacingChart({ data }: { data: SpectralSpacingResponse |
           <div className="mono muted" style={{ marginBottom: 8 }}>
             Source: {data?.source || "—"}
           </div>
-          <div style={{ height: 240 }}>
+          <div className="chart-shell large">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={rows} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
                 <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />

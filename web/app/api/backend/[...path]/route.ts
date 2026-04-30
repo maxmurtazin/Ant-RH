@@ -1,19 +1,29 @@
 import { NextRequest } from "next/server";
 
 function getApiBase() {
-  return process.env.API_BASE || process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8084";
+  // Server-side only. Do not use NEXT_PUBLIC_API_BASE here.
+  const raw = process.env.API_BASE || "http://127.0.0.1:8084";
+  return normalizeLoopback(raw);
+}
+
+function normalizeLoopback(url: string) {
+  return url
+    .replace("http://localhost", "http://127.0.0.1")
+    .replace("http://0.0.0.0", "http://127.0.0.1");
 }
 
 async function proxy(req: NextRequest, context: { params: Promise<{ path?: string[] }> }) {
   const { path = [] } = await context.params;
-  const apiBase = getApiBase();
+  const apiBase = getApiBase().replace(/\/+$/, "");
   const rest = Array.isArray(path) ? path.join("/") : "";
   const qs = req.nextUrl.search ? req.nextUrl.search : "";
-  const target = `${apiBase.replace(/\/+$/, "")}/${rest}${qs}`;
+  const target = `${apiBase}/${rest}${qs}`;
 
   const method = req.method || "GET";
-  const headers = new Headers(req.headers);
-  headers.delete("host");
+  const headers: Record<string, string> = {
+    accept: req.headers.get("accept") || "application/json",
+    "content-type": req.headers.get("content-type") || "application/json",
+  };
 
   // Preserve content-type and forward body for non-GET/HEAD.
   let body: ArrayBuffer | undefined = undefined;
@@ -22,6 +32,7 @@ async function proxy(req: NextRequest, context: { params: Promise<{ path?: strin
   }
 
   try {
+    console.log("[proxy]", method, target);
     const upstream = await fetch(target, { method, headers, body });
     const buf = await upstream.arrayBuffer();
     const outHeaders = new Headers(upstream.headers);

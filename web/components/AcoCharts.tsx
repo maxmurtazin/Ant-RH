@@ -5,11 +5,11 @@ export function AcoCharts({ points }: { points: any[] }) {
   const safe = Array.isArray(points) ? points : [];
 
   return (
-    <MetricCard title="ACO Loss (history)" span2>
+    <MetricCard title="ACO Loss (history)" className="result-card span-1">
       {safe.length === 0 ? (
         <div className="mono muted">No data yet</div>
       ) : (
-        <div style={{ height: 220 }}>
+        <div className="chart-shell">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={safe} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />

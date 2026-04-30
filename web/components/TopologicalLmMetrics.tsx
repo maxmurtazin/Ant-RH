@@ -11,7 +11,7 @@ function toneFromAdvantage(adv?: number | null) {
 export function TopologicalLmMetrics({ data }: { data: TopoMetricsResponse | null }) {
   const badge = toneFromAdvantage(data?.advantage_over_random ?? null);
   return (
-    <MetricCard title="Topological LLM" right={<StatusBadge tone={badge.tone} label={badge.label} />}>
+    <MetricCard title="Topological LLM" right={<StatusBadge tone={badge.tone} label={badge.label} />} className="result-card span-1">
       <table className="table mono">
         <tbody>
           <tr>

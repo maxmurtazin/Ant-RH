@@ -28,7 +28,8 @@ export function OperatorAnalysis(props: {
   return (
     <MetricCard
       title="Operator Formula / Analysis"
-      span2
+      className="result-card span-2"
+      id="operator-analysis"
     >
       <div className="twoCol">
         <div>

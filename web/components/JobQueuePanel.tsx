@@ -27,7 +27,7 @@ export function JobQueuePanel(props: { data: { running: any[]; queued: any[]; do
   }
 
   return (
-    <MetricCard title="Job Queue" span2>
+    <MetricCard title="Jobs & Queue" className="compact-panel">
       {!d ? (
         <div className="mono muted">No queue data yet.</div>
       ) : (

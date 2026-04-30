@@ -359,15 +359,55 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(380px, 1fr);
+  grid-template-columns: minmax(0, 2.4fr) minmax(360px, 0.8fr);
   gap: 20px;
   align-items: start;
 }
 
+.results-section h2 {
+  margin: 6px 2px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.86);
+}
+
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 16px;
+  align-items: start;
+}
+
+/* Result card spans (12-col grid) */
+.result-card.span-1 {
+  grid-column: span 6;
+}
+
+.result-card.span-2 {
+  grid-column: span 12;
+}
+
+.result-card.span-full {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1600px) {
+  .result-card.span-1 {
+    grid-column: span 4;
+  }
+  .result-card.span-2 {
+    grid-column: span 8;
+  }
+  .result-card.span-full {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1800px) {
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 2.8fr) minmax(420px, 0.9fr);
+  }
 }
 
 @media (max-width: 1200px) {
@@ -376,9 +416,15 @@ body {
   }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1100px) {
   .results-grid {
     grid-template-columns: 1fr;
+  }
+  .result-card,
+  .result-card.span-1,
+  .result-card.span-2,
+  .result-card.span-full {
+    grid-column: 1 / -1;
   }
 }
 
@@ -388,6 +434,70 @@ body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+/* Prevent overflow in grid columns */
+.card,
+.result-card,
+.controls-column,
+.results-column,
+.resultsCol,
+.controlsCol {
+  min-width: 0;
+}
+
+.recharts-wrapper,
+.recharts-surface {
+  max-width: 100%;
+}
+
+pre,
+.table-wrap,
+.formula-block,
+.terminal,
+.console,
+.block,
+.formulaBox {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.chart-shell {
+  width: 100%;
+  min-width: 0;
+  height: 280px;
+}
+
+.chart-shell.large {
+  height: 360px;
+}
+
+.chart-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-wrap table {
+  width: 100%;
+  min-width: 760px;
+}
+
+.logStream {
+  max-height: 420px;
+}
+
+.multiRunTableWrap {
+  max-height: 420px;
+  overflow: auto;
+}
+
+.formulaBox {
+  max-height: 300px;
 }
 
 .controlsSticky {
@@ -410,6 +520,47 @@ body {
   .controls-column {
     position: static;
   }
+}
+
+.controls-column > h2 {
+  margin: 6px 2px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.control-card {
+  min-width: 0;
+}
+
+.control-card-wide {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1600px) {
+  .controls-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .control-card-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.control-card .card {
+  height: 100%;
+}
+
+.compact-panel {
+  max-height: 320px;
+  overflow: auto;
 }
 
 .sectionTitle {
@@ -873,7 +1024,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 12px;
   padding: 12px;
-  max-height: 400px;
+  max-height: 360px;
   overflow: auto;
 }
 

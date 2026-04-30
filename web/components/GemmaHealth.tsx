@@ -18,7 +18,7 @@ export function GemmaHealth({ data }: { data: GemmaHealthResponse | null }) {
   const s = (name: string) => byName.get(name)?.status ?? "—";
 
   return (
-    <MetricCard title="Gemma Health" right={<StatusBadge tone={badge.tone} label={badge.label} />}>
+    <MetricCard title="Gemma Health" right={<StatusBadge tone={badge.tone} label={badge.label} />} className="compact-panel">
       <table className="table mono">
         <tbody>
           <tr>
@@ -47,12 +47,6 @@ export function GemmaHealth({ data }: { data: GemmaHealthResponse | null }) {
           </tr>
         </tbody>
       </table>
-      <details>
-        <summary className="mono muted" style={{ cursor: "pointer", marginTop: 10 }}>
-          raw report
-        </summary>
-        <pre className="console mono">{data ? JSON.stringify(data, null, 2) : "—"}</pre>
-      </details>
     </MetricCard>
   );
 }

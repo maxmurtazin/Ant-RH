@@ -5,9 +5,14 @@ export function MetricCard(props: {
   right?: ReactNode;
   children: ReactNode;
   span2?: boolean;
+  className?: string;
+  id?: string;
 }) {
   return (
-    <section className={`card ${props.span2 ? "span2" : ""}`}>
+    <section
+      id={props.id}
+      className={["card", props.span2 ? "span2" : "", props.className || ""].filter(Boolean).join(" ")}
+    >
       <div className="cardHeader">
         <div className="cardTitle">{props.title}</div>
         <div className="cardHeaderRight">{props.right}</div>

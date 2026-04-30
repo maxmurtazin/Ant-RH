@@ -14,7 +14,7 @@ export default function AcoLiveCharts({ points }: { points: any[] }) {
   const hasReward = safePoints.some((p) => typeof p?.best_reward === "number" || typeof p?.mean_reward === "number");
 
   return (
-    <MetricCard title="ACO Live Charts" span2>
+    <MetricCard title="ACO Live Charts" className="result-card span-2" id="aco-live-charts">
       <div className="mono muted" style={{ marginBottom: 8 }}>
         ACO points: {safePoints.length}
       </div>
@@ -23,7 +23,7 @@ export default function AcoLiveCharts({ points }: { points: any[] }) {
         <div className="mono muted">No ACO history yet</div>
       ) : (
         <div style={{ display: "grid", gap: 12 }}>
-          <div style={{ height: 220 }}>
+          <div className="chart-shell">
             <div className="label">loss</div>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={safePoints} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
@@ -43,7 +43,7 @@ export default function AcoLiveCharts({ points }: { points: any[] }) {
           </div>
 
           {hasReward ? (
-            <div style={{ height: 220 }}>
+            <div className="chart-shell">
               <div className="label">reward</div>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={safePoints} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>

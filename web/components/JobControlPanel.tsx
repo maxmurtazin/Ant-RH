@@ -1,14 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { resumeJob, startJob, stopJob } from "@/lib/api";
+import { startJob } from "@/lib/api";
 import { JobButton } from "@/components/JobButton";
 
 type Props = {
   onJobStarted: (jobId: string) => void;
   disabled?: boolean;
-  runningJobs?: { id: string; name?: string; job?: string; status?: string }[];
-  onRefreshJobs?: () => void;
   jobsSummary?: any;
 };
 
@@ -20,13 +18,10 @@ function num(v: string) {
 export function JobControlPanel({
   onJobStarted,
   disabled,
-  runningJobs,
-  onRefreshJobs,
   jobsSummary,
 }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [conflictJobs, setConflictJobs] = useState<any[]>([]);
 
   // ACO params
   const [numAnts, setNumAnts] = useState("32");
@@ -62,7 +57,6 @@ export function JobControlPanel({
   async function run(job: string, params?: Record<string, any>) {
     setBusy(true);
     setError("");
-    setConflictJobs([]);
     try {
       const res = await startJob(job, params || {});
       onJobStarted(res.job_id);
@@ -70,14 +64,8 @@ export function JobControlPanel({
       const anyErr: any = e;
       if (anyErr?.status === 409) {
         setError("Job conflict: another job is already running or paused.");
-        if (anyErr?.body?.running_jobs && Array.isArray(anyErr.body.running_jobs)) {
-          setConflictJobs(anyErr.body.running_jobs);
-        }
       } else if (anyErr?.status === 429) {
         setError("Another job is already running.");
-        if (anyErr?.body?.running_jobs && Array.isArray(anyErr.body.running_jobs)) {
-          setConflictJobs(anyErr.body.running_jobs);
-        }
       } else {
         setError(e instanceof Error ? e.message : String(e));
       }
@@ -86,98 +74,14 @@ export function JobControlPanel({
     }
   }
 
-  async function onStop(id: string) {
-    setBusy(true);
-    try {
-      await stopJob(id);
-      onRefreshJobs?.();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function onResume(id: string) {
-    setBusy(true);
-    try {
-      await resumeJob(id);
-      onRefreshJobs?.();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
-    <section className="card span2">
+    <section className="card">
       <div className="cardHeader">
         <div className="cardTitle">Job Control</div>
-        <div className="hint">Whitelisted jobs only · max 2 running</div>
+        <div className="hint">Launch jobs + parameters</div>
       </div>
       <div className="cardBody">
         {error ? <div className="errorBox mono">{error}</div> : null}
-        {conflictJobs.length ? (
-          <div className="card" style={{ marginBottom: 12 }}>
-            <div className="cardBody">
-              <div className="label">Conflicting jobs</div>
-              <div className="row">
-                {onRefreshJobs ? (
-                  <button className="btn" onClick={onRefreshJobs} disabled={busy}>
-                    Refresh jobs
-                  </button>
-                ) : null}
-              </div>
-              <table className="table mono compactTable" style={{ marginTop: 10 }}>
-                <thead>
-                  <tr>
-                    <td className="k">id</td>
-                    <td className="k">job</td>
-                    <td className="k">status</td>
-                    <td className="v">actions</td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {conflictJobs.map((j) => (
-                    <tr key={String(j.id)}>
-                      <td className="k">{String(j.id)}</td>
-                      <td className="k">{String(j.job || j.name || "—")}</td>
-                      <td className="k">{String(j.status || "—")}</td>
-                      <td className="v">
-                        <div className="action-row" style={{ justifyContent: "flex-end" }}>
-                          <button className="btn" disabled={busy} onClick={() => onResume(String(j.id))}>
-                            Resume
-                          </button>
-                          <button className="btn" disabled={busy} onClick={() => onStop(String(j.id))}>
-                            Stop
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : null}
-        {runningJobs?.length ? (
-          <div className="row" style={{ marginBottom: 10 }}>
-            <span className="badge mono">running: {runningJobs[0].job || runningJobs[0].name || runningJobs[0].id}</span>
-            <span className="badge mono">job_id: {runningJobs[0].id}</span>
-            {onRefreshJobs ? (
-              <button className="btn" onClick={onRefreshJobs} disabled={busy}>
-                Refresh jobs
-              </button>
-            ) : null}
-          </div>
-        ) : onRefreshJobs ? (
-          <div className="row" style={{ marginBottom: 10 }}>
-            <button className="btn" onClick={onRefreshJobs} disabled={busy}>
-              Refresh jobs
-            </button>
-          </div>
-        ) : null}
 
         <div className="twoCol">
           <div>

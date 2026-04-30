@@ -70,11 +70,11 @@ export function CheckpointPanel() {
   return (
     <MetricCard
       title="Checkpoints"
-      span2
+      className="compact-panel"
       right={
         <div className="action-row">
           <button className="btn btnPrimary" disabled={busy} onClick={createManual}>
-            Create Manual Checkpoint
+            Create
           </button>
           <button className="btn" disabled={busy} onClick={refresh}>
             Refresh
@@ -86,51 +86,44 @@ export function CheckpointPanel() {
       {sorted.length === 0 ? (
         <div className="mono muted">No checkpoints yet.</div>
       ) : (
-        <table className="table mono compactTable">
-          <thead>
-            <tr>
-              <td className="k">timestamp</td>
-              <td className="k">name</td>
-              <td className="k">reason</td>
-              <td className="k">size</td>
-              <td className="k">metrics</td>
-              <td className="v">actions</td>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((e) => (
-              <tr key={e.id}>
-                <td className="k">{e.timestamp || "—"}</td>
-                <td className="k">{e.name}</td>
-                <td className="k">{e.reason}</td>
-                <td className="k">{fmtBytes(e.size_bytes)}</td>
-                <td className="k">
-                  {e.metrics_summary ? (
-                    <>
-                      aco_best_loss={String(e.metrics_summary.aco_best_loss ?? "—")}
-                      <br />
-                      topo_reward_mean={String(e.metrics_summary.topo_reward_mean ?? "—")}
-                      <br />
-                      spectral_loss={String(e.metrics_summary.spectral_loss ?? "—")}
-                    </>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td className="v">
-                  <div className="action-row" style={{ justifyContent: "flex-end" }}>
-                    <button className="btn" onClick={() => downloadExport(e.id)}>
-                      Download
-                    </button>
-                    <button className="btn" disabled={busy} onClick={() => onDelete(e.id)}>
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <>
+          <div className="mono muted" style={{ marginBottom: 8 }}>
+            latest: {sorted[0]?.timestamp || "—"} · {sorted[0]?.name || "—"} · {fmtBytes(sorted[0]?.size_bytes || 0)}
+          </div>
+          <div style={{ maxHeight: 240, overflow: "auto" }}>
+            <table className="table mono compactTable">
+              <thead>
+                <tr>
+                  <td className="k">timestamp</td>
+                  <td className="k">name</td>
+                  <td className="k">reason</td>
+                  <td className="k">size</td>
+                  <td className="v">actions</td>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((e) => (
+                  <tr key={e.id}>
+                    <td className="k">{e.timestamp || "—"}</td>
+                    <td className="k">{e.name}</td>
+                    <td className="k">{e.reason}</td>
+                    <td className="k">{fmtBytes(e.size_bytes)}</td>
+                    <td className="v">
+                      <div className="action-row" style={{ justifyContent: "flex-end" }}>
+                        <button className="btn" onClick={() => downloadExport(e.id)}>
+                          Download
+                        </button>
+                        <button className="btn" disabled={busy} onClick={() => onDelete(e.id)}>
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </MetricCard>
   );

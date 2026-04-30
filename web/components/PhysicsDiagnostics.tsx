@@ -21,6 +21,7 @@ export function PhysicsDiagnostics({ data }: { data: PhysicsMetricsResponse | nu
   return (
     <MetricCard
       title="Physics Diagnostics"
+      className="result-card span-1"
       right={
         <>
           <span className="badge mono">{data?.source ?? "—"}</span>

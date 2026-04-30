@@ -1,12 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActionPanel } from "@/components/ActionPanel";
 import { AcoMetrics } from "@/components/AcoMetrics";
 import AcoLiveCharts from "@/components/AcoLiveCharts";
 import { AcoCharts } from "@/components/AcoCharts";
 import { GemmaHealth } from "@/components/GemmaHealth";
-import { GemmaHelp } from "@/components/GemmaHelp";
 import { CheckpointPanel } from "@/components/CheckpointPanel";
 import { ImportExportPanel } from "@/components/ImportExportPanel";
 import { JobControlPanel } from "@/components/JobControlPanel";
@@ -17,8 +15,6 @@ import { PhysicsCharts } from "@/components/PhysicsCharts";
 import { PhysicsDiagnostics } from "@/components/PhysicsDiagnostics";
 import { QuickGuide } from "@/components/QuickGuide";
 import { ProgressTracker } from "@/components/ProgressTracker";
-import { NextStepAdvisor } from "@/components/NextStepAdvisor";
-import { FullPipelinePanel } from "@/components/FullPipelinePanel";
 import { RewardHistogram } from "@/components/RewardHistogram";
 import { SpectralSpacingChart } from "@/components/SpectralSpacingChart";
 import { TopologicalLmMetrics } from "@/components/TopologicalLmMetrics";
@@ -28,6 +24,7 @@ import { SystemMonitor } from "@/components/SystemMonitor";
 import { JobQueuePanel } from "@/components/JobQueuePanel";
 import { MultiRunComparison } from "@/components/MultiRunComparison";
 import { ScreenshotButton } from "@/components/ScreenshotButton";
+import { JobButton } from "@/components/JobButton";
 import type {
   AcoMetricsResponse,
   GemmaHealthResponse,
@@ -443,170 +440,172 @@ export default function Page() {
         </div>
       </header>
 
-      <SystemMonitor data={systemMetrics} compact />
-
       <div className="dashboard-grid">
-        <div className="resultsCol">
-          <div className="sectionTitle">Results &amp; Diagnostics</div>
-          <div className="results-grid">
-
-          <section className="card">
-        <div className="cardHeader">
-          <div className="cardTitle">Project Status</div>
-          <div className="cardHeaderRight">{endpointBadges}</div>
-        </div>
-        <div className="cardBody">
-          <div className="mono muted" style={{ marginTop: 8 }}>
-            ACO points: {acoHistory.length}
-            <br />
-            ACO error: {errors.acoHistory || "none"}
-          </div>
-          {Object.entries(endpointErrors).length ? (
-            <div className="errorBox mono">
-              {Object.entries(endpointErrors).map(([k, v]) => (
-                <div key={k}>
-                  <strong>{k}</strong>: {v}
+        <section className="results-column resultsCol">
+          <section className="results-section">
+            <h2>Results &amp; Diagnostics</h2>
+            <div className="results-grid">
+              <section className="card result-card span-full">
+                <div className="cardHeader">
+                  <div className="cardTitle">Project Status</div>
+                  <div className="cardHeaderRight">{endpointBadges}</div>
                 </div>
-              ))}
+                <div className="cardBody">
+                  <div className="mono muted" style={{ marginTop: 8 }}>
+                    ACO points: {acoHistory.length}
+                    <br />
+                    ACO error: {errors.acoHistory || "none"}
+                  </div>
+                  {Object.entries(endpointErrors).length ? (
+                    <div className="errorBox mono">
+                      {Object.entries(endpointErrors).map(([k, v]) => (
+                        <div key={k}>
+                          <strong>{k}</strong>: {v}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                  <div className="twoCol">
+                    <div>
+                      <div className="label">Current state</div>
+                      <pre className="mono block">{summary}</pre>
+                    </div>
+                    <div>
+                      <div className="label">Missing artifacts</div>
+                      <pre className="mono block">{status?.missing?.length ? status.missing.join("\n") : "none"}</pre>
+                    </div>
+                  </div>
+                  <div className="divider" />
+                  <div className="mono muted">Auto-refresh every {lowResourceMode ? "20s" : "5s"}</div>
+                </div>
+              </section>
+
+              <AcoMetrics data={aco} />
+              <AcoLiveCharts points={acoHistory} />
+              <TopologicalLmMetrics data={topo} />
+              <PhysicsDiagnostics data={physics} />
+              <AcoCharts points={acoHistory} />
+              <OperatorCharts
+                operatorDistanceMean={operatorAnalysis?.sensitivity?.operator_distance_mean ?? null}
+                lossStd={operatorAnalysis?.sensitivity?.loss_std ?? null}
+              />
+              <SpectralSpacingChart data={spectralSpacing} />
+              <RewardHistogram samples={topoRewardSamples} />
+              <PhysicsCharts points={physicsHistory} />
+              <OperatorAnalysis data={operatorAnalysis} />
+              <MultiRunComparison runs={Array.isArray(runCompare?.runs) ? runCompare.runs : []} />
             </div>
-          ) : null}
-          <div className="twoCol">
-            <div>
-              <div className="label">Current state</div>
-              <pre className="mono block">{summary}</pre>
-            </div>
-            <div>
-              <div className="label">Missing artifacts</div>
-              <pre className="mono block">{status?.missing?.length ? status.missing.join("\n") : "none"}</pre>
-            </div>
-          </div>
-          <div className="divider" />
-          <div className="mono muted">Auto-refresh every {lowResourceMode ? "20s" : "5s"}</div>
-        </div>
           </section>
+        </section>
 
-      <AcoMetrics data={aco} />
-      <div id="aco-live-charts">
-        <AcoLiveCharts points={acoHistory} />
-      </div>
-      <AcoCharts points={acoHistory} />
-      <OperatorCharts
-        operatorDistanceMean={operatorAnalysis?.sensitivity?.operator_distance_mean ?? null}
-        lossStd={operatorAnalysis?.sensitivity?.loss_std ?? null}
-      />
-      <div id="spectral-spacing-chart">
-        <SpectralSpacingChart data={spectralSpacing} />
-      </div>
-      <RewardHistogram samples={topoRewardSamples} />
-      <PhysicsCharts points={physicsHistory} />
-      <TopologicalLmMetrics data={topo} />
-      <PhysicsDiagnostics data={physics} />
-      <div id="operator-analysis">
-        <OperatorAnalysis data={operatorAnalysis} />
-      </div>
-      <MultiRunComparison runs={Array.isArray(runCompare?.runs) ? runCompare.runs : []} />
-          </div>
-        </div>
+        <aside className="controls-column controlsCol">
+          <h2>Run Controls</h2>
 
-        <div className="controlsCol">
-          <div className="controls-column">
-            <div className="sectionTitle">Run Controls</div>
-
-            <QuickGuide onRunJob={startJob} jobsSummary={jobsSummary} />
-            <section className="card span2">
-              <div className="cardHeader">
-                <div className="cardTitle">Screenshots</div>
-                <div className="hint">Saved to runs/screenshots</div>
-              </div>
-              <div className="cardBody">
-                <div className="row" style={{ flexWrap: "wrap" }}>
-                  <ScreenshotButton targetId="dashboard-root" name="dashboard" label="Save Dashboard" />
-                  <ScreenshotButton targetId="aco-live-charts" name="aco_chart" label="Save ACO Chart" />
-                  <ScreenshotButton targetId="spectral-spacing-chart" name="spectral_spacing" label="Save Spectral Spacing" />
-                  <ScreenshotButton targetId="operator-analysis" name="operator_analysis" label="Save Operator Analysis" />
-                  <ScreenshotButton targetId="multi-run-comparison" name="multi_run_comparison" label="Save Run Comparison" />
+          <div className="controls-grid">
+            <div className="control-card control-card-wide">
+              <section className="card">
+                <div className="cardHeader">
+                  <div className="cardTitle">Quick Actions</div>
+                  <div className="hint">Most common runs</div>
                 </div>
-              </div>
-            </section>
-          <JobQueuePanel data={jobQueue} onRefresh={async () => setJobQueue(await getJobQueue())} />
-        <NextStepAdvisor onRunJob={startJob} onStartFullPipeline={startPipeline} jobsSummary={jobsSummary} lowResourceMode={lowResourceMode} />
-            <FullPipelinePanel onStart={startPipeline} activeJobId={activeJobId} jobsSummary={jobsSummary} />
-            <ProgressTracker data={progress} onRunJob={startJob} jobsSummary={jobsSummary} />
-            <JobControlPanel
-              onJobStarted={setActiveJobId}
-              disabled={anyRunning}
-              runningJobs={runningJobs}
-              onRefreshJobs={async () => {
-                try {
-                  const res = await getJobs();
-                  setJobs(Array.isArray(res.jobs) ? res.jobs : []);
-                } catch {
-                  // ignore
-                }
-              }}
-              jobsSummary={jobsSummary}
-            />
-            <ImportExportPanel />
-            <CheckpointPanel />
-
-            <section className="card">
-              <div className="cardHeader">
-                <div className="cardTitle">Operator Jobs</div>
-                <div className="hint">Runs in backend job manager</div>
-              </div>
-              <div className="cardBody">
-                <div className="action-row">
-                  {/* keep as-is; JobControlPanel/QuickGuide have job-aware buttons */}
-                  <button className="btn action-button" onClick={() => startJob("pde", {})} disabled={Boolean(jobsSummary?.latest_by_name?.pde?.status === "running")}>
-                    Run PDE Discovery
-                  </button>
-                  <button className="btn action-button secondary" onClick={() => startJob("sensitivity", {})} disabled={Boolean(jobsSummary?.latest_by_name?.sensitivity?.status === "running")}>
-                    Run Sensitivity Test
-                  </button>
-                  <button className="btn action-button secondary" onClick={() => startJob("stability", {})} disabled={Boolean(jobsSummary?.latest_by_name?.stability?.status === "running")}>
-                    Run Stability Report
-                  </button>
+                <div className="cardBody">
+                  <div className="action-row" style={{ flexWrap: "wrap" }}>
+                    <JobButton label="Run ACO" jobName="aco" jobsSummary={jobsSummary} onRun={() => startJob("aco", { num_ants: 32, num_iters: 80, max_length: 6, max_power: 4, reward_mode: "rank" })} />
+                    <JobButton label="Run Topo Eval" jobName="topo-eval" jobsSummary={jobsSummary} onRun={() => startJob("topo-eval", {})} />
+                    <JobButton label="Run PDE" jobName="pde" jobsSummary={jobsSummary} onRun={() => startJob("pde", {})} />
+                    <JobButton label="Run Sensitivity" jobName="sensitivity" jobsSummary={jobsSummary} onRun={() => startJob("sensitivity", {})} />
+                    <button
+                      className="btn btnPrimary"
+                      onClick={() => startPipeline({ continue_on_failure: true, include_ppo: false })}
+                      disabled={Boolean(jobsSummary?.running_count && jobsSummary.running_count > 0)}
+                      title="Starts a sequential pipeline in backend"
+                    >
+                      Run Full Pipeline
+                    </button>
+                  </div>
+                  {Boolean(jobsSummary?.running_count && jobsSummary.running_count > 0) ? (
+                    <div className="mono muted" style={{ marginTop: 10 }}>
+                      Pipeline disabled while jobs are running.
+                    </div>
+                  ) : null}
                 </div>
-                {operatorError ? <div className="errorBox mono" style={{ marginTop: 10 }}>{operatorError}</div> : null}
-              </div>
-            </section>
+              </section>
+            </div>
 
-            <section className="card">
-              <div className="cardHeader">
-                <div className="cardTitle">Actions</div>
-                <div className="hint">Whitelisted actions only</div>
-              </div>
-              <div className="cardBody">
-                <ActionPanel onAfterAction={refreshAll} />
-              </div>
-            </section>
+            <div className="control-card control-card-wide">
+              <QuickGuide onRunJob={startJob} jobsSummary={jobsSummary} />
+            </div>
 
-            <GemmaHealth data={gemmaHealth} />
+            <div className="control-card control-card-wide">
+              <ProgressTracker data={progress} onRunJob={startJob} jobsSummary={jobsSummary} />
+            </div>
 
-            <section className="card">
-              <div className="cardHeader">
-                <div className="cardTitle">Gemma Help</div>
-                <div className="hint">Local model; may be slow</div>
-              </div>
-              <div className="cardBody">
-                <GemmaHelp />
-              </div>
-            </section>
+            <div className="control-card">
+              <JobControlPanel onJobStarted={setActiveJobId} disabled={anyRunning} jobsSummary={jobsSummary} />
+            </div>
 
-        <LogStream
-          jobId={activeJobId}
-          enabled={logsEnabled}
-          disabledReason={lowResourceMode ? "Live logs disabled in Low Resource Mode." : "Live logs disabled."}
-          onEnable={
-            lowResourceMode
-              ? () => {
-                  setLogsEnabled(true);
+            <div className="control-card">
+              <JobQueuePanel data={jobQueue} onRefresh={async () => setJobQueue(await getJobQueue())} />
+            </div>
+
+            <div className="control-card control-card-wide">
+              <LogStream
+                jobId={activeJobId}
+                enabled={logsEnabled}
+                disabledReason={lowResourceMode ? "Live logs disabled in Low Resource Mode." : "Live logs disabled."}
+                onEnable={
+                  lowResourceMode
+                    ? () => {
+                        setLogsEnabled(true);
+                      }
+                    : undefined
                 }
-              : undefined
-          }
-        />
+              />
+            </div>
+
+            <div className="control-card">
+              <GemmaHealth data={gemmaHealth} />
+            </div>
+
+            <div className="control-card">
+              <section className="card">
+                <div className="cardHeader">
+                  <div className="cardTitle">System Monitor</div>
+                  <div className="hint">CPU / RAM / Process / GPU</div>
+                </div>
+                <div className="cardBody">
+                  <SystemMonitor data={systemMetrics} compact />
+                </div>
+              </section>
+            </div>
+
+            <div className="control-card">
+              <CheckpointPanel />
+            </div>
+
+            <div className="control-card">
+              <ImportExportPanel />
+            </div>
+
+            <div className="control-card">
+              <section className="card">
+                <div className="cardHeader">
+                  <div className="cardTitle">Screenshots</div>
+                  <div className="hint">Saved to runs/screenshots</div>
+                </div>
+                <div className="cardBody">
+                  <div className="row" style={{ flexWrap: "wrap" }}>
+                    <ScreenshotButton targetId="dashboard-root" name="dashboard" label="Save Dashboard" />
+                    <ScreenshotButton targetId="aco-live-charts" name="aco_chart" label="Save ACO Chart" />
+                    <ScreenshotButton targetId="spectral-spacing-chart" name="spectral_spacing" label="Save Spectral Spacing" />
+                    <ScreenshotButton targetId="operator-analysis" name="operator_analysis" label="Save Operator Analysis" />
+                    <ScreenshotButton targetId="multi-run-comparison" name="multi_run_comparison" label="Save Run Comparison" />
+                  </div>
+                </div>
+              </section>
+            </div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );

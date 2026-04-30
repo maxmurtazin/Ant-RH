@@ -55,8 +55,7 @@ export function MultiRunComparison(props: { runs: RunCompareRow[] }) {
   }, [rows]);
 
   return (
-    <div id="multi-run-comparison">
-      <MetricCard title="Multi-run comparison" span2>
+    <MetricCard title="Multi-run comparison" className="result-card span-full" id="multi-run-comparison">
         {!rows.length ? (
           <div className="mono muted">No runs yet.</div>
         ) : (
@@ -93,41 +92,42 @@ export function MultiRunComparison(props: { runs: RunCompareRow[] }) {
 
             <div className="divider" />
             <div className="multiRunTableWrap">
-              <table className="table mono compactTable multiRunTable">
-                <thead>
-                  <tr>
-                    <th>run</th>
-                    <th>timestamp</th>
-                    <th>aco_best_loss</th>
-                    <th>aco_mean_loss</th>
-                    <th>topo_reward_mean</th>
-                    <th>advantage</th>
-                    <th>self_adjoint_error</th>
-                    <th>r_mean</th>
-                    <th>operator_sensitivity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r, i) => (
-                    <tr key={r.id} className={r.source === "current" ? "multiRunCurrent" : ""}>
-                      <td>{r.label || r.id}</td>
-                      <td className="muted">{(r.timestamp || "—").slice(0, 19)}</td>
-                      <td className={i === best.aco_best_loss ? "bestCell" : ""}>{fmt(r.aco_best_loss)}</td>
-                      <td>{fmt(r.aco_mean_loss)}</td>
-                      <td className={i === best.topo_reward_mean ? "bestCell" : ""}>{fmt(r.topo_reward_mean)}</td>
-                      <td>{fmt(r.topo_advantage_over_random)}</td>
-                      <td className={i === best.self_adjoint_error ? "bestCell" : ""}>{fmt(r.self_adjoint_error)}</td>
-                      <td className={i === best.r_mean ? "bestCell" : ""}>{fmt(r.r_mean)}</td>
-                      <td>{fmt(r.operator_sensitivity)}</td>
+              <div className="table-wrap">
+                <table className="table mono compactTable multiRunTable">
+                  <thead>
+                    <tr>
+                      <th>run</th>
+                      <th>timestamp</th>
+                      <th>aco_best_loss</th>
+                      <th>aco_mean_loss</th>
+                      <th>topo_reward_mean</th>
+                      <th>advantage</th>
+                      <th>self_adjoint_error</th>
+                      <th>r_mean</th>
+                      <th>operator_sensitivity</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {rows.map((r, i) => (
+                      <tr key={r.id} className={r.source === "current" ? "multiRunCurrent" : ""}>
+                        <td>{r.label || r.id}</td>
+                        <td className="muted">{(r.timestamp || "—").slice(0, 19)}</td>
+                        <td className={i === best.aco_best_loss ? "bestCell" : ""}>{fmt(r.aco_best_loss)}</td>
+                        <td>{fmt(r.aco_mean_loss)}</td>
+                        <td className={i === best.topo_reward_mean ? "bestCell" : ""}>{fmt(r.topo_reward_mean)}</td>
+                        <td>{fmt(r.topo_advantage_over_random)}</td>
+                        <td className={i === best.self_adjoint_error ? "bestCell" : ""}>{fmt(r.self_adjoint_error)}</td>
+                        <td className={i === best.r_mean ? "bestCell" : ""}>{fmt(r.r_mean)}</td>
+                        <td>{fmt(r.operator_sensitivity)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </>
         )}
-      </MetricCard>
-    </div>
+    </MetricCard>
   );
 }
 

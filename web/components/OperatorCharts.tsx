@@ -8,11 +8,11 @@ export function OperatorCharts(props: { operatorDistanceMean: number | null; los
   ].filter((x) => x.v !== null);
 
   return (
-    <MetricCard title="Operator Sensitivity (signal)" span2>
+    <MetricCard title="Operator Sensitivity (signal)" className="result-card span-1">
       {data.length === 0 ? (
         <div className="mono muted">No data yet</div>
       ) : (
-        <div style={{ height: 220 }}>
+        <div className="chart-shell">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 6, right: 8, bottom: 10, left: 0 }}>
               <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
