@@ -411,7 +411,7 @@ export default function Page() {
   return (
     <div className="dashboardPage" id="dashboard-root">
       <header className="dashboard-header">
-        <div>
+        <div className="header-left">
           <h1 className="dashboardTitle">Ant-RH Control Dashboard</h1>
           <div className="header-meta mono muted">
             <span className="badge mono">Live: ON</span>
@@ -439,6 +439,10 @@ export default function Page() {
           </button>
         </div>
       </header>
+
+      <div className="system-monitor-top">
+        <SystemMonitor data={systemMetrics} compact />
+      </div>
 
       <div className="dashboard-grid">
         <section className="results-column resultsCol">
@@ -565,18 +569,6 @@ export default function Page() {
 
             <div className="control-card">
               <GemmaHealth data={gemmaHealth} />
-            </div>
-
-            <div className="control-card">
-              <section className="card">
-                <div className="cardHeader">
-                  <div className="cardTitle">System Monitor</div>
-                  <div className="hint">CPU / RAM / Process / GPU</div>
-                </div>
-                <div className="cardBody">
-                  <SystemMonitor data={systemMetrics} compact />
-                </div>
-              </section>
             </div>
 
             <div className="control-card">
