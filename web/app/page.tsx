@@ -41,6 +41,7 @@ import type {
 } from "@/lib/api";
 import {
   API_BASE,
+  DISPLAY_API_BASE,
   getJobQueue,
   getSystemMetrics,
   getRunComparison,
@@ -417,7 +418,8 @@ export default function Page() {
           <h1 className="dashboardTitle">Ant-RH Control Dashboard</h1>
           <div className="header-meta mono muted">
             <span className="badge mono">Live: ON</span>
-            <span className="badge mono">API base: {API_BASE}</span>
+            <span className="badge mono">Backend target: {DISPLAY_API_BASE}</span>
+            <span className="badge mono">Browser API route: {API_BASE}</span>
             <span className="badge mono">Last updated: {lastUpdated}</span>
           </div>
         </div>

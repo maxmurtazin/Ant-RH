@@ -1,4 +1,8 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8084";
+// Browser calls go through Next.js same-origin proxy to avoid CORS/localhost issues.
+export const API_BASE = "/api/backend";
+
+// For display/debug only: the actual backend target the proxy forwards to.
+export const DISPLAY_API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8084";
 
 export type StatusResponse = {
   ok: boolean;
@@ -100,7 +104,16 @@ export type GemmaHelpResponse = { answer: string };
 
 export async function fetchJson(path: string, options?: RequestInit) {
   const url = `${API_BASE}${path}`;
-  const res = await fetch(url, { cache: "no-store", ...(options || {}) });
+  let res: Response;
+  try {
+    res = await fetch(url, { cache: "no-store", ...(options || {}) });
+  } catch (e: any) {
+    const msg = e?.message || String(e);
+    const err: any = new Error(`Cannot reach API. Check proxy route and backend target. (${msg})`);
+    err.status = 0;
+    err.body = null;
+    throw err;
+  }
   if (!res.ok) {
     let body: any = null;
     try {

@@ -10,6 +10,7 @@ from typing import Iterable, Tuple
 
 REQUIRED_ENDPOINTS = [
     "/health",
+    "/debug/cors",
     "/status",
     "/metrics/aco",
     "/metrics/aco/history",
@@ -35,9 +36,12 @@ OPTIONAL_ENDPOINTS = [
 ]
 
 
-def _get(base: str, path: str, timeout_s: float = 3.0) -> Tuple[int, str]:
+def _get(base: str, path: str, timeout_s: float = 3.0, *, method: str = "GET", headers: dict | None = None) -> Tuple[int, str]:
     url = base.rstrip("/") + path
-    req = urllib.request.Request(url, method="GET")
+    req = urllib.request.Request(url, method=str(method or "GET"))
+    if headers:
+        for k, v in headers.items():
+            req.add_header(str(k), str(v))
     try:
         with urllib.request.urlopen(req, timeout=timeout_s) as resp:
             return int(resp.status), "ok"
@@ -69,6 +73,32 @@ def check_endpoints(base_url: str) -> dict:
         st, info = _get(base, ep)
         ok = st == 200
         opt_rows.append((ep, st, ok, info))
+
+    # CORS check: preflight OPTIONS /status from localhost:3000 should include allow-origin.
+    cors_ok = True
+    cors_info = "ok"
+    try:
+        url = base.rstrip("/") + "/status"
+        req = urllib.request.Request(
+            url,
+            method="OPTIONS",
+            headers={
+                "Origin": "http://localhost:3000",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=3.0) as resp:
+            acao = resp.headers.get("Access-Control-Allow-Origin")
+            if not acao:
+                cors_ok = False
+                cors_info = "missing access-control-allow-origin"
+    except Exception as e:
+        cors_ok = False
+        cors_info = f"cors_error: {e.__class__.__name__}"
+
+    if not cors_ok:
+        any_req_fail = True
+        req_rows.append(("/cors(preflight /status)", 0, False, cors_info))
 
     return {"required": req_rows, "optional": opt_rows, "required_ok": (not any_req_fail)}
 
