@@ -236,6 +236,15 @@ dashboard-8081:
 api-install:
 	python3 -m pip install fastapi uvicorn pydantic psutil
 
+test-install:
+	python3 -m pip install pytest fastapi httpx
+
+test:
+	PYTHONPATH=. pytest -q
+
+test-dashboard:
+	PYTHONPATH=. pytest -q tests/test_api_routes.py tests/test_preflight.py
+
 gemma-health:
 	python3 analysis/gemma_health_check.py \
 		--llama_cli $(LLAMA_CLI) \
@@ -271,6 +280,7 @@ dashboard-next:
 		while [ ! -f runs/dashboard_port.txt ]; do sleep 0.2; done; \
 		PORT=$$(cat runs/dashboard_port.txt); \
 		echo "Backend: http://127.0.0.1:$$PORT"; \
+		python3 scripts/preflight_dashboard.py --base http://127.0.0.1:$$PORT; \
 		echo "Frontend: http://localhost:3000"; \
 		cd web && NEXT_PUBLIC_API_BASE=http://127.0.0.1:$$PORT npm run dev
 
