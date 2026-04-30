@@ -28,6 +28,14 @@ from core.artin_symbolic_billiard import (
 from core.artin_operator import build_geodesic_kernel, build_laplacian, sample_domain
 from validation.selberg_trace_loss import compute_selberg_loss
 
+try:
+    from core.artin_operator_word_sensitive import build_word_sensitive_operator
+
+    _HAVE_WORD_SENSITIVE = True
+except Exception:
+    build_word_sensitive_operator = None
+    _HAVE_WORD_SENSITIVE = False
+
 
 def load_zeros(path: str) -> np.ndarray:
     p = Path(path)
@@ -157,6 +165,9 @@ class ArtinACO:
             safe_loss = min(safe_loss, clip_value)
             if mode == "inverse":
                 reward = 1.0 / (safe_loss + 1e-8)
+            elif mode == "raw":
+                # Continuous reward directly from loss (no normalization).
+                reward = -safe_loss
             elif mode == "soft_rank":
                 reward = float(math.exp(-float(idx) / temp))
             else:
@@ -171,6 +182,62 @@ class ArtinACO:
                 )
             )
         return updated
+
+    def _assign_adaptive_rewards(
+        self,
+        scored: List[Candidate],
+        *,
+        adaptive_reward_window: int,
+        adaptive_reward_eps: float,
+        adaptive_reward_clip: float,
+    ) -> Tuple[List[Candidate], Dict[str, float]]:
+        """
+        Compute rewards over the whole candidate population (not per-candidate independently),
+        using robust scaling based on the current iteration's loss distribution.
+        """
+        losses = np.asarray([float(c.loss) for c in scored], dtype=_DTF)
+        finite_losses = losses[np.isfinite(losses)]
+
+        # NOTE: adaptive_reward_window is accepted for CLI/API stability, but the scaling
+        # is intentionally computed per-iteration from the candidate population only.
+        _ = int(adaptive_reward_window)
+
+        if finite_losses.size < 2:
+            rewards = np.zeros_like(losses, dtype=_DTF)
+            med = float("nan")
+            iqr = float("nan")
+            std = float("nan")
+        else:
+            med = float(np.median(finite_losses))
+            q25 = float(np.percentile(finite_losses, 25))
+            q75 = float(np.percentile(finite_losses, 75))
+            iqr = float(q75 - q25)
+            std = float(np.std(finite_losses))
+            scale = float(max(iqr, std, float(adaptive_reward_eps)))
+            rewards = -(losses - med) / scale
+            rewards = np.clip(rewards, -float(adaptive_reward_clip), float(adaptive_reward_clip))
+
+        updated: List[Candidate] = []
+        for c, r in zip(scored, rewards.tolist()):
+            updated.append(
+                Candidate(
+                    a_list=c.a_list,
+                    length=float(c.length),
+                    trace=float(c.trace),
+                    reward=float(r),
+                    loss=float(c.loss),
+                )
+            )
+
+        rep = {
+            "loss_median": float(med),
+            "loss_iqr": float(iqr),
+            "loss_std": float(std),
+            "reward_min": float(np.min(rewards)) if rewards.size else float("nan"),
+            "reward_max": float(np.max(rewards)) if rewards.size else float("nan"),
+            "reward_mean": float(np.mean(rewards)) if rewards.size else float("nan"),
+        }
+        return updated, rep
 
     def _tau(self, prev_a: int, next_a: int) -> float:
         return float(self.pheromone.get((int(prev_a), int(next_a)), 1.0))
@@ -242,26 +309,55 @@ class ArtinACO:
         op_sigma: float,
         op_eps: float,
         top_k_geodesics: int,
+        operator_builder: str,
+        geo_weight: float,
+        geo_sigma: float,
+        potential_weight: float,
         seed: int,
     ) -> float:
         geodesics = self._bank_top_geodesics(top_k_geodesics)
         if not geodesics:
             return float("inf")
 
-        sig = tuple(tuple(int(a) for a in g["a_list"]) for g in geodesics)
+        sig = (
+            str(operator_builder).lower(),
+            float(op_sigma),
+            float(op_eps),
+            float(geo_weight),
+            float(geo_sigma),
+            float(potential_weight),
+            tuple(tuple(int(a) for a in g["a_list"]) for g in geodesics),
+        )
         cached = self._op_cache.get(sig)
         if cached is not None:
             return cached
 
         Z = sample_domain(int(n_points), seed=int(seed))
-        L, _, _ = build_laplacian(Z, eps=float(op_eps))
-        Kmat, used = build_geodesic_kernel(Z, geodesics, sigma=float(op_sigma))
-        if used <= 0:
-            self._op_cache[sig] = float("inf")
-            return float("inf")
+        builder = str(operator_builder).lower()
+        if builder == "word_sensitive" and _HAVE_WORD_SENSITIVE and build_word_sensitive_operator is not None:
+            # Word-sensitive builder explicitly depends on word entries/signs/etc.
+            H, _ = build_word_sensitive_operator(
+                z_points=Z,
+                distances=None,
+                geodesics=geodesics,
+                eps=float(op_eps),
+                geo_sigma=float(geo_sigma),
+                kernel_normalization="max",
+                laplacian_weight=1.0,
+                geo_weight=float(geo_weight),
+                potential_weight=float(potential_weight),
+            )
+            H = np.asarray(H, dtype=_DTF, copy=False)
+        else:
+            # Legacy baseline: graph Laplacian + geodesic kernel.
+            L, _, _ = build_laplacian(Z, eps=float(op_eps))
+            Kmat, used = build_geodesic_kernel(Z, geodesics, sigma=float(op_sigma))
+            if used <= 0:
+                self._op_cache[sig] = float("inf")
+                return float("inf")
+            H = -L + Kmat
+            H = (H + H.T) * 0.5
 
-        H = -L + Kmat
-        H = (H + H.T) * 0.5
         eigvals = np.linalg.eigh(H, UPLO="U")[0].astype(_DTF, copy=False)
         eigvals.sort()
 
@@ -302,9 +398,19 @@ class ArtinACO:
         op_sigma: float,
         op_eps: float,
         op_top_k_geodesics: int,
+        operator_builder: str = "word_sensitive",
+        geo_weight: float = 10.0,
+        geo_sigma: float = 0.6,
+        potential_weight: float = 0.25,
         reward_mode: str,
         loss_clip: float,
         rank_temperature: float,
+        adaptive_reward_window: int = 50,
+        adaptive_reward_eps: float = 1e-8,
+        adaptive_reward_clip: float = 5.0,
+        normalize_loss_components: bool = True,
+        component_clip: float = 100.0,
+        component_log_scale: bool = True,
     ) -> Tuple[List[Candidate], Dict[str, float]]:
         # Update bank with newly found valid geodesics (placeholder losses/rewards for ranking)
         for a_list, ell, tr in candidates:
@@ -319,23 +425,57 @@ class ArtinACO:
             bank_items.sort(key=lambda c: c.length)
             self._bank = {c.a_list: c for c in bank_items[: self.bank_size]}
 
-        # Compute global losses using current bank
-        L_sel = self._selberg_loss(zeros, sigma=selberg_sigma, m_max=selberg_m_max, bank_top_n=selberg_bank_top_n)
+        # Compute global losses using current bank (raw components)
+        L_selberg = self._selberg_loss(zeros, sigma=selberg_sigma, m_max=selberg_m_max, bank_top_n=selberg_bank_top_n)
         L_spec = self._operator_spectral_loss(
             zeros,
             n_points=n_points,
             op_sigma=op_sigma,
             op_eps=op_eps,
             top_k_geodesics=op_top_k_geodesics,
+            operator_builder=str(operator_builder),
+            geo_weight=float(geo_weight),
+            geo_sigma=float(geo_sigma),
+            potential_weight=float(potential_weight),
             seed=self.seed,
         )
         L_spacing = 0.0
         if lambda_spacing != 0.0:
             L_spacing = 0.0
 
-        L_total_global = lambda_selberg * L_sel + lambda_spec * L_spec + lambda_spacing * L_spacing
-        if not np.isfinite(L_total_global):
-            L_total_global = float("inf")
+        def _to_bool(x: Any) -> bool:
+            return str(x).lower() in ["1", "true", "yes", "y"]
+
+        def _norm_component(x: Any, clip: float = 100.0, log_scale: Any = True) -> float:
+            if x is None or not np.isfinite(float(x)):
+                return float(clip)
+            v = min(abs(float(x)), float(clip))
+            if _to_bool(log_scale):
+                return float(np.log1p(v))
+            return float(v)
+
+        if _to_bool(normalize_loss_components):
+            L_selberg_used = _norm_component(L_selberg, float(component_clip), component_log_scale)
+            L_spec_used = _norm_component(L_spec, float(component_clip), component_log_scale)
+            L_spacing_used = _norm_component(L_spacing, float(component_clip), component_log_scale)
+        else:
+            L_selberg_used = float(L_selberg)
+            L_spec_used = float(L_spec)
+            L_spacing_used = float(L_spacing)
+
+        L_total_global = (
+            float(lambda_selberg) * float(L_selberg_used)
+            + float(lambda_spec) * float(L_spec_used)
+            + float(lambda_spacing) * float(L_spacing_used)
+        )
+
+        # For logging: "norm" fields reflect what was actually used in the sum.
+        L_sel_norm = float(L_selberg_used)
+        L_spec_norm = float(L_spec_used)
+        L_spacing_norm = float(L_spacing_used)
+
+        if not np.isfinite(float(L_total_global)):
+            L_total_global = float(loss_clip)
 
         # Candidate-specific score: global + tiny length regularizer
         scored: List[Candidate] = []
@@ -348,12 +488,22 @@ class ArtinACO:
             scored.append(c)
 
         scored.sort(key=lambda c: c.loss)
-        scored = self._assign_rewards(
-            scored,
-            reward_mode=reward_mode,
-            loss_clip=float(loss_clip),
-            rank_temperature=float(rank_temperature),
-        )
+        mode = str(reward_mode).lower()
+        adaptive_rep: Dict[str, float] = {}
+        if mode == "adaptive":
+            scored, adaptive_rep = self._assign_adaptive_rewards(
+                scored,
+                adaptive_reward_window=int(adaptive_reward_window),
+                adaptive_reward_eps=float(adaptive_reward_eps),
+                adaptive_reward_clip=float(adaptive_reward_clip),
+            )
+        else:
+            scored = self._assign_rewards(
+                scored,
+                reward_mode=reward_mode,
+                loss_clip=float(loss_clip),
+                rank_temperature=float(rank_temperature),
+            )
         for c in scored:
             self._bank[c.a_list] = c
 
@@ -363,10 +513,14 @@ class ArtinACO:
         self._bank = {c.a_list: c for c in bank_items2[: self.bank_size]}
 
         stats = {
-            "L_selberg": float(L_sel),
-            "L_spec": float(L_spec),
-            "L_spacing": float(L_spacing),
+            "L_selberg_raw": float(L_selberg),
+            "L_spec_raw": float(L_spec),
+            "L_spacing_raw": float(L_spacing),
+            "L_selberg_norm": float(L_sel_norm),
+            "L_spec_norm": float(L_spec_norm),
+            "L_spacing_norm": float(L_spacing_norm),
             "L_total_global": float(L_total_global),
+            **adaptive_rep,
         }
         return scored, stats
 
@@ -403,6 +557,10 @@ class ArtinACO:
         op_sigma: float,
         op_eps: float,
         op_top_k_geodesics: int,
+        operator_builder: str = "word_sensitive",
+        geo_weight: float = 10.0,
+        geo_sigma: float = 0.6,
+        potential_weight: float = 0.25,
         log_top_words: int = 5,
         use_planner: bool = False,
         planner_backend: str = "llama_cpp",
@@ -414,8 +572,63 @@ class ArtinACO:
         reward_mode: str = "rank",
         loss_clip: float = 1000.0,
         rank_temperature: float = 1.0,
-    ) -> Tuple[Dict[str, Any], List[Tuple[int, float, float, float, float, str]]]:
-        history: List[Tuple[int, float, float, float, float, str]] = []
+        adaptive_reward_window: int = 50,
+        adaptive_reward_eps: float = 1e-8,
+        adaptive_reward_clip: float = 5.0,
+        normalize_loss_components: bool = True,
+        component_clip: float = 100.0,
+        component_log_scale: bool = True,
+    ) -> Tuple[
+        Dict[str, Any],
+        List[
+            Tuple[
+                int,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                str,
+            ]
+        ],
+    ]:
+        history: List[
+            Tuple[
+                int,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                float,
+                str,
+            ]
+        ] = []
         best_snapshot: Dict[str, Any] = {"best_loss": float("inf"), "best_words": [], "best_lengths": []}
         recent_losses: List[float] = []
 
@@ -522,7 +735,30 @@ class ArtinACO:
 
             if not valids:
                 self.evaporate()
-                history.append((it, float("inf"), float("inf"), 0.0, 0.0, str(reward_mode)))
+                history.append(
+                    (
+                        it,
+                        float("inf"),
+                        float("inf"),
+                        0.0,
+                        0.0,
+                        float("-inf"),
+                        float("-inf"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        str(reward_mode),
+                    )
+                )
                 print(
                     f"[{it}] best=inf mean=inf valid=0 avg_ell=nan bank={len(self._bank)}",
                     flush=True,
@@ -542,9 +778,19 @@ class ArtinACO:
                 op_sigma=float(op_sigma),
                 op_eps=float(op_eps),
                 op_top_k_geodesics=int(op_top_k_geodesics),
+                operator_builder=str(operator_builder),
+                geo_weight=float(geo_weight),
+                geo_sigma=float(geo_sigma),
+                potential_weight=float(potential_weight),
                 reward_mode=str(reward_mode),
                 loss_clip=float(loss_clip),
                 rank_temperature=float(rank_temperature),
+                adaptive_reward_window=int(adaptive_reward_window),
+                adaptive_reward_eps=float(adaptive_reward_eps),
+                adaptive_reward_clip=float(adaptive_reward_clip),
+                normalize_loss_components=bool(normalize_loss_components),
+                component_clip=float(component_clip),
+                component_log_scale=bool(component_log_scale),
             )
 
             scored.sort(key=lambda c: c.loss)
@@ -552,6 +798,21 @@ class ArtinACO:
             mean_loss = float(np.mean([c.loss for c in scored])) if scored else float("inf")
             best_reward = float(scored[0].reward) if scored else 0.0
             mean_reward = float(np.mean([c.reward for c in scored])) if scored else 0.0
+            # Raw reward is always defined as -loss (un-normalized), for logging/debugging.
+            best_raw_reward = -float(best.loss)
+            mean_raw_reward = -float(mean_loss)
+            loss_median = float(stats.get("loss_median", float("nan")))
+            loss_iqr = float(stats.get("loss_iqr", float("nan")))
+            loss_std = float(stats.get("loss_std", float("nan")))
+            reward_min = float(stats.get("reward_min", float("nan")))
+            reward_max = float(stats.get("reward_max", float("nan")))
+            reward_mean = float(stats.get("reward_mean", float("nan")))
+            L_selberg_raw = float(stats.get("L_selberg_raw", float("nan")))
+            L_spec_raw = float(stats.get("L_spec_raw", float("nan")))
+            L_spacing_raw = float(stats.get("L_spacing_raw", float("nan")))
+            L_selberg_norm = float(stats.get("L_selberg_norm", float("nan")))
+            L_spec_norm = float(stats.get("L_spec_norm", float("nan")))
+            L_spacing_norm = float(stats.get("L_spacing_norm", float("nan")))
             avg_ell = float(np.mean([c.length for c in scored])) if scored else float("nan")
             valid_rate = float(len(scored)) / float(max(1, self.num_ants))
 
@@ -567,7 +828,30 @@ class ArtinACO:
             self.evaporate()
             self.reinforce(scored[: self.best_k_ants])
 
-            history.append((it, float(best.loss), float(mean_loss), float(best_reward), float(mean_reward), str(reward_mode)))
+            history.append(
+                (
+                    it,
+                    float(best.loss),
+                    float(mean_loss),
+                    float(best_reward),
+                    float(mean_reward),
+                    float(best_raw_reward),
+                    float(mean_raw_reward),
+                    float(loss_median),
+                    float(loss_iqr),
+                    float(loss_std),
+                    float(reward_min),
+                    float(reward_max),
+                    float(reward_mean),
+                    float(L_selberg_raw),
+                    float(L_spec_raw),
+                    float(L_spacing_raw),
+                    float(L_selberg_norm),
+                    float(L_spec_norm),
+                    float(L_spacing_norm),
+                    str(reward_mode),
+                )
+            )
             recent_losses.append(float(best.loss))
             last_valid_rate = float(valid_rate)
             last_mean_loss = float(mean_loss)
@@ -578,22 +862,96 @@ class ArtinACO:
                 [f"{list(c.a_list)} ℓ={c.length:.3g} L={c.loss:.3g} r={c.reward:.3g}" for c in top_words]
             )
             dt = time.perf_counter() - t_it0
-            print(
-                f"[{it}] best={best.loss:.6g} mean={mean_loss:.6g} valid={len(scored)} "
-                f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
-                f"L_sel={stats['L_selberg']:.3g} L_spec={stats['L_spec']:.3g} "
-                f"best_r={best_reward:.3g} mean_r={mean_reward:.3g} mode={reward_mode} dt={dt:.3g}s :: {top_words_s}",
-                flush=True,
-            )
+            if it % 10 == 0:
+                print(
+                    f"[{it}] best={best.loss:.6g} mean={mean_loss:.6g} valid={len(scored)} "
+                    f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
+                    f"L_sel={L_selberg_raw:.3g} L_spec={L_spec_raw:.3g} "
+                    f"loss_std={loss_std:.3g} loss_iqr={loss_iqr:.3g} "
+                    f"r_min={reward_min:.3g} r_max={reward_max:.3g} r_mean={reward_mean:.3g} "
+                    f"best_r={best_reward:.3g} mean_r={mean_reward:.3g} mode={reward_mode} "
+                    f"builder={operator_builder} dt={dt:.3g}s :: {top_words_s}",
+                    flush=True,
+                )
+            else:
+                print(
+                    f"[{it}] best={best.loss:.6g} mean={mean_loss:.6g} valid={len(scored)} "
+                    f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
+                    f"L_sel={L_selberg_raw:.3g} L_spec={L_spec_raw:.3g} "
+                    f"best_r={best_reward:.3g} mean_r={mean_reward:.3g} mode={reward_mode} "
+                    f"builder={operator_builder} dt={dt:.3g}s :: {top_words_s}",
+                    flush=True,
+                )
 
         return best_snapshot, history
 
 
-def _write_history_csv(path: Path, history: Iterable[Tuple[int, float, float, float, float, str]]) -> None:
+def _write_history_csv(
+    path: Path,
+    history: Iterable[
+        Tuple[
+            int,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            float,
+            str,
+        ]
+    ],
+    *,
+    operator_builder: str,
+) -> None:
     with open(path, "w", encoding="utf-8") as f:
-        f.write("iter,best_loss,mean_loss,best_reward,mean_reward,reward_mode\n")
-        for it, b, m, br, mr, mode in history:
-            f.write(f"{int(it)},{float(b)},{float(m)},{float(br)},{float(mr)},{mode}\n")
+        f.write(
+            "iter,best_loss,mean_loss,best_reward,mean_reward,"
+            "best_raw_reward,mean_raw_reward,reward_mode,"
+            "loss_median,loss_iqr,loss_std,reward_min,reward_max,reward_mean,"
+            "L_selberg_raw,L_spec_raw,L_spacing_raw,L_selberg_norm,L_spec_norm,L_spacing_norm,"
+            "operator_builder\n"
+        )
+        for (
+            it,
+            b,
+            m,
+            br,
+            mr,
+            brr,
+            mrr,
+            lmed,
+            liqr,
+            lstd,
+            rmin,
+            rmax,
+            rmean,
+            lsel_r,
+            lspec_r,
+            lsp_r,
+            lsel_n,
+            lspec_n,
+            lsp_n,
+            mode,
+        ) in history:
+            f.write(
+                f"{int(it)},{float(b)},{float(m)},{float(br)},{float(mr)},"
+                f"{float(brr)},{float(mrr)},{mode},"
+                f"{float(lmed)},{float(liqr)},{float(lstd)},{float(rmin)},{float(rmax)},{float(rmean)},"
+                f"{float(lsel_r)},{float(lspec_r)},{float(lsp_r)},{float(lsel_n)},{float(lspec_n)},{float(lsp_n)},"
+                f"{operator_builder}\n"
+            )
 
 
 def main() -> None:
@@ -619,6 +977,10 @@ def main() -> None:
     ap.add_argument("--op_sigma", type=float, default=0.3)
     ap.add_argument("--op_eps", type=float, default=0.6)
     ap.add_argument("--op_top_k_geodesics", type=int, default=250)
+    ap.add_argument("--operator_builder", type=str, default="word_sensitive", choices=["structured", "word_sensitive"])
+    ap.add_argument("--geo_weight", type=float, default=10.0)
+    ap.add_argument("--geo_sigma", type=float, default=0.6)
+    ap.add_argument("--potential_weight", type=float, default=0.25)
 
     ap.add_argument("--zeros", type=str, default="data/zeta_zeros.txt")
     ap.add_argument("--out_dir", type=str, default="runs/")
@@ -631,10 +993,23 @@ def main() -> None:
     ap.add_argument("--planner_model", type=str, default="/Users/machome/models/gemma/gemma-3-1b-it-Q4_K_M.gguf")
     ap.add_argument("--planner_inject_frac", type=float, default=0.2)
     ap.add_argument("--planner_replace_frac", type=float, default=0.2)
-    ap.add_argument("--reward_mode", type=str, default="rank", choices=["inverse", "rank", "soft_rank"])
+    ap.add_argument("--reward_mode", type=str, default="rank", choices=["inverse", "rank", "soft_rank", "raw", "adaptive"])
+    ap.add_argument("--adaptive_reward_window", type=int, default=50)
+    ap.add_argument("--adaptive_reward_eps", type=float, default=1e-8)
+    ap.add_argument("--adaptive_reward_clip", type=float, default=5.0)
+    ap.add_argument("--normalize_loss_components", type=str, default="True")
+    ap.add_argument("--component_clip", type=float, default=100.0)
+    ap.add_argument("--component_log_scale", type=str, default="True")
     ap.add_argument("--loss_clip", type=float, default=1000.0)
     ap.add_argument("--rank_temperature", type=float, default=1.0)
     args = ap.parse_args()
+
+    print(
+        f"[loss-normalization] enabled={str(args.normalize_loss_components).lower() in ['1','true','yes','y']} "
+        f"component_clip={float(args.component_clip)} "
+        f"log_scale={str(args.component_log_scale).lower() in ['1','true','yes','y']}",
+        flush=True,
+    )
 
     zeros = load_zeros(args.zeros)
     if zeros.size == 0:
@@ -670,6 +1045,10 @@ def main() -> None:
         op_sigma=float(args.op_sigma),
         op_eps=float(args.op_eps),
         op_top_k_geodesics=int(args.op_top_k_geodesics),
+        operator_builder=str(args.operator_builder),
+        geo_weight=float(args.geo_weight),
+        geo_sigma=float(args.geo_sigma),
+        potential_weight=float(args.potential_weight),
         log_top_words=5,
         use_planner=str(args.use_planner).lower() in ["1", "true", "yes", "y"],
         planner_backend=str(args.planner_backend),
@@ -679,6 +1058,12 @@ def main() -> None:
         planner_log_path=str(Path("runs") / "gemma_planner_log.jsonl"),
         planner_replace_frac=float(args.planner_replace_frac),
         reward_mode=str(args.reward_mode),
+        adaptive_reward_window=int(args.adaptive_reward_window),
+        adaptive_reward_eps=float(args.adaptive_reward_eps),
+        adaptive_reward_clip=float(args.adaptive_reward_clip),
+        normalize_loss_components=str(args.normalize_loss_components).lower() in ["1", "true", "yes", "y"],
+        component_clip=float(args.component_clip),
+        component_log_scale=str(args.component_log_scale).lower() in ["1", "true", "yes", "y"],
         loss_clip=float(args.loss_clip),
         rank_temperature=float(args.rank_temperature),
     )
@@ -687,9 +1072,10 @@ def main() -> None:
     with open(out_dir / "artin_aco_best.json", "w", encoding="utf-8") as f:
         payload = dict(best)
         payload["wall_time_s"] = float(dt)
+        payload["operator_builder"] = str(args.operator_builder)
         json.dump(payload, f, indent=2)
 
-    _write_history_csv(out_dir / "artin_aco_history.csv", history)
+    _write_history_csv(out_dir / "artin_aco_history.csv", history, operator_builder=str(args.operator_builder))
 
 
 if __name__ == "__main__":

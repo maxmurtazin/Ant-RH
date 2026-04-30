@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import inspect
 import json
 import os
 import sys
@@ -24,6 +25,14 @@ from core.artin_symbolic_billiard import (
     trace_2x2,
 )
 from core.spectral_stabilization import safe_eigh, stable_spectral_loss
+
+try:
+    from core.artin_operator_word_sensitive import build_word_sensitive_operator
+
+    _HAVE_WORD_SENSITIVE = True
+except Exception:
+    build_word_sensitive_operator = None
+    _HAVE_WORD_SENSITIVE = False
 
 try:
     from core.artin_operator_structured import build_operator_basis
@@ -152,26 +161,62 @@ def _build_operator(
     geodesics: List[Dict[str, Any]],
     eps: float,
     sigma: float,
+    geo_weight: float,
+    geo_sigma: float,
+    kernel_normalization: str,
+    laplacian_weight: float,
+    potential_weight: float,
+    builder: str,
     use_structured: bool,
     top_k_geodesics: int,
 ) -> Tuple[np.ndarray, Dict[str, Any]]:
     L, _, distances = build_laplacian(z_points, eps=float(eps))
     rep: Dict[str, Any] = {"builder": "basic", "used_geodesics": int(len(geodesics))}
 
+    if str(builder).lower() == "word_sensitive":
+        if not _HAVE_WORD_SENSITIVE or build_word_sensitive_operator is None:
+            rep["word_sensitive_error"] = "core.artin_operator_word_sensitive unavailable"
+        else:
+            H, wrep = build_word_sensitive_operator(
+                z_points=z_points,
+                distances=distances,
+                geodesics=geodesics,
+                eps=float(eps),
+                geo_sigma=float(geo_sigma),
+                kernel_normalization=str(kernel_normalization),
+                laplacian_weight=float(laplacian_weight),
+                geo_weight=float(geo_weight),
+                potential_weight=float(potential_weight),
+            )
+            rep.update({"builder": "word_sensitive", "word_sensitive_report": wrep})
+            return np.asarray(H, dtype=DTYPE), rep
+
     if use_structured and _HAVE_STRUCTURED and build_operator_basis is not None:
         try:
             tmp_path = Path("runs") / "_operator_sensitivity_words.json"
             tmp_path.parent.mkdir(parents=True, exist_ok=True)
             tmp_path.write_text(json.dumps(geodesics, ensure_ascii=False), encoding="utf-8")
-            basis, names, basis_rep = build_operator_basis(
-                z_points=z_points,
-                distances=distances,
-                eps=float(eps),
-                geo_sigma=float(sigma),
-                top_k_geodesics=int(top_k_geodesics),
-                geodesics_path=str(tmp_path),
-                seed=42,
-            )
+            requested_kwargs: Dict[str, Any] = {
+                "z_points": z_points,
+                "distances": distances,
+                "eps": float(eps),
+                "geo_weight": float(geo_weight),
+                "geo_sigma": float(geo_sigma),
+                "kernel_normalization": str(kernel_normalization),
+                "laplacian_weight": float(laplacian_weight),
+                "potential_weight": float(potential_weight),
+                "top_k_geodesics": int(top_k_geodesics),
+                "geodesics_path": str(tmp_path),
+                "seed": 42,
+            }
+            try:
+                sig = inspect.signature(build_operator_basis)
+                accepted = set(sig.parameters.keys())
+                call_kwargs = {k: v for k, v in requested_kwargs.items() if k in accepted}
+            except Exception:
+                call_kwargs = dict(requested_kwargs)
+
+            basis, names, basis_rep = build_operator_basis(**call_kwargs)
             H = np.zeros_like(L, dtype=DTYPE)
             for B, name in zip(basis, names):
                 if str(name) == "K_geo":
@@ -181,7 +226,20 @@ def _build_operator(
             else:
                 H = -np.asarray(L, dtype=DTYPE) + np.asarray(H, dtype=DTYPE)
             H = 0.5 * (H + H.T)
-            rep.update({"builder": "structured", "basis_report": basis_rep})
+            rep.update(
+                {
+                    "builder": "structured",
+                    "basis_report": basis_rep,
+                    "structured_params": {
+                        "geo_weight": float(geo_weight),
+                        "geo_sigma": float(geo_sigma),
+                        "kernel_normalization": str(kernel_normalization),
+                        "laplacian_weight": float(laplacian_weight),
+                        "potential_weight": float(potential_weight),
+                    },
+                    "structured_call_keys": sorted(list(call_kwargs.keys())),
+                }
+            )
             return H, rep
         except Exception as e:
             rep["structured_error"] = repr(e)
@@ -230,8 +288,14 @@ def main() -> None:
     ap.add_argument("--max_power", type=int, default=4)
     ap.add_argument("--n_points", type=int, default=128)
     ap.add_argument("--top_k_geodesics", type=int, default=500)
+    ap.add_argument("--builder", type=str, default="word_sensitive", choices=["structured", "word_sensitive"])
     ap.add_argument("--eps", type=float, default=0.6)
     ap.add_argument("--sigma", type=float, default=0.3)
+    ap.add_argument("--geo_weight", type=float, default=10.0)
+    ap.add_argument("--geo_sigma", type=float, default=0.6)
+    ap.add_argument("--kernel_normalization", type=str, default="max")
+    ap.add_argument("--laplacian_weight", type=float, default=1.0)
+    ap.add_argument("--potential_weight", type=float, default=0.25)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--zeros", type=str, default="data/zeta_zeros.txt")
     ap.add_argument("--out_dir", type=str, default="runs")
@@ -276,7 +340,13 @@ def main() -> None:
             geodesics=geodesics,
             eps=float(args.eps),
             sigma=float(args.sigma),
-            use_structured=True,
+            geo_weight=float(args.geo_weight),
+            geo_sigma=float(args.geo_sigma),
+            kernel_normalization=str(args.kernel_normalization),
+            laplacian_weight=float(args.laplacian_weight),
+            potential_weight=float(args.potential_weight),
+            builder=str(args.builder),
+            use_structured=str(args.builder).lower() == "structured",
             top_k_geodesics=int(args.top_k_geodesics),
         )
         fro_norm = float(np.linalg.norm(H, ord="fro"))
@@ -324,14 +394,32 @@ def main() -> None:
     loss_std = float(np.std(finite_losses)) if finite_losses.size else float("nan")
     loss_range = float(np.max(finite_losses) - np.min(finite_losses)) if finite_losses.size else float("nan")
     diagnosis = _diagnosis(operator_distance_mean, spectrum_distance_mean, loss_std)
+    sensitivity_success = bool(
+        (np.isfinite(operator_distance_mean) and operator_distance_mean > 1e-3)
+        and (np.isfinite(spectrum_distance_mean) and spectrum_distance_mean > 1e-3)
+        and (np.isfinite(loss_std) and loss_std > 1e-3)
+    )
 
     report = {
+        "builder": str(args.builder),
+        "word_sensitivity_enabled": str(args.builder).lower() == "word_sensitive",
+        "geo_weight": float(args.geo_weight),
+        "geo_sigma": float(args.geo_sigma),
+        "kernel_normalization": str(args.kernel_normalization),
+        "laplacian_weight": float(args.laplacian_weight),
+        "potential_weight": float(args.potential_weight),
         "operator_distance_mean": operator_distance_mean,
         "operator_distance_max": operator_distance_max,
         "spectrum_distance_mean": spectrum_distance_mean,
         "spectrum_distance_max": spectrum_distance_max,
         "loss_std": loss_std,
         "loss_range": loss_range,
+        "success_criteria": {
+            "operator_distance_mean_gt": 1e-3,
+            "spectrum_distance_mean_gt": 1e-3,
+            "loss_std_gt": 1e-3,
+        },
+        "sensitivity_success": sensitivity_success,
         "diagnosis": diagnosis,
         "set_reports": rows,
     }
