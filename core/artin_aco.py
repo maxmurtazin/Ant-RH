@@ -60,6 +60,57 @@ def load_zeros(path: str) -> np.ndarray:
     return z
 
 
+def compute_scheduler_effective(
+    *,
+    adaptive_scheduler: bool,
+    stagnation_iters: int,
+    scheduler_window: int,
+    exploration_floor: float,
+    exploration_floor_max: float,
+    lambda_ncg: float,
+    lambda_ncg_max: float,
+    lambda_diversity: float,
+    lambda_diversity_max: float,
+    restart_patience: int,
+    restart_patience_min: int,
+) -> Tuple[float, float, float, int, float]:
+    """
+    V12.8 adaptive stagnation ramp (diagnostic; not an RH proof).
+    Returns (exploration_floor_eff, lambda_ncg_eff, lambda_diversity_eff, restart_patience_eff, ramp_p).
+    """
+    if not adaptive_scheduler or int(scheduler_window) <= 0:
+        return (
+            float(exploration_floor),
+            float(lambda_ncg),
+            float(lambda_diversity),
+            int(restart_patience),
+            0.0,
+        )
+    if stagnation_iters < int(scheduler_window):
+        return (
+            float(exploration_floor),
+            float(lambda_ncg),
+            float(lambda_diversity),
+            int(restart_patience),
+            0.0,
+        )
+    excess = int(stagnation_iters) - int(scheduler_window)
+    denom = float(max(1, int(scheduler_window)))
+    p = min(1.0, float(excess) / denom)
+    ef = min(
+        float(exploration_floor_max),
+        float(exploration_floor) + p * (float(exploration_floor_max) - float(exploration_floor)),
+    )
+    ln_cg = min(float(lambda_ncg_max), float(lambda_ncg) + p * (float(lambda_ncg_max) - float(lambda_ncg)))
+    ld = min(
+        float(lambda_diversity_max),
+        float(lambda_diversity) + p * (float(lambda_diversity_max) - float(lambda_diversity)),
+    )
+    rp_f = float(restart_patience) - p * (float(restart_patience) - float(restart_patience_min))
+    rp = int(max(int(restart_patience_min), int(round(rp_f))))
+    return (ef, ln_cg, ld, rp, p)
+
+
 def resolve_zeros_cli(z: str) -> np.ndarray:
     """
     If ``z`` is an integer string (e.g. ``32``), build synthetic ordinates for smoke tests.
@@ -737,6 +788,8 @@ class ArtinACO:
         lambda_dtes_triple: float = 0.0,
         lambda_spectral_div: float = 0.0,
         ncg_eps: float = 1e-6,
+        spec_clip: float = 100.0,
+        reject_nonfinite_spec: bool = False,
     ) -> Tuple[List[Candidate], Dict[str, float]]:
         # Update bank with newly found valid geodesics (placeholder losses/rewards for ranking)
         for a_list, ell, tr in candidates:
@@ -753,7 +806,7 @@ class ArtinACO:
 
         # Compute global losses using current bank (raw components)
         L_selberg = self._selberg_loss(zeros, sigma=selberg_sigma, m_max=selberg_m_max, bank_top_n=selberg_bank_top_n)
-        L_spec = self._operator_spectral_loss(
+        L_spec_raw = self._operator_spectral_loss(
             zeros,
             n_points=n_points,
             op_sigma=op_sigma,
@@ -765,6 +818,35 @@ class ArtinACO:
             potential_weight=float(potential_weight),
             seed=self.seed,
         )
+        spec_cf = float(spec_clip)
+        spec_clip_iteration = 0
+        if not np.isfinite(L_spec_raw):
+            if bool(reject_nonfinite_spec):
+                nan_v = float("nan")
+                return [], {
+                    "L_spec_raw": float(L_spec_raw),
+                    "L_spec_eff": nan_v,
+                    "L_spec_clipped": 0,
+                    "spec_clip_iteration": 0,
+                    "spec_nonfinite_rejected": 1,
+                    "L_selberg_raw": float(L_selberg),
+                    "L_spacing_raw": 0.0,
+                    "L_selberg_norm": nan_v,
+                    "L_spec_norm": nan_v,
+                    "L_spacing_norm": nan_v,
+                    "L_zeta_raw": 0.0,
+                    "L_zeta_norm": nan_v,
+                    "L_total_global": nan_v,
+                    "heat_trace": nan_v,
+                    "spectral_entropy": nan_v,
+                }
+            L_spec = float(spec_cf)
+            spec_clip_iteration = 1
+        else:
+            L_spec = min(float(L_spec_raw), float(spec_cf))
+            if float(L_spec_raw) > float(spec_cf):
+                spec_clip_iteration = 1
+
         L_spacing = 0.0
         if lambda_spacing != 0.0:
             L_spacing = 0.0
@@ -1063,7 +1145,10 @@ class ArtinACO:
 
         stats = {
             "L_selberg_raw": float(L_selberg),
-            "L_spec_raw": float(L_spec),
+            "L_spec_raw": float(L_spec_raw),
+            "L_spec_eff": float(L_spec),
+            "L_spec_clipped": int(spec_clip_iteration > 0),
+            "spec_clip_iteration": int(spec_clip_iteration),
             "L_spacing_raw": float(L_spacing),
             "L_selberg_norm": float(L_sel_norm),
             "L_spec_norm": float(L_spec_norm),
@@ -1225,11 +1310,20 @@ class ArtinACO:
         bank_prune_fraction: float = 0.5,
         alpha_anneal: float = 0.0,
         beta_anneal: float = 0.0,
+        adaptive_scheduler: bool = False,
+        scheduler_window: int = 10,
+        exploration_floor_max: float = 0.3,
+        lambda_ncg_max: float = 0.1,
+        lambda_diversity_max: float = 0.2,
+        restart_patience_min: int = 4,
+        spec_clip: float = 100.0,
+        reject_nonfinite_spec: bool = False,
     ) -> Tuple[Dict[str, Any], List[Tuple[Any, ...]]]:
         history: List[Tuple[Any, ...]] = []
         best_snapshot: Dict[str, Any] = {"best_loss": float("inf"), "best_words": [], "best_lengths": []}
         recent_losses: List[float] = []
         last_eval_stats: Dict[str, Any] = {}
+        spec_was_clipped_count = 0
 
         alpha_base = float(self.alpha)
         beta_base = float(self.beta)
@@ -1241,6 +1335,18 @@ class ArtinACO:
         last_improvement_iter = -1
         restart_count = 0
         bank_saturation_iter: Optional[int] = None
+        global_best_history: List[float] = []
+        iter_best_history: List[float] = []
+        exploration_floor_eff_final = float(exploration_floor)
+        lambda_ncg_eff_final = float(lambda_ncg)
+        lambda_diversity_eff_final = float(lambda_diversity)
+        restart_patience_eff_final = int(restart_patience)
+        stagnation_iters_final = 0
+        sched_ramp_p_final = 0.0
+        sched_note_ncg: Optional[str] = None
+        sched_note_div: Optional[str] = None
+        _sched_warned_ncg_cap: List[bool] = [False]
+        _sched_warned_div_cap: List[bool] = [False]
 
         planner = None
         if use_planner:
@@ -1270,9 +1376,65 @@ class ArtinACO:
             beta_eff = beta_base * (1.0 + float(beta_anneal) * t_scale)
             self._alpha_eff = alpha_eff
             self._beta_eff = beta_eff
-            self._exploration_floor = float(exploration_floor)
 
-            rp = int(restart_patience)
+            stagnation_iters = int(it) - int(global_best_iter)
+            (
+                exploration_floor_eff,
+                lambda_ncg_eff,
+                lambda_diversity_eff,
+                restart_patience_eff,
+                sched_ramp_p,
+            ) = compute_scheduler_effective(
+                adaptive_scheduler=bool(adaptive_scheduler),
+                stagnation_iters=stagnation_iters,
+                scheduler_window=int(scheduler_window),
+                exploration_floor=float(exploration_floor),
+                exploration_floor_max=float(exploration_floor_max),
+                lambda_ncg=float(lambda_ncg),
+                lambda_ncg_max=float(lambda_ncg_max),
+                lambda_diversity=float(lambda_diversity),
+                lambda_diversity_max=float(lambda_diversity_max),
+                restart_patience=int(restart_patience),
+                restart_patience_min=int(restart_patience_min),
+            )
+            self._exploration_floor = float(exploration_floor_eff)
+            exploration_floor_eff_final = float(exploration_floor_eff)
+            lambda_ncg_eff_final = float(lambda_ncg_eff)
+            lambda_diversity_eff_final = float(lambda_diversity_eff)
+            restart_patience_eff_final = int(restart_patience_eff)
+            stagnation_iters_final = int(stagnation_iters)
+            sched_ramp_p_final = float(sched_ramp_p)
+
+            scheduler_active = int(
+                bool(adaptive_scheduler) and stagnation_iters >= int(scheduler_window)
+            )
+            ncg_headroom = float(lambda_ncg_max) - float(lambda_ncg)
+            div_headroom = float(lambda_diversity_max) - float(lambda_diversity)
+            if (
+                bool(adaptive_scheduler)
+                and stagnation_iters >= int(scheduler_window)
+                and float(sched_ramp_p) > 0.0
+            ):
+                if ncg_headroom <= 0.0 and not _sched_warned_ncg_cap[0]:
+                    _sched_warned_ncg_cap[0] = True
+                    sched_note_ncg = "lambda_ncg_at_cap"
+                    warnings.warn(
+                        "V12.8 adaptive scheduler: lambda_ncg already at or above lambda_ncg_max; "
+                        "NCG weight ramp skipped.",
+                        UserWarning,
+                        stacklevel=2,
+                    )
+                if div_headroom <= 0.0 and not _sched_warned_div_cap[0]:
+                    _sched_warned_div_cap[0] = True
+                    sched_note_div = "lambda_diversity_at_cap"
+                    warnings.warn(
+                        "V12.8 adaptive scheduler: lambda_diversity already at or above lambda_diversity_max; "
+                        "diversity weight ramp skipped.",
+                        UserWarning,
+                        stacklevel=2,
+                    )
+
+            rp = int(restart_patience_eff)
             if rp > 0 and it >= rp:
                 gap = int(it) - int(last_improvement_iter)
                 if gap >= rp:
@@ -1437,11 +1599,23 @@ class ArtinACO:
                         float("nan"),
                         float("nan"),
                         float("nan"),
+                        float("nan"),
+                        0,
+                        int(spec_was_clipped_count),
                         str(reward_mode),
                     )
                 )
+                gb_h = float(global_best_loss) if global_best_candidate is not None else float("inf")
+                global_best_history.append(gb_h)
+                iter_best_history.append(float("inf"))
                 print(
-                    f"[{it}] best=inf mean=inf valid=0 avg_ell=nan bank={len(self._bank)}",
+                    f"[{it}] best=inf mean=inf valid=0 avg_ell=nan bank={len(self._bank)} "
+                    f"scheduler_active={int(bool(adaptive_scheduler) and int(stagnation_iters) >= int(scheduler_window))} "
+                    f"exploration_floor_eff={float(exploration_floor_eff):.6g} "
+                    f"lambda_ncg_eff={float(lambda_ncg_eff):.6g} "
+                    f"lambda_diversity_eff={float(lambda_diversity_eff):.6g} "
+                    f"restart_patience_eff={int(restart_patience_eff)} "
+                    f"stagnation_iters={int(stagnation_iters)}",
                     flush=True,
                 )
                 continue
@@ -1474,7 +1648,7 @@ class ArtinACO:
                 ncg_dtype=str(ncg_dtype),
                 ncg_device=str(ncg_device),
                 use_ncg_braid=bool(use_ncg_braid),
-                lambda_ncg=float(lambda_ncg),
+                lambda_ncg=float(lambda_ncg_eff),
                 lambda_ncg_spectral=float(lambda_ncg_spectral),
                 lambda_ncg_selfadjoint=float(lambda_ncg_selfadjoint),
                 lambda_ncg_commutator=float(lambda_ncg_commutator),
@@ -1500,7 +1674,7 @@ class ArtinACO:
                 trace_sigma=float(trace_sigma),
                 trace_max_cycles=int(trace_max_cycles),
                 lambda_comm=float(lambda_comm),
-                lambda_diversity=float(lambda_diversity),
+                lambda_diversity=float(lambda_diversity_eff),
                 lambda_length=float(lambda_length),
                 comm_eps=float(comm_eps),
                 diversity_sigma=float(diversity_sigma),
@@ -1508,7 +1682,80 @@ class ArtinACO:
                 lambda_dtes_triple=float(lambda_dtes_triple),
                 lambda_spectral_div=float(lambda_spectral_div),
                 ncg_eps=float(ncg_eps),
+                spec_clip=float(spec_clip),
+                reject_nonfinite_spec=bool(reject_nonfinite_spec),
             )
+
+            spec_was_clipped_count += int(stats.get("spec_clip_iteration", 0))
+
+            if not scored:
+                last_eval_stats = dict(stats)
+                self.evaporate()
+                history.append(
+                    (
+                        it,
+                        float("inf"),
+                        float("inf"),
+                        0.0,
+                        0.0,
+                        float("-inf"),
+                        float("-inf"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        int(stats.get("L_spec_clipped", 0)),
+                        int(spec_was_clipped_count),
+                        str(reward_mode),
+                    )
+                )
+                gb_h = float(global_best_loss) if global_best_candidate is not None else float("inf")
+                global_best_history.append(gb_h)
+                iter_best_history.append(float("inf"))
+                lsr = float(stats.get("L_spec_raw", float("nan")))
+                print(
+                    f"[{it}] spec_nonfinite_rejected valid={len(valids)} bank={len(self._bank)} "
+                    f"L_spec_raw={lsr} L_spec_clipped={int(stats.get('L_spec_clipped', 0))} "
+                    f"spec_clip_count={spec_was_clipped_count} "
+                    f"scheduler_active={int(bool(adaptive_scheduler) and int(stagnation_iters) >= int(scheduler_window))} "
+                    f"exploration_floor_eff={float(exploration_floor_eff):.6g} "
+                    f"lambda_ncg_eff={float(lambda_ncg_eff):.6g} "
+                    f"lambda_diversity_eff={float(lambda_diversity_eff):.6g} "
+                    f"restart_patience_eff={int(restart_patience_eff)} "
+                    f"stagnation_iters={int(stagnation_iters)}",
+                    flush=True,
+                )
+                continue
 
             stats["seed_used"] = float(seed_init_count)
             stats["seed_frac"] = float(seed_init_count) / float(max(1, self.num_ants))
@@ -1526,6 +1773,10 @@ class ArtinACO:
                 global_best_iter = int(it)
                 last_improvement_iter = int(it)
             final_iter_best_loss = iter_best_loss
+            global_best_history.append(
+                float(global_best_loss) if global_best_candidate is not None else float("inf")
+            )
+            iter_best_history.append(float(iter_best_loss))
 
             mean_loss = float(np.mean([c.loss for c in scored])) if scored else float("inf")
             best_reward = float(scored[0].reward) if scored else 0.0
@@ -1541,6 +1792,8 @@ class ArtinACO:
             reward_mean = float(stats.get("reward_mean", float("nan")))
             L_selberg_raw = float(stats.get("L_selberg_raw", float("nan")))
             L_spec_raw = float(stats.get("L_spec_raw", float("nan")))
+            L_spec_eff_v = float(stats.get("L_spec_eff", float("nan")))
+            L_spec_clipped_v = int(stats.get("L_spec_clipped", 0))
             L_spacing_raw = float(stats.get("L_spacing_raw", float("nan")))
             L_selberg_norm = float(stats.get("L_selberg_norm", float("nan")))
             L_spec_norm = float(stats.get("L_spec_norm", float("nan")))
@@ -1682,6 +1935,8 @@ class ArtinACO:
                     float(seed_used_v),
                     float(seed_frac_v),
                     float(motif_hits_v),
+                    int(L_spec_clipped_v),
+                    int(spec_was_clipped_count),
                     str(reward_mode),
                 )
             )
@@ -1700,14 +1955,25 @@ class ArtinACO:
             )
             ae_v = float(getattr(self, "_alpha_eff", self.alpha))
             be_v = float(getattr(self, "_beta_eff", self.beta))
+            sched_log = (
+                f"scheduler_active={scheduler_active} "
+                f"exploration_floor_eff={float(exploration_floor_eff):.6g} "
+                f"lambda_ncg_eff={float(lambda_ncg_eff):.6g} "
+                f"lambda_diversity_eff={float(lambda_diversity_eff):.6g} "
+                f"restart_patience_eff={int(restart_patience_eff)} "
+                f"stagnation_iters={int(stagnation_iters)} "
+                f"L_spec_raw={L_spec_raw:.6g} L_spec_eff={L_spec_eff_v:.6g} "
+                f"L_spec_clipped={L_spec_clipped_v} spec_clip_count={spec_was_clipped_count}"
+            )
             if it % 10 == 0:
                 print(
                     f"[{it}] best={gb_loss_log:.6g} iter_best={iter_best_loss:.6g} "
                     f"global_best={gb_loss_log:.6g} global_best_iter={global_best_iter} "
                     f"mean={mean_loss:.6g} valid={len(scored)} "
                     f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
+                    f"{sched_log} "
                     f"alpha_eff={ae_v:.4g} beta_eff={be_v:.4g} "
-                    f"L_sel={L_selberg_raw:.3g} L_spec={L_spec_raw:.3g} "
+                    f"L_sel={L_selberg_raw:.3g} L_spec_raw={L_spec_raw:.3g} L_spec_eff={L_spec_eff_v:.3g} "
                     f"L_comm={L_comm_v:.3g} L_div={L_div_v:.3g} L_len={L_len_v:.3g} "
                     f"comm_norm_mean={comm_norm_mean_v:.3g} diversity_penalty_mean={div_pen_mean_v:.3g} "
                     f"length_penalty_mean={len_pen_mean_v:.3g} "
@@ -1727,8 +1993,9 @@ class ArtinACO:
                     f"global_best={gb_loss_log:.6g} global_best_iter={global_best_iter} "
                     f"mean={mean_loss:.6g} valid={len(scored)} "
                     f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
+                    f"{sched_log} "
                     f"alpha_eff={ae_v:.4g} beta_eff={be_v:.4g} "
-                    f"L_sel={L_selberg_raw:.3g} L_spec={L_spec_raw:.3g} "
+                    f"L_sel={L_selberg_raw:.3g} L_spec_raw={L_spec_raw:.3g} L_spec_eff={L_spec_eff_v:.3g} "
                     f"L_comm={L_comm_v:.3g} L_div={L_div_v:.3g} L_len={L_len_v:.3g} "
                     f"comm_norm_mean={comm_norm_mean_v:.3g} diversity_penalty_mean={div_pen_mean_v:.3g} "
                     f"length_penalty_mean={len_pen_mean_v:.3g} "
@@ -1825,7 +2092,73 @@ class ArtinACO:
         best_snapshot["beta_anneal"] = float(beta_anneal)
         best_snapshot["elite_reinforcement_enabled"] = bool(float(elite_weight) > 0.0)
 
+        best_snapshot["spec_clip"] = float(spec_clip)
+        best_snapshot["spec_was_clipped_count"] = int(spec_was_clipped_count)
+        best_snapshot["reject_nonfinite_spec"] = bool(reject_nonfinite_spec)
+
+        # V12.8 adaptive stagnation scheduler (not an RH proof).
+        best_snapshot["adaptive_scheduler"] = bool(adaptive_scheduler)
+        best_snapshot["scheduler_window"] = int(scheduler_window)
+        best_snapshot["exploration_floor_final"] = float(exploration_floor_eff_final)
+        best_snapshot["lambda_ncg_final"] = float(lambda_ncg_eff_final)
+        best_snapshot["lambda_diversity_final"] = float(lambda_diversity_eff_final)
+        best_snapshot["restart_patience_final"] = int(restart_patience_eff_final)
+        best_snapshot["stagnation_iters_final"] = int(stagnation_iters_final)
+        best_snapshot["global_best_history"] = list(global_best_history)
+        best_snapshot["iter_best_history"] = list(iter_best_history)
+        if sched_note_ncg is not None:
+            best_snapshot["scheduler_note_ncg"] = str(sched_note_ncg)
+        if sched_note_div is not None:
+            best_snapshot["scheduler_note_diversity"] = str(sched_note_div)
+
         return best_snapshot, history
+
+
+def _csv_history_cell(v: Any) -> str:
+    """Single CSV field (comma-separated; minimal escaping)."""
+    if v is None:
+        return ""
+    if isinstance(v, bool):
+        return "1" if v else "0"
+    if isinstance(v, (int, np.integer)):
+        return str(int(v))
+    if isinstance(v, float):
+        if math.isnan(v):
+            return "nan"
+        if math.isinf(v):
+            return "inf" if v > 0 else "-inf"
+        return repr(v)
+    if isinstance(v, str):
+        if any(c in v for c in ",\n\r\""):
+            return '"' + v.replace('"', '""') + '"'
+        return v
+    return str(v)
+
+
+def _normalize_history_csv_row(row: Tuple[Any, ...], *, target_len: int) -> List[Any]:
+    """Pad/trim history tuples so CSV columns stay aligned with the header."""
+    r = list(row)
+    n = len(r)
+    if n == target_len:
+        return r
+    # Pre–V12.8B CSV (42 data columns ending with reward_mode): insert spectral columns before mode.
+    if n == target_len - 2 and n >= 2:
+        print(
+            f"[history-warning] row_len={n} header_len={target_len} legacy_42_expanding",
+            flush=True,
+        )
+        return r[:-1] + [float("nan"), 0, r[-1]]
+    if n < target_len:
+        print(
+            f"[history-warning] row_len={n} header_len={target_len} padding_short_row",
+            flush=True,
+        )
+        return r + [None] * (target_len - n)
+    print(
+        f"[history-warning] row_len={n} header_len={target_len} trimming_long_row",
+        flush=True,
+    )
+    return r[:target_len]
 
 
 def _write_history_csv(
@@ -1834,77 +2167,37 @@ def _write_history_csv(
     *,
     operator_builder: str,
 ) -> None:
+    header_line = (
+        "iter,best_loss,mean_loss,best_reward,mean_reward,"
+        "best_raw_reward,mean_raw_reward,"
+        "loss_median,loss_iqr,loss_std,reward_min,reward_max,reward_mean,"
+        "L_selberg_raw,L_spec_raw,L_spacing_raw,L_selberg_norm,L_spec_norm,L_spacing_norm,"
+        "L_zeta_raw,heat_trace,spectral_entropy,"
+        "ncg_loss,ncg_spectral_loss,ncg_selfadjoint_loss,ncg_commutator_loss,"
+        "ncg_heat_trace_log,ncg_zeta_D_s2,ncg_spacing_mean,ncg_spacing_std,ncg_r_stat_mean,"
+        "ncg_eig_min,ncg_eig_max,"
+        "trace_loss,spectral_side,geometric_side,primitive_braid_count,mean_braid_length,"
+        "seed_used,seed_frac,motif_hits,"
+        "L_spec_clipped,spec_clip_count,reward_mode,"
+        "operator_builder\n"
+    )
+    header_cols = header_line.strip().split(",")
+    target_len = len(header_cols) - 1
     with open(path, "w", encoding="utf-8") as f:
-        f.write(
-            "iter,best_loss,mean_loss,best_reward,mean_reward,"
-            "best_raw_reward,mean_raw_reward,reward_mode,"
-            "loss_median,loss_iqr,loss_std,reward_min,reward_max,reward_mean,"
-            "L_selberg_raw,L_spec_raw,L_spacing_raw,L_selberg_norm,L_spec_norm,L_spacing_norm,"
-            "L_zeta_raw,heat_trace,spectral_entropy,"
-            "ncg_loss,ncg_spectral_loss,ncg_selfadjoint_loss,ncg_commutator_loss,"
-            "ncg_heat_trace_log,ncg_zeta_D_s2,ncg_spacing_mean,ncg_spacing_std,ncg_r_stat_mean,"
-            "ncg_eig_min,ncg_eig_max,"
-            "trace_loss,spectral_side,geometric_side,primitive_braid_count,mean_braid_length,"
-            "seed_used,seed_frac,motif_hits,"
-            "operator_builder\n"
-        )
+        f.write(header_line)
         for row in history:
-            (
-                it,
-                b,
-                m,
-                br,
-                mr,
-                brr,
-                mrr,
-                lmed,
-                liqr,
-                lstd,
-                rmin,
-                rmax,
-                rmean,
-                lsel_r,
-                lspec_r,
-                lsp_r,
-                lsel_n,
-                lspec_n,
-                lsp_n,
-                lzeta_r,
-                heat_tr,
-                spec_ent,
-                ncg_l,
-                ncg_sl,
-                ncg_sa,
-                ncg_co,
-                ncg_ht,
-                ncg_z2,
-                ncg_spm,
-                ncg_sps,
-                ncg_rs,
-                ncg_emn,
-                ncg_emx,
-                tr_lo,
-                tr_sp,
-                tr_geo,
-                tr_pb,
-                tr_mbl,
-                seed_u,
-                seed_f,
-                motif_h,
-                mode,
-            ) = row
-            f.write(
-                f"{int(it)},{float(b)},{float(m)},{float(br)},{float(mr)},"
-                f"{float(brr)},{float(mrr)},{mode},"
-                f"{float(lmed)},{float(liqr)},{float(lstd)},{float(rmin)},{float(rmax)},{float(rmean)},"
-                f"{float(lsel_r)},{float(lspec_r)},{float(lsp_r)},{float(lsel_n)},{float(lspec_n)},{float(lsp_n)},"
-                f"{float(lzeta_r)},{float(heat_tr)},{float(spec_ent)},"
-                f"{float(ncg_l)},{float(ncg_sl)},{float(ncg_sa)},{float(ncg_co)},{float(ncg_ht)},{float(ncg_z2)},"
-                f"{float(ncg_spm)},{float(ncg_sps)},{float(ncg_rs)},{float(ncg_emn)},{float(ncg_emx)},"
-                f"{float(tr_lo)},{float(tr_sp)},{float(tr_geo)},{float(tr_pb)},{float(tr_mbl)},"
-                f"{float(seed_u)},{float(seed_f)},{float(motif_h)},"
-                f"{operator_builder}\n"
-            )
+            cells = _normalize_history_csv_row(tuple(row), target_len=target_len)
+            if len(cells) != target_len:
+                print(
+                    f"[history-warning] row_len={len(cells)} header_len={target_len} after_normalize",
+                    flush=True,
+                )
+                if len(cells) < target_len:
+                    cells = cells + [None] * (target_len - len(cells))
+                else:
+                    cells = cells[:target_len]
+            line = ",".join(_csv_history_cell(c) for c in cells) + "," + _csv_history_cell(operator_builder)
+            f.write(line + "\n")
 
 
 def main() -> None:
@@ -1920,6 +2213,18 @@ def main() -> None:
 
     ap.add_argument("--lambda_selberg", type=float, default=1.0)
     ap.add_argument("--lambda_spec", type=float, default=1.0)
+    ap.add_argument(
+        "--spec_clip",
+        type=float,
+        default=100.0,
+        help="Cap raw operator spectral loss (finite values above this are clipped; non-finite uses this value unless rejected).",
+    )
+    ap.add_argument(
+        "--reject_nonfinite_spec",
+        type=str,
+        default="false",
+        help="If true, skip scoring for the iteration when operator spectral loss is not finite.",
+    )
     ap.add_argument("--lambda_spacing", type=float, default=0.0)
     ap.add_argument("--lambda_zeta", type=float, default=0.0)
     ap.add_argument("--use_ncg_braid", action="store_true", help="Enable per-ant NCG braid spectral losses (experimental).")
@@ -2022,6 +2327,23 @@ def main() -> None:
     )
     ap.add_argument("--alpha_anneal", type=float, default=0.0, help="Linear alpha multiplier ramp across iterations.")
     ap.add_argument("--beta_anneal", type=float, default=0.0, help="Linear beta multiplier ramp across iterations.")
+    # V12.8 adaptive stagnation scheduler (diagnostic; not an RH proof).
+    ap.add_argument(
+        "--adaptive_scheduler",
+        type=str,
+        default="false",
+        help="When true, ramp exploration_floor / lambda_ncg / lambda_diversity and tighten restart patience after stagnation.",
+    )
+    ap.add_argument("--scheduler_window", type=int, default=10, help="Iterations without global_best improvement before ramping.")
+    ap.add_argument("--exploration_floor_max", type=float, default=0.3, help="Upper cap for exploration_floor under adaptive scheduler.")
+    ap.add_argument("--lambda_ncg_max", type=float, default=0.1, help="Upper cap for lambda_ncg under adaptive scheduler.")
+    ap.add_argument("--lambda_diversity_max", type=float, default=0.2, help="Upper cap for lambda_diversity under adaptive scheduler.")
+    ap.add_argument(
+        "--restart_patience_min",
+        type=int,
+        default=4,
+        help="Lower floor for effective restart patience under adaptive scheduler.",
+    )
     # NCG-inspired anti-collapse regularizers (NOT an RH proof); defaults preserve legacy behavior.
     ap.add_argument("--lambda_comm", type=float, default=0.0)
     ap.add_argument("--lambda_diversity", type=float, default=0.0)
@@ -2166,6 +2488,14 @@ def main() -> None:
         bank_prune_fraction=float(args.bank_prune_fraction),
         alpha_anneal=float(args.alpha_anneal),
         beta_anneal=float(args.beta_anneal),
+        adaptive_scheduler=str(args.adaptive_scheduler).lower() in ["1", "true", "yes", "y"],
+        scheduler_window=int(args.scheduler_window),
+        exploration_floor_max=float(args.exploration_floor_max),
+        lambda_ncg_max=float(args.lambda_ncg_max),
+        lambda_diversity_max=float(args.lambda_diversity_max),
+        restart_patience_min=int(args.restart_patience_min),
+        spec_clip=float(args.spec_clip),
+        reject_nonfinite_spec=str(args.reject_nonfinite_spec).lower() in ["1", "true", "yes", "y"],
     )
     dt = time.perf_counter() - t0
 
