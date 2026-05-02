@@ -1,0 +1,47 @@
+defaults:
+  - _self_
+
+version: V13_NCG_BRAID_ACO
+
+use_ncg_braid: true
+
+lambda_ncg: 0.25
+lambda_ncg_spectral: 1.0
+lambda_ncg_selfadjoint: 0.01
+lambda_ncg_commutator: 0.001
+lambda_ncg_spacing: 0.05
+lambda_ncg_zeta: 0.01
+
+ncg_dim: 128
+ncg_n_strands: 4
+ncg_max_word_len: 8
+ncg_diagonal_growth: exp
+ncg_growth_alpha: 0.35
+ncg_edge_scale: 0.15
+ncg_spectrum_scale: 20.0
+ncg_dtype: float64
+ncg_device: cpu
+
+target_zeros:
+  - 14.134725
+  - 21.022039
+  - 25.010857
+  - 30.424876
+  - 32.935062
+  - 37.586178
+
+aco:
+  num_ants: 32
+  num_iters: 50
+  max_length: 8
+  alpha: 1.0
+  beta: 2.0
+  rho: 0.1
+
+out_dir: runs/v13_ncg_aco
+
+# Optional Selberg-style braid trace layer (see core/selberg_braid_trace.py); wire via CLI flags.
+use_selberg_trace: false
+lambda_trace: 0.0
+trace_sigma: 0.75
+trace_max_cycles: 16

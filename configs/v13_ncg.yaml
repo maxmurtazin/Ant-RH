@@ -1,0 +1,15 @@
+# V13 — NCG braid spectral triple hooks (zeta ordinate matching + heat trace).
+defaults:
+  - _self_
+
+lambda_zeta: 1.0
+lambda_heat: 0.1
+
+model:
+  dim: 128
+
+target:
+  zeros:
+    - 14.134725
+    - 21.022039
+    - 25.010857

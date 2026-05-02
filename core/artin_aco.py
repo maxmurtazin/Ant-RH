@@ -17,7 +17,18 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
+import torch
 
+from core.ncg_braid_spectral import (
+    build_braid_operator,
+    compute_heat_trace,
+    compute_ncg_braid_losses,
+    compute_zeta_loss,
+    parse_braid_word,
+    spectral_entropy,
+)
+from core.selberg_braid_trace import compute_selberg_braid_trace_metrics
+from core.spectral_stabilization import safe_eigh
 from core.artin_symbolic_billiard import (
     build_word as build_word_matrix,
     hyperbolic_length_from_trace,
@@ -49,6 +60,36 @@ def load_zeros(path: str) -> np.ndarray:
 
 _DTF = np.float64
 
+# Commutator-like braid fragments from prior ACO runs (algebraic prior; not an RH proof).
+SEED_MOTIFS = [
+    [1, -1, 1, -1],
+    [-1, 1, -1, 1],
+    [-2, 2, 1, -1],
+    [2, -2, 1, -1],
+    [3, -3, -1, 1],
+    [-4, 1, -1, 1],
+    [4, -1, 1, -1],
+]
+
+
+def count_motif_occurrences(word: List[int], motifs: Optional[List[List[int]]] = None) -> int:
+    """Count contiguous matches of any seed motif as a sublist of ``word`` (overlaps allowed)."""
+    if motifs is None:
+        motifs = SEED_MOTIFS
+    w = [int(x) for x in word]
+    total = 0
+    for m in motifs:
+        if not m:
+            continue
+        k = len(m)
+        n = len(w)
+        if n < k:
+            continue
+        for i in range(n - k + 1):
+            if w[i : i + k] == m:
+                total += 1
+    return int(total)
+
 
 def _clip(x: float, lo: float, hi: float) -> float:
     return float(min(max(x, lo), hi))
@@ -66,6 +107,54 @@ def _stable_softmax(logits: np.ndarray) -> np.ndarray:
 
 def _word_key(a_list: List[int]) -> Tuple[int, ...]:
     return tuple(int(a) for a in a_list)
+
+
+def normalize_braid_token(tok: str) -> str:
+    tok = str(tok).strip()
+    mapping = {
+        "sigma1": "s1+",
+        "sigma1^-1": "s1-",
+        "sigma2": "s2+",
+        "sigma2^-1": "s2-",
+        "sigma3": "s3+",
+        "sigma3^-1": "s3-",
+        "s1+": "s1+",
+        "s1-": "s1-",
+        "s2+": "s2+",
+        "s2-": "s2-",
+        "s3+": "s3+",
+        "s3-": "s3-",
+    }
+    return mapping.get(tok, tok)
+
+
+def candidate_to_braid_words(candidate: Any, *, n_strands: int = 4) -> List[str]:
+    """
+    Map an ACO candidate (Artin ints or braid-like tokens) to NCG parser tokens (s1+, s2-, ...).
+    """
+    if isinstance(candidate, str):
+        return [normalize_braid_token(t) for t in candidate.split() if str(t).strip()]
+    if isinstance(candidate, (list, tuple)):
+        if not candidate:
+            return ["e"]
+        if isinstance(candidate[0], str):
+            return [normalize_braid_token(t) for t in candidate]
+        if isinstance(candidate[0], int):
+            m = max(1, int(n_strands) - 1)
+            out: List[str] = []
+            for a in candidate:
+                try:
+                    ai = int(a)
+                except Exception:
+                    continue
+                if ai == 0:
+                    continue
+                sign = 1 if ai > 0 else -1
+                idx = 1 + (abs(ai) - 1) % m
+                idx = min(idx, m)
+                out.append(f"s{idx}{'+' if sign > 0 else '-'}")
+            return out if out else ["e"]
+    return ["e"]
 
 
 def _is_valid_action_word(word: List[int], max_length: int, max_power: int) -> bool:
@@ -145,6 +234,7 @@ class ArtinACO:
         self._word_cache: Dict[Tuple[int, ...], Tuple[bool, float, float]] = {}
         self._bank: Dict[Tuple[int, ...], Candidate] = {}
         self._op_cache: Dict[Tuple[Tuple[int, ...], ...], float] = {}
+        self.best_ncg_export: Optional[Dict[str, Any]] = None
 
     def _assign_rewards(
         self,
@@ -245,26 +335,58 @@ class ArtinACO:
     def _set_tau(self, prev_a: int, next_a: int, value: float) -> None:
         self.pheromone[(int(prev_a), int(next_a))] = _clip(value, self.tau_min, self.tau_max)
 
-    def sample_word(self) -> List[int]:
-        L = int(self.rng.integers(3, self.max_length + 1))
+    def _sample_random_word_of_length(self, L: int) -> List[int]:
+        L = int(L)
+        if L <= 0:
+            return []
+        L = min(L, self.max_length)
         a1 = int(self.rng.choice(self.a_vals))
         word = [a1]
         prev = a1
-
         for _ in range(L - 1):
             taus = np.empty(self.a_vals.size, dtype=_DTF)
             for i, a in enumerate(self.a_vals):
                 taus[i] = self._tau(prev, int(a))
             taus = np.clip(taus, self.tau_min, self.tau_max)
-
             logits = self.alpha * np.log(taus) + self.beta * self._heur_log
             probs = _stable_softmax(logits)
             idx = int(self.rng.choice(self.a_vals.size, p=probs))
             nxt = int(self.a_vals[idx])
             word.append(nxt)
             prev = nxt
-
         return word
+
+    def sample_word(self) -> List[int]:
+        L = int(self.rng.integers(3, self.max_length + 1))
+        return self._sample_random_word_of_length(L)
+
+    def _maybe_seed_mutate(
+        self,
+        word: List[int],
+        *,
+        use_seed_motifs: bool,
+        seed_mutation_prob: float,
+    ) -> List[int]:
+        if not use_seed_motifs or self.rng.random() >= float(seed_mutation_prob):
+            return list(word)
+        w = list(word)
+        motif = list(SEED_MOTIFS[int(self.rng.integers(0, len(SEED_MOTIFS)))])
+        m2 = motif[:2]
+        if not m2:
+            return w
+        if len(w) == 0:
+            idx = 0
+        else:
+            idx = int(self.rng.integers(0, len(w)))
+        w[idx:idx] = m2
+        return w[: self.max_length]
+
+    def _boost_motif_pheromone(self) -> None:
+        for motif in SEED_MOTIFS:
+            for i in range(len(motif) - 1):
+                key = (int(motif[i]), int(motif[i + 1]))
+                v = float(self.pheromone.get(key, 1.0)) * 1.05
+                self.pheromone[key] = _clip(v, self.tau_min, self.tau_max)
 
     def _validate_and_length(self, a_list: List[int]) -> Tuple[bool, float, float]:
         if not _is_valid_action_word(a_list, self.max_length, self.max_power):
@@ -391,6 +513,7 @@ class ArtinACO:
         lambda_selberg: float,
         lambda_spec: float,
         lambda_spacing: float,
+        lambda_zeta: float = 0.0,
         selberg_sigma: float,
         selberg_m_max: int,
         selberg_bank_top_n: int,
@@ -402,6 +525,24 @@ class ArtinACO:
         geo_weight: float = 10.0,
         geo_sigma: float = 0.6,
         potential_weight: float = 0.25,
+        ncg_dim: int = 128,
+        ncg_n_strands: int = 4,
+        ncg_max_word_len: int = 8,
+        ncg_diagonal_growth: str = "exp",
+        ncg_growth_alpha: float = 0.15,
+        ncg_edge_scale: float = 0.05,
+        ncg_spectrum_scale: float = 1.0,
+        ncg_dtype: str = "float64",
+        ncg_device: str = "cpu",
+        use_ncg_braid: bool = False,
+        lambda_ncg: float = 0.0,
+        lambda_ncg_spectral: float = 1.0,
+        lambda_ncg_selfadjoint: float = 0.01,
+        lambda_ncg_commutator: float = 0.001,
+        lambda_ncg_spacing: float = 0.05,
+        lambda_ncg_zeta: float = 0.01,
+        ncg_target_zeros: Optional[np.ndarray] = None,
+        planner_braid_words: Optional[List[Any]] = None,
         reward_mode: str,
         loss_clip: float,
         rank_temperature: float,
@@ -411,6 +552,10 @@ class ArtinACO:
         normalize_loss_components: bool = True,
         component_clip: float = 100.0,
         component_log_scale: bool = True,
+        use_selberg_trace: bool = False,
+        lambda_trace: float = 0.0,
+        trace_sigma: float = 0.75,
+        trace_max_cycles: int = 16,
     ) -> Tuple[List[Candidate], Dict[str, float]]:
         # Update bank with newly found valid geodesics (placeholder losses/rewards for ranking)
         for a_list, ell, tr in candidates:
@@ -443,6 +588,38 @@ class ArtinACO:
         if lambda_spacing != 0.0:
             L_spacing = 0.0
 
+        L_zeta_raw = 0.0
+        heat_trace_ncg = float("nan")
+        spectral_entropy_ncg = float("nan")
+        if float(lambda_zeta) != 0.0 and candidates:
+            try:
+                word_lists = [list(w) for w, _, _ in candidates]
+                if planner_braid_words:
+                    word_lists = word_lists + [w for w in planner_braid_words if w is not None]
+                H_ncg = build_braid_operator(
+                    words=word_lists,
+                    dim=int(ncg_dim),
+                    device=str(ncg_device),
+                    n_strands=int(ncg_n_strands),
+                    max_word_len=int(ncg_max_word_len),
+                    diagonal_growth=str(ncg_diagonal_growth),
+                    growth_alpha=float(ncg_growth_alpha),
+                    edge_scale=float(ncg_edge_scale),
+                    spectrum_scale=float(ncg_spectrum_scale),
+                    dtype=str(ncg_dtype),
+                )
+                H_np = H_ncg.detach().cpu().numpy()
+                eigs_np, _, _ = safe_eigh(H_np, return_eigenvectors=False)
+                zt = compute_zeta_loss(eigs_np, zeros)
+                L_zeta_raw = float(zt.detach().cpu().item())
+                heat_trace_ncg = float(compute_heat_trace(H_ncg, t=0.1).detach().cpu().item())
+                e_t = torch.from_numpy(np.asarray(eigs_np, dtype=np.float64)).reshape(-1)
+                spectral_entropy_ncg = float(spectral_entropy(e_t).detach().cpu().item())
+            except Exception:
+                L_zeta_raw = float("inf")
+                heat_trace_ncg = float("nan")
+                spectral_entropy_ncg = float("nan")
+
         def _to_bool(x: Any) -> bool:
             return str(x).lower() in ["1", "true", "yes", "y"]
 
@@ -458,33 +635,101 @@ class ArtinACO:
             L_selberg_used = _norm_component(L_selberg, float(component_clip), component_log_scale)
             L_spec_used = _norm_component(L_spec, float(component_clip), component_log_scale)
             L_spacing_used = _norm_component(L_spacing, float(component_clip), component_log_scale)
+            L_zeta_used = _norm_component(L_zeta_raw, float(component_clip), component_log_scale)
         else:
             L_selberg_used = float(L_selberg)
             L_spec_used = float(L_spec)
             L_spacing_used = float(L_spacing)
+            L_zeta_used = float(L_zeta_raw)
 
         L_total_global = (
             float(lambda_selberg) * float(L_selberg_used)
             + float(lambda_spec) * float(L_spec_used)
             + float(lambda_spacing) * float(L_spacing_used)
+            + float(lambda_zeta) * float(L_zeta_used)
         )
 
         # For logging: "norm" fields reflect what was actually used in the sum.
         L_sel_norm = float(L_selberg_used)
         L_spec_norm = float(L_spec_used)
         L_spacing_norm = float(L_spacing_used)
+        L_zeta_norm = float(L_zeta_used)
 
         if not np.isfinite(float(L_total_global)):
             L_total_global = float(loss_clip)
 
-        # Candidate-specific score: global + tiny length regularizer
+        tz_ncg = ncg_target_zeros
+        if tz_ncg is None or np.asarray(tz_ncg).size == 0:
+            tz_ncg = zeros
+        tz_ncg = np.asarray(tz_ncg, dtype=_DTF).reshape(-1)
+        tz_ncg = tz_ncg[np.isfinite(tz_ncg)]
+
+        per_ncg: Dict[Tuple[int, ...], Dict[str, float]] = {}
+        per_trace: Dict[Tuple[int, ...], Dict[str, float]] = {}
         scored: List[Candidate] = []
         for a_list, ell, tr in candidates:
             reg = 1e-3 * float(ell)
-            loss = float(L_total_global + reg)
+            base_loss = float(L_total_global + reg)
+            loss = base_loss
+            key_w = _word_key(a_list)
+            build_h = bool(use_ncg_braid) or bool(use_selberg_trace)
+            if build_h:
+                try:
+                    toks = candidate_to_braid_words(list(a_list), n_strands=int(ncg_n_strands))
+                    phrase = " ".join(toks) if toks else "e"
+                    if phrase.strip() and phrase.strip() != "e":
+                        try:
+                            bw = parse_braid_word(phrase)
+                        except Exception:
+                            bw = tuple()
+                    else:
+                        bw = tuple()
+
+                    H_ncg, braid_basis, cfg_ncg = build_braid_operator(
+                        words=[phrase],
+                        n_strands=int(ncg_n_strands),
+                        dim=int(ncg_dim),
+                        max_word_len=int(ncg_max_word_len),
+                        diagonal_growth=str(ncg_diagonal_growth),
+                        growth_alpha=float(ncg_growth_alpha),
+                        edge_scale=float(ncg_edge_scale),
+                        spectrum_scale=float(ncg_spectrum_scale),
+                        dtype=str(ncg_dtype),
+                        device=str(ncg_device),
+                        return_basis=True,
+                    )
+                    if bool(use_ncg_braid):
+                        ncg_d = compute_ncg_braid_losses(
+                            H_ncg,
+                            tz_ncg,
+                            braid_words=braid_basis,
+                            cfg=cfg_ncg,
+                            spectral_weight=float(lambda_ncg_spectral),
+                            selfadjoint_weight=float(lambda_ncg_selfadjoint),
+                            commutator_weight=float(lambda_ncg_commutator),
+                            spacing_weight=float(lambda_ncg_spacing),
+                            zeta_weight=float(lambda_ncg_zeta),
+                        )
+                        per_ncg[key_w] = ncg_d
+                        loss = base_loss + float(lambda_ncg) * float(ncg_d["loss"])
+                    if bool(use_selberg_trace):
+                        tr_d = compute_selberg_braid_trace_metrics(
+                            H_ncg,
+                            bw,
+                            float(ell),
+                            sigma=float(trace_sigma),
+                            max_cycles=int(trace_max_cycles),
+                        )
+                        per_trace[key_w] = tr_d
+                        loss = float(loss) + float(lambda_trace) * float(tr_d["trace_loss"])
+                except Exception:
+                    pen = (float(lambda_ncg) != 0.0 and bool(use_ncg_braid)) or (
+                        float(lambda_trace) != 0.0 and bool(use_selberg_trace)
+                    )
+                    loss = float(loss_clip) if pen else base_loss
             if not np.isfinite(loss):
                 loss = float(loss_clip)
-            c = Candidate(a_list=_word_key(a_list), length=float(ell), trace=float(tr), reward=0.0, loss=float(loss))
+            c = Candidate(a_list=key_w, length=float(ell), trace=float(tr), reward=0.0, loss=float(loss))
             scored.append(c)
 
         scored.sort(key=lambda c: c.loss)
@@ -512,6 +757,19 @@ class ArtinACO:
         bank_items2.sort(key=lambda c: (-c.reward, c.loss))
         self._bank = {c.a_list: c for c in bank_items2[: self.bank_size]}
 
+        bm: Dict[str, float] = {}
+        bm_trace: Dict[str, float] = {}
+        if scored:
+            bm = dict(per_ncg.get(scored[0].a_list, {}))
+            bm_trace = dict(per_trace.get(scored[0].a_list, {}))
+        nan = float("nan")
+
+        def _gf(key: str, default: float = nan) -> float:
+            v = bm.get(key)
+            if v is None:
+                return float(default)
+            return float(v)
+
         stats = {
             "L_selberg_raw": float(L_selberg),
             "L_spec_raw": float(L_spec),
@@ -519,7 +777,34 @@ class ArtinACO:
             "L_selberg_norm": float(L_sel_norm),
             "L_spec_norm": float(L_spec_norm),
             "L_spacing_norm": float(L_spacing_norm),
+            "L_zeta_raw": float(L_zeta_raw),
+            "L_zeta_norm": float(L_zeta_norm),
+            "zeta_loss": float(L_zeta_raw),
+            "heat_trace": float(heat_trace_ncg),
+            "spectral_entropy": float(spectral_entropy_ncg),
             "L_total_global": float(L_total_global),
+            "ncg_loss": _gf("loss") if bool(use_ncg_braid) else nan,
+            "ncg_spectral_loss": _gf("spectral_loss") if bool(use_ncg_braid) else nan,
+            "ncg_selfadjoint_loss": _gf("selfadjoint_loss") if bool(use_ncg_braid) else nan,
+            "ncg_commutator_loss": _gf("commutator_loss") if bool(use_ncg_braid) else nan,
+            "ncg_heat_trace_log": _gf("heat_trace_log") if bool(use_ncg_braid) else nan,
+            "ncg_zeta_D_s2": _gf("zeta_D_s2") if bool(use_ncg_braid) else nan,
+            "ncg_spacing_mean": _gf("spacing_mean") if bool(use_ncg_braid) else nan,
+            "ncg_spacing_std": _gf("spacing_std") if bool(use_ncg_braid) else nan,
+            "ncg_r_stat_mean": _gf("r_stat_mean") if bool(use_ncg_braid) else nan,
+            "ncg_eig_min": _gf("eig_min") if bool(use_ncg_braid) else nan,
+            "ncg_eig_max": _gf("eig_max") if bool(use_ncg_braid) else nan,
+            "best_candidate_base_loss": float(L_total_global + 1e-3 * float(scored[0].length))
+            if scored
+            else nan,
+            "best_candidate_total_loss": float(scored[0].loss) if scored else nan,
+            "trace_loss": float(bm_trace.get("trace_loss", nan)) if bool(use_selberg_trace) else nan,
+            "spectral_side": float(bm_trace.get("spectral_side", nan)) if bool(use_selberg_trace) else nan,
+            "geometric_side": float(bm_trace.get("geometric_side", nan)) if bool(use_selberg_trace) else nan,
+            "primitive_braid_count": float(bm_trace.get("primitive_braid_count", nan))
+            if bool(use_selberg_trace)
+            else nan,
+            "mean_braid_length": float(bm_trace.get("mean_braid_length", nan)) if bool(use_selberg_trace) else nan,
             **adaptive_rep,
         }
         return scored, stats
@@ -578,57 +863,33 @@ class ArtinACO:
         normalize_loss_components: bool = True,
         component_clip: float = 100.0,
         component_log_scale: bool = True,
-    ) -> Tuple[
-        Dict[str, Any],
-        List[
-            Tuple[
-                int,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                str,
-            ]
-        ],
-    ]:
-        history: List[
-            Tuple[
-                int,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                float,
-                str,
-            ]
-        ] = []
+        lambda_zeta: float = 0.0,
+        ncg_dim: int = 128,
+        ncg_n_strands: int = 4,
+        ncg_max_word_len: int = 8,
+        ncg_diagonal_growth: str = "exp",
+        ncg_growth_alpha: float = 0.15,
+        ncg_edge_scale: float = 0.05,
+        ncg_spectrum_scale: float = 1.0,
+        ncg_dtype: str = "float64",
+        ncg_device: str = "cpu",
+        use_ncg_braid: bool = False,
+        lambda_ncg: float = 0.0,
+        lambda_ncg_spectral: float = 1.0,
+        lambda_ncg_selfadjoint: float = 0.01,
+        lambda_ncg_commutator: float = 0.001,
+        lambda_ncg_spacing: float = 0.05,
+        lambda_ncg_zeta: float = 0.01,
+        ncg_target_zeros: Optional[np.ndarray] = None,
+        use_selberg_trace: bool = False,
+        lambda_trace: float = 0.0,
+        trace_sigma: float = 0.75,
+        trace_max_cycles: int = 16,
+        use_seed_motifs: bool = False,
+        seed_motif_frac: float = 0.25,
+        seed_mutation_prob: float = 0.5,
+    ) -> Tuple[Dict[str, Any], List[Tuple[Any, ...]]]:
+        history: List[Tuple[Any, ...]] = []
         best_snapshot: Dict[str, Any] = {"best_loss": float("inf"), "best_words": [], "best_lengths": []}
         recent_losses: List[float] = []
 
@@ -653,8 +914,32 @@ class ArtinACO:
 
         for it in range(int(num_iters)):
             t_it0 = time.perf_counter()
-            # build raw population
-            population: List[List[int]] = [self.sample_word() for _ in range(self.num_ants)]
+            # build raw population (optional seed motifs + local motif splice mutation)
+            population = []
+            seed_init_count = 0
+            for _ in range(self.num_ants):
+                if use_seed_motifs and self.rng.random() < float(seed_motif_frac):
+                    base = list(SEED_MOTIFS[int(self.rng.integers(0, len(SEED_MOTIFS)))])
+                    seed_init_count += 1
+                    if len(base) < self.max_length:
+                        room = self.max_length - len(base)
+                        extra_len = (
+                            int(self.rng.integers(0, room)) if room > 0 else 0
+                        )
+                        extra = (
+                            self._sample_random_word_of_length(extra_len) if extra_len > 0 else []
+                        )
+                        word = base + extra
+                    else:
+                        word = base[: self.max_length]
+                else:
+                    word = self.sample_word()
+                word = self._maybe_seed_mutate(
+                    word,
+                    use_seed_motifs=bool(use_seed_motifs),
+                    seed_mutation_prob=float(seed_mutation_prob),
+                )
+                population.append(word)
 
             # planner injection
             if planner is not None:
@@ -756,6 +1041,27 @@ class ArtinACO:
                         float("nan"),
                         float("nan"),
                         float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
+                        float("nan"),
                         str(reward_mode),
                     )
                 )
@@ -771,6 +1077,7 @@ class ArtinACO:
                 lambda_selberg=float(lambda_selberg),
                 lambda_spec=float(lambda_spec),
                 lambda_spacing=float(lambda_spacing),
+                lambda_zeta=float(lambda_zeta),
                 selberg_sigma=float(selberg_sigma),
                 selberg_m_max=int(selberg_m_max),
                 selberg_bank_top_n=int(selberg_bank_top_n),
@@ -782,6 +1089,23 @@ class ArtinACO:
                 geo_weight=float(geo_weight),
                 geo_sigma=float(geo_sigma),
                 potential_weight=float(potential_weight),
+                ncg_dim=int(ncg_dim),
+                ncg_n_strands=int(ncg_n_strands),
+                ncg_max_word_len=int(ncg_max_word_len),
+                ncg_diagonal_growth=str(ncg_diagonal_growth),
+                ncg_growth_alpha=float(ncg_growth_alpha),
+                ncg_edge_scale=float(ncg_edge_scale),
+                ncg_spectrum_scale=float(ncg_spectrum_scale),
+                ncg_dtype=str(ncg_dtype),
+                ncg_device=str(ncg_device),
+                use_ncg_braid=bool(use_ncg_braid),
+                lambda_ncg=float(lambda_ncg),
+                lambda_ncg_spectral=float(lambda_ncg_spectral),
+                lambda_ncg_selfadjoint=float(lambda_ncg_selfadjoint),
+                lambda_ncg_commutator=float(lambda_ncg_commutator),
+                lambda_ncg_spacing=float(lambda_ncg_spacing),
+                lambda_ncg_zeta=float(lambda_ncg_zeta),
+                ncg_target_zeros=ncg_target_zeros,
                 reward_mode=str(reward_mode),
                 loss_clip=float(loss_clip),
                 rank_temperature=float(rank_temperature),
@@ -791,9 +1115,23 @@ class ArtinACO:
                 normalize_loss_components=bool(normalize_loss_components),
                 component_clip=float(component_clip),
                 component_log_scale=bool(component_log_scale),
+                planner_braid_words=(
+                    list(getattr(planner, "last_candidate_braid_words", []) or [])
+                    if planner is not None
+                    else None
+                ),
+                use_selberg_trace=bool(use_selberg_trace),
+                lambda_trace=float(lambda_trace),
+                trace_sigma=float(trace_sigma),
+                trace_max_cycles=int(trace_max_cycles),
             )
 
-            scored.sort(key=lambda c: c.loss)
+            stats["seed_used"] = float(seed_init_count)
+            stats["seed_frac"] = float(seed_init_count) / float(max(1, self.num_ants))
+            stats["motif_hits"] = (
+                float(count_motif_occurrences(list(scored[0].a_list))) if scored else float("nan")
+            )
+
             best = scored[0]
             mean_loss = float(np.mean([c.loss for c in scored])) if scored else float("inf")
             best_reward = float(scored[0].reward) if scored else 0.0
@@ -813,6 +1151,28 @@ class ArtinACO:
             L_selberg_norm = float(stats.get("L_selberg_norm", float("nan")))
             L_spec_norm = float(stats.get("L_spec_norm", float("nan")))
             L_spacing_norm = float(stats.get("L_spacing_norm", float("nan")))
+            L_zeta_raw = float(stats.get("L_zeta_raw", float("nan")))
+            heat_trace_ncg = float(stats.get("heat_trace", float("nan")))
+            spectral_entropy_ncg = float(stats.get("spectral_entropy", float("nan")))
+            ncg_loss = float(stats.get("ncg_loss", float("nan")))
+            ncg_spectral_loss = float(stats.get("ncg_spectral_loss", float("nan")))
+            ncg_selfadjoint_loss = float(stats.get("ncg_selfadjoint_loss", float("nan")))
+            ncg_commutator_loss = float(stats.get("ncg_commutator_loss", float("nan")))
+            ncg_heat_trace_log = float(stats.get("ncg_heat_trace_log", float("nan")))
+            ncg_zeta_D_s2 = float(stats.get("ncg_zeta_D_s2", float("nan")))
+            ncg_spacing_mean = float(stats.get("ncg_spacing_mean", float("nan")))
+            ncg_spacing_std = float(stats.get("ncg_spacing_std", float("nan")))
+            ncg_r_stat_mean = float(stats.get("ncg_r_stat_mean", float("nan")))
+            ncg_eig_min = float(stats.get("ncg_eig_min", float("nan")))
+            ncg_eig_max = float(stats.get("ncg_eig_max", float("nan")))
+            trace_loss_v = float(stats.get("trace_loss", float("nan")))
+            spectral_side_v = float(stats.get("spectral_side", float("nan")))
+            geometric_side_v = float(stats.get("geometric_side", float("nan")))
+            primitive_braid_count_v = float(stats.get("primitive_braid_count", float("nan")))
+            mean_braid_length_v = float(stats.get("mean_braid_length", float("nan")))
+            seed_used_v = float(stats.get("seed_used", float("nan")))
+            seed_frac_v = float(stats.get("seed_frac", float("nan")))
+            motif_hits_v = float(stats.get("motif_hits", float("nan")))
             avg_ell = float(np.mean([c.length for c in scored])) if scored else float("nan")
             valid_rate = float(len(scored)) / float(max(1, self.num_ants))
 
@@ -824,9 +1184,44 @@ class ArtinACO:
                     "best_words": [list(best.a_list)],
                     "best_lengths": [float(best.length)],
                 }
+                if bool(use_ncg_braid) or bool(use_selberg_trace):
+                    ncg_m: Optional[Dict[str, Any]] = None
+                    if bool(use_ncg_braid):
+                        ncg_m = {
+                            "loss": float(stats.get("ncg_loss", float("nan"))),
+                            "spectral_loss": float(stats.get("ncg_spectral_loss", float("nan"))),
+                            "selfadjoint_loss": float(stats.get("ncg_selfadjoint_loss", float("nan"))),
+                            "commutator_loss": float(stats.get("ncg_commutator_loss", float("nan"))),
+                            "heat_trace_log": float(stats.get("ncg_heat_trace_log", float("nan"))),
+                            "zeta_D_s2": float(stats.get("ncg_zeta_D_s2", float("nan"))),
+                            "spacing_mean": float(stats.get("ncg_spacing_mean", float("nan"))),
+                            "spacing_std": float(stats.get("ncg_spacing_std", float("nan"))),
+                            "r_stat_mean": float(stats.get("ncg_r_stat_mean", float("nan"))),
+                            "eig_min": float(stats.get("ncg_eig_min", float("nan"))),
+                            "eig_max": float(stats.get("ncg_eig_max", float("nan"))),
+                        }
+                    trace_m: Optional[Dict[str, float]] = None
+                    if bool(use_selberg_trace):
+                        trace_m = {
+                            "trace_loss": float(stats.get("trace_loss", float("nan"))),
+                            "spectral_side": float(stats.get("spectral_side", float("nan"))),
+                            "geometric_side": float(stats.get("geometric_side", float("nan"))),
+                            "primitive_braid_count": float(stats.get("primitive_braid_count", float("nan"))),
+                            "mean_braid_length": float(stats.get("mean_braid_length", float("nan"))),
+                        }
+                    self.best_ncg_export = {
+                        "best_words": [list(best.a_list)],
+                        "base_loss": float(stats.get("best_candidate_base_loss", float("nan"))),
+                        "ncg_loss": float(stats.get("ncg_loss", float("nan"))) if bool(use_ncg_braid) else float("nan"),
+                        "total_loss": float(best.loss),
+                        "ncg_metrics": ncg_m,
+                        "selberg_trace_metrics": trace_m,
+                    }
 
             self.evaporate()
             self.reinforce(scored[: self.best_k_ants])
+            if use_seed_motifs:
+                self._boost_motif_pheromone()
 
             history.append(
                 (
@@ -849,6 +1244,28 @@ class ArtinACO:
                     float(L_selberg_norm),
                     float(L_spec_norm),
                     float(L_spacing_norm),
+                    float(L_zeta_raw),
+                    float(heat_trace_ncg),
+                    float(spectral_entropy_ncg),
+                    float(ncg_loss),
+                    float(ncg_spectral_loss),
+                    float(ncg_selfadjoint_loss),
+                    float(ncg_commutator_loss),
+                    float(ncg_heat_trace_log),
+                    float(ncg_zeta_D_s2),
+                    float(ncg_spacing_mean),
+                    float(ncg_spacing_std),
+                    float(ncg_r_stat_mean),
+                    float(ncg_eig_min),
+                    float(ncg_eig_max),
+                    float(trace_loss_v),
+                    float(spectral_side_v),
+                    float(geometric_side_v),
+                    float(primitive_braid_count_v),
+                    float(mean_braid_length_v),
+                    float(seed_used_v),
+                    float(seed_frac_v),
+                    float(motif_hits_v),
                     str(reward_mode),
                 )
             )
@@ -888,30 +1305,7 @@ class ArtinACO:
 
 def _write_history_csv(
     path: Path,
-    history: Iterable[
-        Tuple[
-            int,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            float,
-            str,
-        ]
-    ],
+    history: Iterable[Tuple[Any, ...]],
     *,
     operator_builder: str,
 ) -> None:
@@ -921,35 +1315,69 @@ def _write_history_csv(
             "best_raw_reward,mean_raw_reward,reward_mode,"
             "loss_median,loss_iqr,loss_std,reward_min,reward_max,reward_mean,"
             "L_selberg_raw,L_spec_raw,L_spacing_raw,L_selberg_norm,L_spec_norm,L_spacing_norm,"
+            "L_zeta_raw,heat_trace,spectral_entropy,"
+            "ncg_loss,ncg_spectral_loss,ncg_selfadjoint_loss,ncg_commutator_loss,"
+            "ncg_heat_trace_log,ncg_zeta_D_s2,ncg_spacing_mean,ncg_spacing_std,ncg_r_stat_mean,"
+            "ncg_eig_min,ncg_eig_max,"
+            "trace_loss,spectral_side,geometric_side,primitive_braid_count,mean_braid_length,"
+            "seed_used,seed_frac,motif_hits,"
             "operator_builder\n"
         )
-        for (
-            it,
-            b,
-            m,
-            br,
-            mr,
-            brr,
-            mrr,
-            lmed,
-            liqr,
-            lstd,
-            rmin,
-            rmax,
-            rmean,
-            lsel_r,
-            lspec_r,
-            lsp_r,
-            lsel_n,
-            lspec_n,
-            lsp_n,
-            mode,
-        ) in history:
+        for row in history:
+            (
+                it,
+                b,
+                m,
+                br,
+                mr,
+                brr,
+                mrr,
+                lmed,
+                liqr,
+                lstd,
+                rmin,
+                rmax,
+                rmean,
+                lsel_r,
+                lspec_r,
+                lsp_r,
+                lsel_n,
+                lspec_n,
+                lsp_n,
+                lzeta_r,
+                heat_tr,
+                spec_ent,
+                ncg_l,
+                ncg_sl,
+                ncg_sa,
+                ncg_co,
+                ncg_ht,
+                ncg_z2,
+                ncg_spm,
+                ncg_sps,
+                ncg_rs,
+                ncg_emn,
+                ncg_emx,
+                tr_lo,
+                tr_sp,
+                tr_geo,
+                tr_pb,
+                tr_mbl,
+                seed_u,
+                seed_f,
+                motif_h,
+                mode,
+            ) = row
             f.write(
                 f"{int(it)},{float(b)},{float(m)},{float(br)},{float(mr)},"
                 f"{float(brr)},{float(mrr)},{mode},"
                 f"{float(lmed)},{float(liqr)},{float(lstd)},{float(rmin)},{float(rmax)},{float(rmean)},"
                 f"{float(lsel_r)},{float(lspec_r)},{float(lsp_r)},{float(lsel_n)},{float(lspec_n)},{float(lsp_n)},"
+                f"{float(lzeta_r)},{float(heat_tr)},{float(spec_ent)},"
+                f"{float(ncg_l)},{float(ncg_sl)},{float(ncg_sa)},{float(ncg_co)},{float(ncg_ht)},{float(ncg_z2)},"
+                f"{float(ncg_spm)},{float(ncg_sps)},{float(ncg_rs)},{float(ncg_emn)},{float(ncg_emx)},"
+                f"{float(tr_lo)},{float(tr_sp)},{float(tr_geo)},{float(tr_pb)},{float(tr_mbl)},"
+                f"{float(seed_u)},{float(seed_f)},{float(motif_h)},"
                 f"{operator_builder}\n"
             )
 
@@ -968,6 +1396,37 @@ def main() -> None:
     ap.add_argument("--lambda_selberg", type=float, default=1.0)
     ap.add_argument("--lambda_spec", type=float, default=1.0)
     ap.add_argument("--lambda_spacing", type=float, default=0.0)
+    ap.add_argument("--lambda_zeta", type=float, default=0.0)
+    ap.add_argument("--use_ncg_braid", action="store_true", help="Enable per-ant NCG braid spectral losses (experimental).")
+    ap.add_argument(
+        "--use_selberg_trace",
+        action="store_true",
+        help="Selberg-style braid trace alignment vs spectrum (experimental; not an RH proof).",
+    )
+    ap.add_argument("--lambda_trace", type=float, default=0.0)
+    ap.add_argument("--trace_sigma", type=float, default=0.75)
+    ap.add_argument("--trace_max_cycles", type=int, default=16)
+    ap.add_argument("--lambda_ncg", type=float, default=0.0)
+    ap.add_argument("--lambda_ncg_spectral", type=float, default=1.0)
+    ap.add_argument("--lambda_ncg_selfadjoint", type=float, default=0.01)
+    ap.add_argument("--lambda_ncg_commutator", type=float, default=0.001)
+    ap.add_argument("--lambda_ncg_spacing", type=float, default=0.05)
+    ap.add_argument("--lambda_ncg_zeta", type=float, default=0.01)
+    ap.add_argument("--ncg_dim", type=int, default=128)
+    ap.add_argument("--ncg_n_strands", type=int, default=4)
+    ap.add_argument("--ncg_max_word_len", type=int, default=8)
+    ap.add_argument("--ncg_diagonal_growth", type=str, default="exp")
+    ap.add_argument("--ncg_growth_alpha", type=float, default=0.15)
+    ap.add_argument("--ncg_edge_scale", type=float, default=0.05)
+    ap.add_argument("--ncg_spectrum_scale", type=float, default=1.0)
+    ap.add_argument("--ncg_dtype", type=str, default="float64", choices=["float32", "float64"])
+    ap.add_argument("--device", type=str, default="cpu", help="Torch device for NCG builds (e.g. cpu, cuda:0).")
+    ap.add_argument(
+        "--ncg_target_zeros",
+        type=str,
+        default="",
+        help="Comma-separated zeta ordinates for NCG loss; empty uses --zeros file.",
+    )
 
     ap.add_argument("--selberg_sigma", type=float, default=0.5)
     ap.add_argument("--selberg_m_max", type=int, default=6)
@@ -1002,6 +1461,13 @@ def main() -> None:
     ap.add_argument("--component_log_scale", type=str, default="True")
     ap.add_argument("--loss_clip", type=float, default=1000.0)
     ap.add_argument("--rank_temperature", type=float, default=1.0)
+    ap.add_argument(
+        "--use_seed_motifs",
+        action="store_true",
+        help="Inject structured braid motifs into initialization and mutation (experimental search prior).",
+    )
+    ap.add_argument("--seed_motif_frac", type=float, default=0.25)
+    ap.add_argument("--seed_mutation_prob", type=float, default=0.5)
     args = ap.parse_args()
 
     print(
@@ -1014,6 +1480,13 @@ def main() -> None:
     zeros = load_zeros(args.zeros)
     if zeros.size == 0:
         raise ValueError("zeros file is empty or unreadable")
+
+    ncg_target_zeros: Optional[np.ndarray] = None
+    if str(args.ncg_target_zeros).strip():
+        ncg_target_zeros = np.array(
+            [float(x) for x in str(args.ncg_target_zeros).split(",") if str(x).strip()],
+            dtype=_DTF,
+        )
 
     aco = ArtinACO(
         num_ants=int(args.num_ants),
@@ -1066,6 +1539,31 @@ def main() -> None:
         component_log_scale=str(args.component_log_scale).lower() in ["1", "true", "yes", "y"],
         loss_clip=float(args.loss_clip),
         rank_temperature=float(args.rank_temperature),
+        lambda_zeta=float(args.lambda_zeta),
+        ncg_dim=int(args.ncg_dim),
+        ncg_n_strands=int(args.ncg_n_strands),
+        ncg_max_word_len=int(args.ncg_max_word_len),
+        ncg_diagonal_growth=str(args.ncg_diagonal_growth),
+        ncg_growth_alpha=float(args.ncg_growth_alpha),
+        ncg_edge_scale=float(args.ncg_edge_scale),
+        ncg_spectrum_scale=float(args.ncg_spectrum_scale),
+        ncg_dtype=str(args.ncg_dtype),
+        ncg_device=str(args.device),
+        use_ncg_braid=bool(args.use_ncg_braid),
+        lambda_ncg=float(args.lambda_ncg),
+        lambda_ncg_spectral=float(args.lambda_ncg_spectral),
+        lambda_ncg_selfadjoint=float(args.lambda_ncg_selfadjoint),
+        lambda_ncg_commutator=float(args.lambda_ncg_commutator),
+        lambda_ncg_spacing=float(args.lambda_ncg_spacing),
+        lambda_ncg_zeta=float(args.lambda_ncg_zeta),
+        ncg_target_zeros=ncg_target_zeros,
+        use_selberg_trace=bool(args.use_selberg_trace),
+        lambda_trace=float(args.lambda_trace),
+        trace_sigma=float(args.trace_sigma),
+        trace_max_cycles=int(args.trace_max_cycles),
+        use_seed_motifs=bool(args.use_seed_motifs),
+        seed_motif_frac=float(args.seed_motif_frac),
+        seed_mutation_prob=float(args.seed_mutation_prob),
     )
     dt = time.perf_counter() - t0
 
@@ -1074,6 +1572,10 @@ def main() -> None:
         payload["wall_time_s"] = float(dt)
         payload["operator_builder"] = str(args.operator_builder)
         json.dump(payload, f, indent=2)
+
+    if (bool(args.use_ncg_braid) or bool(args.use_selberg_trace)) and aco.best_ncg_export is not None:
+        with open(out_dir / "artin_aco_best_ncg.json", "w", encoding="utf-8") as f:
+            json.dump(aco.best_ncg_export, f, indent=2, allow_nan=True)
 
     _write_history_csv(out_dir / "artin_aco_history.csv", history, operator_builder=str(args.operator_builder))
 

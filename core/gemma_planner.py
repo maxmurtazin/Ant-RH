@@ -88,6 +88,7 @@ class GemmaPlanner:
         self.last_parsed_words: List[List[int]] = []
         self.last_valid_words: List[List[int]] = []
         self.last_rejected_count: int = 0
+        self.last_candidate_braid_words: List[Any] = []
         self.runner = LLMRunner(
             model_path=str(model_path),
             llama_cli=str(llama_cli),
@@ -117,13 +118,25 @@ class GemmaPlanner:
             "- avoid repetition\n"
             "- prefer small |a|\n\n"
             "Return ONLY JSON list:\n"
-            "[[1,-1,2], [2,-2,1], ...]\n"
+            "[[1,-1,2], [2,-2,1], ...]\n\n"
+            "Optional (for braid/NCG): include candidate_words as braid tokens, e.g.\n"
+            '{"words": [[1,-1,2]], "candidate_words": [["sigma1","sigma2^-1","sigma1"]]}\n'
         )
 
         fallback_words = [[1, -1, 2], [2, -1, 1], [-1, 2, -2]]
         try:
             text = self.runner.generate(prompt, max_tokens=128, temperature=0.7)
             self.last_raw_response = str(text or "")
+            self.last_candidate_braid_words = []
+            try:
+                cleaned_full = str(text or "").replace("```json", "").replace("```", "").strip()
+                obj_try = json.loads(cleaned_full)
+                if isinstance(obj_try, dict):
+                    cw = obj_try.get("candidate_words")
+                    if isinstance(cw, list):
+                        self.last_candidate_braid_words = cw
+            except Exception:
+                pass
             parsed = clean_llm_json(text)
             parsed_words = parsed if isinstance(parsed, list) else []
             self.last_parsed_words = [list(w) for w in parsed_words if isinstance(w, list)]

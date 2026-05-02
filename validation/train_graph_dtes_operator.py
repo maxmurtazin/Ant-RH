@@ -77,6 +77,8 @@ def _write_loss_curve(path: Path, history):
                 "spacing_loss",
                 "smoothness_loss",
                 "amplitude_loss",
+                "zeta_loss",
+                "heat_trace",
                 "edge_scale",
                 "spectral_scale",
                 "spectral_shift",
@@ -165,6 +167,8 @@ def parse_args(argv=None):
     parser.add_argument("--spectral-calibration", action="store_true")
     parser.add_argument("--smooth-weight", type=float, default=0.01)
     parser.add_argument("--amplitude-weight", type=float, default=0.001)
+    parser.add_argument("--lambda-zeta", type=float, default=0.0)
+    parser.add_argument("--lambda-heat", type=float, default=0.0)
     parser.add_argument("--max-n", type=int, default=800)
     parser.add_argument("--device", default="cpu")
     return parser.parse_args(argv)
@@ -199,6 +203,8 @@ def main(argv=None):
         smooth_weight=args.smooth_weight,
         amplitude_weight=args.amplitude_weight,
         device=args.device,
+        lambda_zeta=float(args.lambda_zeta),
+        lambda_heat=float(args.lambda_heat),
     )
 
     potential_path = out_path.parent / "graph_dtes_v9_potential.npy"

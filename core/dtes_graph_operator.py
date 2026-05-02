@@ -10,6 +10,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from core.ncg_braid_spectral import compute_heat_trace, compute_zeta_loss
 from core.spectral_stabilization import safe_torch_eigh
 
 
@@ -183,6 +184,8 @@ def train_graph_dtes_operator(
     smooth_weight=0.01,
     amplitude_weight=0.001,
     device="cpu",
+    lambda_zeta=0.0,
+    lambda_heat=0.0,
 ):
     W = build_dtes_graph_weights(
         t_grid,
@@ -221,7 +224,13 @@ def train_graph_dtes_operator(
         opt.zero_grad()
 
         H, edge_scale = model()
-        eig_raw = safe_eigvalsh(H)
+        H = 0.5 * (H + H.T)
+        n_h = int(H.shape[0])
+        H = H + 1e-6 * torch.eye(n_h, device=H.device, dtype=H.dtype)
+        try:
+            eig_raw = torch.linalg.eigvalsh(H)
+        except RuntimeError:
+            eig_raw = safe_eigvalsh(H)
         eig_raw = torch.nan_to_num(eig_raw, nan=0.0, posinf=0.0, neginf=0.0)
 
         if calibration is not None:
@@ -243,6 +252,14 @@ def train_graph_dtes_operator(
             + float(smooth_weight) * loss_smooth
             + float(amplitude_weight) * loss_amp
         )
+        zeta_ncg = torch.zeros((), device=eig.device, dtype=eig.dtype)
+        heat_tr = torch.zeros((), device=eig.device, dtype=eig.dtype)
+        if float(lambda_zeta) != 0.0:
+            zeta_ncg = compute_zeta_loss(eig, zeta_zeros_t, k=k)
+            loss = loss + float(lambda_zeta) * zeta_ncg
+        if float(lambda_heat) != 0.0:
+            heat_tr = compute_heat_trace(H, t=0.1)
+            loss = loss + float(lambda_heat) * heat_tr
         if not torch.isfinite(loss):
             raise FloatingPointError("Graph-DTES operator loss became NaN or inf")
 
@@ -257,6 +274,8 @@ def train_graph_dtes_operator(
                 "spacing_loss": float(loss_spacing.detach().cpu()),
                 "smoothness_loss": float(loss_smooth.detach().cpu()),
                 "amplitude_loss": float(loss_amp.detach().cpu()),
+                "zeta_loss": float(zeta_ncg.detach().cpu()),
+                "heat_trace": float(heat_tr.detach().cpu()),
                 "edge_scale": float(edge_scale.detach().cpu().reshape(-1)[0]),
                 "spectral_scale": float(spec_scale.detach().cpu().reshape(-1)[0]),
                 "spectral_shift": float(spec_shift.detach().cpu().reshape(-1)[0]),
@@ -271,7 +290,13 @@ def train_graph_dtes_operator(
             )
 
     H_final, edge_scale = model()
-    eig_raw = safe_eigvalsh(H_final)
+    H_final = 0.5 * (H_final + H_final.T)
+    n_f = int(H_final.shape[0])
+    H_final = H_final + 1e-6 * torch.eye(n_f, device=H_final.device, dtype=H_final.dtype)
+    try:
+        eig_raw = torch.linalg.eigvalsh(H_final)
+    except RuntimeError:
+        eig_raw = safe_eigvalsh(H_final)
     if calibration is not None:
         eig_scaled, spec_scale, spec_shift = calibration(eig_raw)
     else:

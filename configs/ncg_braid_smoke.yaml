@@ -1,0 +1,11 @@
+ncg_braid:
+  n_strands: 4
+  max_word_len: 8
+  dim: 128
+  dtype: float64
+  device: cpu
+  diagonal_growth: exp
+  growth_alpha: 0.15
+  edge_scale: 0.05
+  selfadjoint_weight: 0.01
+  zeta_weight: 0.01
