@@ -12,6 +12,7 @@ import argparse
 import json
 import math
 import time
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -19,6 +20,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import numpy as np
 import torch
 
+from core.dtes_spectral_triple import DTESSpectralTriple
 from core.ncg_braid_spectral import (
     build_braid_operator,
     compute_heat_trace,
@@ -58,6 +60,19 @@ def load_zeros(path: str) -> np.ndarray:
     return z
 
 
+def resolve_zeros_cli(z: str) -> np.ndarray:
+    """
+    If ``z`` is an integer string (e.g. ``32``), build synthetic ordinates for smoke tests.
+    Otherwise load from path via ``load_zeros``.
+    """
+    s = str(z).strip()
+    if s.isdigit() or (s.startswith("-") and len(s) > 1 and s[1:].isdigit()):
+        n = max(1, abs(int(s)))
+        base = 14.134725141734693
+        return np.array([base + float(i) * 4.2 for i in range(n)], dtype=_DTF)
+    return load_zeros(s)
+
+
 _DTF = np.float64
 
 # Commutator-like braid fragments from prior ACO runs (algebraic prior; not an RH proof).
@@ -95,6 +110,39 @@ def _clip(x: float, lo: float, hi: float) -> float:
     return float(min(max(x, lo), hi))
 
 
+def clamp_pheromone(obj: Any, min_val: float, max_val: float) -> None:
+    """
+    In-place clamp of pheromone deposits (dict keyed edges, list, ndarray, or torch.Tensor).
+    """
+    lo = float(min_val)
+    hi = float(max_val)
+    if isinstance(obj, dict):
+        for k in list(obj.keys()):
+            try:
+                obj[k] = float(min(max(float(obj[k]), lo), hi))
+            except (TypeError, ValueError):
+                continue
+        return
+    if isinstance(obj, list):
+        for i in range(len(obj)):
+            try:
+                obj[i] = float(min(max(float(obj[i]), lo), hi))
+            except (TypeError, ValueError):
+                continue
+        return
+    try:
+        import torch
+
+        if isinstance(obj, torch.Tensor):
+            with torch.no_grad():
+                obj.clamp_(min=lo, max=hi)
+            return
+    except Exception:
+        pass
+    if isinstance(obj, np.ndarray):
+        np.clip(obj, lo, hi, out=obj)
+
+
 def _stable_softmax(logits: np.ndarray) -> np.ndarray:
     x = np.asarray(logits, dtype=_DTF)
     x = x - np.max(x)
@@ -107,6 +155,93 @@ def _stable_softmax(logits: np.ndarray) -> np.ndarray:
 
 def _word_key(a_list: List[int]) -> Tuple[int, ...]:
     return tuple(int(a) for a in a_list)
+
+
+# ---------------------------------------------------------------------------
+# NCG-inspired anti-collapse regularizers (NOT a proof of RH; experimental operator
+# search prior to discourage geodesic/spectrum collapse in the ACO loop).
+# ---------------------------------------------------------------------------
+
+
+def _build_diagonal_probe(a_list: List[int], n: int, max_power: int) -> np.ndarray:
+    """Diagonal algebra probe A from candidate Artin letters (normalized)."""
+    if n <= 0:
+        return np.zeros((0, 0), dtype=_DTF)
+    mp = float(max(1, int(max_power)))
+    vals = np.zeros(n, dtype=_DTF)
+    Lw = len(a_list)
+    for i in range(n):
+        if Lw > 0:
+            j = i % Lw
+            vals[i] = abs(float(int(a_list[j]))) / mp
+        else:
+            vals[i] = float(i + 1) / float(max(n, 1))
+    nv = float(np.linalg.norm(vals))
+    if nv > 1e-15:
+        vals = vals / nv
+    return np.diag(vals).astype(_DTF, copy=False)
+
+
+def _commutator_collapse_loss(
+    H: np.ndarray,
+    a_list: List[int],
+    *,
+    comm_eps: float,
+    max_power: int,
+    warned: List[bool],
+) -> Tuple[float, float]:
+    """
+    comm = H @ A - A @ H with diagonal probe A; loss = 1 / (comm_eps + ||comm||_F).
+    Returns (loss, comm_norm). On failure returns (0.0, 0.0) and warns once.
+    """
+    try:
+        H = np.asarray(H, dtype=_DTF)
+        if H.ndim != 2 or H.shape[0] != H.shape[1]:
+            raise ValueError("H not square")
+        n = int(H.shape[0])
+        A = _build_diagonal_probe(list(a_list), n, max_power)
+        if A.shape != H.shape:
+            raise ValueError("shape mismatch")
+        comm = H @ A - A @ H
+        comm_norm = float(np.linalg.norm(comm, ord="fro"))
+        loss = 1.0 / (float(comm_eps) + comm_norm)
+        return (float(loss), comm_norm)
+    except Exception:
+        if not warned[0]:
+            warnings.warn(
+                "NCG commutator probe skipped (operator unavailable or incompatible); using 0.",
+                stacklevel=2,
+            )
+            warned[0] = True
+        return (0.0, 0.0)
+
+
+def _spectral_diversity_penalty(
+    eig_sorted: np.ndarray,
+    prior_spectra: List[np.ndarray],
+    *,
+    diversity_sigma: float,
+) -> float:
+    """Mean Gaussian kernel similarity to prior spectra (penalize overlap)."""
+    if eig_sorted.size == 0 or len(prior_spectra) < 1:
+        return 0.0
+    sig = float(max(float(diversity_sigma), 1e-12))
+    acc: List[float] = []
+    s = np.asarray(eig_sorted, dtype=_DTF).reshape(-1)
+    for sj in prior_spectra:
+        t = np.asarray(sj, dtype=_DTF).reshape(-1)
+        m = int(min(s.size, t.size))
+        if m <= 0:
+            continue
+        d = s[:m] - t[:m]
+        acc.append(math.exp(-float(np.dot(d, d)) / (sig * sig)))
+    if not acc:
+        return 0.0
+    return float(np.mean(acc))
+
+
+def _length_collapse_penalty(ell: float, target_length: float) -> float:
+    return float(max(0.0, float(target_length) - float(ell)) ** 2)
 
 
 def normalize_braid_token(tok: str) -> str:
@@ -340,6 +475,9 @@ class ArtinACO:
         if L <= 0:
             return []
         L = min(L, self.max_length)
+        alpha_use = float(getattr(self, "_alpha_eff", self.alpha))
+        beta_use = float(getattr(self, "_beta_eff", self.beta))
+        ef = float(getattr(self, "_exploration_floor", 0.0))
         a1 = int(self.rng.choice(self.a_vals))
         word = [a1]
         prev = a1
@@ -348,8 +486,13 @@ class ArtinACO:
             for i, a in enumerate(self.a_vals):
                 taus[i] = self._tau(prev, int(a))
             taus = np.clip(taus, self.tau_min, self.tau_max)
-            logits = self.alpha * np.log(taus) + self.beta * self._heur_log
+            logits = alpha_use * np.log(taus) + beta_use * self._heur_log
             probs = _stable_softmax(logits)
+            if ef > 0.0:
+                probs = np.asarray(probs, dtype=_DTF) + ef
+                s = float(np.sum(probs))
+                if s > 0.0 and np.isfinite(s):
+                    probs = probs / s
             idx = int(self.rng.choice(self.a_vals.size, p=probs))
             nxt = int(self.a_vals[idx])
             word.append(nxt)
@@ -387,6 +530,35 @@ class ArtinACO:
                 key = (int(motif[i]), int(motif[i + 1]))
                 v = float(self.pheromone.get(key, 1.0)) * 1.05
                 self.pheromone[key] = _clip(v, self.tau_min, self.tau_max)
+
+    def _pheromone_restart_blend(self, restart_fraction: float) -> None:
+        """Blend pheromone toward uniform baseline (mean edge strength)."""
+        if not self.pheromone:
+            return
+        rf = _clip(float(restart_fraction), 0.0, 1.0)
+        vals = [float(v) for v in self.pheromone.values() if np.isfinite(float(v))]
+        u = float(np.mean(vals)) if vals else 1.0
+        if not np.isfinite(u):
+            u = 1.0
+        for k in list(self.pheromone.keys()):
+            try:
+                old = float(self.pheromone[k])
+            except (TypeError, ValueError):
+                continue
+            self.pheromone[k] = (1.0 - rf) * old + rf * u
+        clamp_pheromone(self.pheromone, self.tau_min, self.tau_max)
+
+    def _prune_bank(self, bank_prune_fraction: float) -> Tuple[int, int]:
+        """Keep lowest-loss fraction of bank (reward-aware tie-break)."""
+        items = list(self._bank.values())
+        old_n = len(items)
+        if old_n == 0:
+            return (0, 0)
+        frac = float(bank_prune_fraction)
+        target = max(1, int(math.floor(old_n * frac)))
+        items.sort(key=lambda c: (float(c.loss), -float(c.reward)))
+        self._bank = {c.a_list: c for c in items[:target]}
+        return (old_n, len(self._bank))
 
     def _validate_and_length(self, a_list: List[int]) -> Tuple[bool, float, float]:
         if not _is_valid_action_word(a_list, self.max_length, self.max_power):
@@ -556,6 +728,15 @@ class ArtinACO:
         lambda_trace: float = 0.0,
         trace_sigma: float = 0.75,
         trace_max_cycles: int = 16,
+        lambda_comm: float = 0.0,
+        lambda_diversity: float = 0.0,
+        lambda_length: float = 0.0,
+        comm_eps: float = 1e-6,
+        diversity_sigma: float = 1.0,
+        target_length: float = 4.0,
+        lambda_dtes_triple: float = 0.0,
+        lambda_spectral_div: float = 0.0,
+        ncg_eps: float = 1e-6,
     ) -> Tuple[List[Candidate], Dict[str, float]]:
         # Update bank with newly found valid geodesics (placeholder losses/rewards for ranking)
         for a_list, ell, tr in candidates:
@@ -667,12 +848,56 @@ class ArtinACO:
         per_ncg: Dict[Tuple[int, ...], Dict[str, float]] = {}
         per_trace: Dict[Tuple[int, ...], Dict[str, float]] = {}
         scored: List[Candidate] = []
-        for a_list, ell, tr in candidates:
+
+        lc = float(lambda_comm)
+        # Spectral-diversity weight: --lambda_diversity + --lambda_spectral_div (same penalty).
+        ld = float(lambda_diversity) + float(lambda_spectral_div)
+        ll = float(lambda_length)
+        ldt = float(lambda_dtes_triple)
+        ln = float(lambda_ncg)
+        # DTES collapse weight: explicit --lambda_dtes_triple, else --lambda_ncg (NCG-inspired; not RH).
+        dtes_w = float(ldt) if float(ldt) != 0.0 else float(ln)
+        # DTES (A,H,D) triple regularizer: finite-dim NCG-inspired anti-collapse; not an RH proof.
+        build_h_reg = (lc > 0.0 or ld > 0.0 or ldt > 0.0 or ln > 0.0)
+        warned_comm: List[bool] = [False]
+        warned_dtes: List[bool] = [False]
+        spectra_accum: List[np.ndarray] = []
+        L_comm_terms: List[float] = []
+        L_div_terms: List[float] = []
+        L_len_terms: List[float] = []
+        comm_norms: List[float] = []
+        div_pen_raw: List[float] = []
+        len_pen_raw: List[float] = []
+        dtes_comm_norms: List[float] = []
+        dtes_ncg_losses: List[float] = []
+        dtes: Optional[DTESSpectralTriple] = None
+        if dtes_w > 0.0:
+            dtes = DTESSpectralTriple(int(ncg_dim), str(ncg_device), dtype=str(ncg_dtype))
+
+        # Per-candidate total (when regularizers enabled):
+        #   total_loss = base_loss
+        #     + lambda_comm * commutator_collapse_loss
+        #     + lambda_diversity * spectral_diversity_penalty
+        #     + lambda_length * length_collapse_penalty
+        # (plus existing NCG braid / Selberg-trace / DTES terms when those flags are on).
+        for cand_idx, (a_list, ell, tr) in enumerate(candidates):
             reg = 1e-3 * float(ell)
             base_loss = float(L_total_global + reg)
-            loss = base_loss
             key_w = _word_key(a_list)
-            build_h = bool(use_ncg_braid) or bool(use_selberg_trace)
+            logged_comm = False
+            logged_div = False
+
+            len_pen_val = 0.0
+            if ll > 0.0:
+                len_pen_val = _length_collapse_penalty(float(ell), float(target_length))
+                len_pen_raw.append(len_pen_val)
+                L_len_terms.append(ll * len_pen_val)
+            else:
+                len_pen_raw.append(0.0)
+
+            loss = base_loss + (ll * len_pen_val if ll > 0.0 else 0.0)
+
+            build_h = bool(use_ncg_braid) or bool(use_selberg_trace) or build_h_reg
             if build_h:
                 try:
                     toks = candidate_to_braid_words(list(a_list), n_strands=int(ncg_n_strands))
@@ -711,7 +936,7 @@ class ArtinACO:
                             zeta_weight=float(lambda_ncg_zeta),
                         )
                         per_ncg[key_w] = ncg_d
-                        loss = base_loss + float(lambda_ncg) * float(ncg_d["loss"])
+                        loss = float(loss) + float(lambda_ncg) * float(ncg_d["loss"])
                     if bool(use_selberg_trace):
                         tr_d = compute_selberg_braid_trace_metrics(
                             H_ncg,
@@ -722,11 +947,77 @@ class ArtinACO:
                         )
                         per_trace[key_w] = tr_d
                         loss = float(loss) + float(lambda_trace) * float(tr_d["trace_loss"])
+
+                    if dtes is not None:
+                        try:
+                            D = dtes.dirac_from_operator(H_ncg)
+                            A = dtes.algebra_probe_from_word(list(a_list))
+                            if tuple(A.shape) != tuple(D.shape):
+                                raise ValueError("DTESSpectralTriple: A and D shape mismatch")
+                            cn = float(dtes.commutator_norm(D, A).detach().cpu().item())
+                            ncg_loss_val = float(
+                                dtes.ncg_collapse_loss(D, A, float(ncg_eps)).detach().cpu().item()
+                            )
+                            loss = float(loss) + float(dtes_w) * ncg_loss_val
+                            dtes_comm_norms.append(cn)
+                            dtes_ncg_losses.append(ncg_loss_val)
+                        except Exception:
+                            if not warned_dtes[0]:
+                                warnings.warn(
+                                    "DTES spectral triple: operator unavailable or incompatible; "
+                                    "skipping NCG collapse term.",
+                                    UserWarning,
+                                    stacklevel=2,
+                                )
+                                warned_dtes[0] = True
+
+                    if build_h_reg:
+                        H_np = np.asarray(H_ncg.detach().cpu().numpy(), dtype=_DTF)
+                        if lc > 0.0:
+                            comm_loss_val, comm_norm_val = _commutator_collapse_loss(
+                                H_np,
+                                list(a_list),
+                                comm_eps=float(comm_eps),
+                                max_power=int(self.max_power),
+                                warned=warned_comm,
+                            )
+                            loss = float(loss) + lc * comm_loss_val
+                            L_comm_terms.append(lc * comm_loss_val)
+                            comm_norms.append(comm_norm_val)
+                            logged_comm = True
+                        if ld > 0.0 and cand_idx < 64:
+                            eigs = np.linalg.eigh(H_np, UPLO="U")[0].astype(_DTF)
+                            eigs.sort()
+                            div_pen_val = 0.0
+                            if len(spectra_accum) >= 1:
+                                div_pen_val = _spectral_diversity_penalty(
+                                    eigs,
+                                    spectra_accum,
+                                    diversity_sigma=float(diversity_sigma),
+                                )
+                            spectra_accum.append(np.asarray(eigs, copy=True))
+                            div_pen_raw.append(div_pen_val)
+                            loss = float(loss) + ld * div_pen_val
+                            L_div_terms.append(ld * div_pen_val)
+                            logged_div = True
+                        elif ld > 0.0:
+                            div_pen_raw.append(0.0)
+                            L_div_terms.append(0.0)
+                            logged_div = True
                 except Exception:
-                    pen = (float(lambda_ncg) != 0.0 and bool(use_ncg_braid)) or (
-                        float(lambda_trace) != 0.0 and bool(use_selberg_trace)
+                    pen = (
+                        (float(lambda_ncg) != 0.0 and bool(use_ncg_braid))
+                        or (float(lambda_trace) != 0.0 and bool(use_selberg_trace))
+                        or build_h_reg
                     )
-                    loss = float(loss_clip) if pen else base_loss
+                    len_extra = ll * len_pen_val if ll > 0.0 else 0.0
+                    loss = float(loss_clip) if pen else base_loss + len_extra
+                if lc > 0.0 and not logged_comm:
+                    L_comm_terms.append(0.0)
+                    comm_norms.append(0.0)
+                if ld > 0.0 and not logged_div:
+                    div_pen_raw.append(0.0)
+                    L_div_terms.append(0.0)
             if not np.isfinite(loss):
                 loss = float(loss_clip)
             c = Candidate(a_list=key_w, length=float(ell), trace=float(tr), reward=0.0, loss=float(loss))
@@ -805,6 +1096,22 @@ class ArtinACO:
             if bool(use_selberg_trace)
             else nan,
             "mean_braid_length": float(bm_trace.get("mean_braid_length", nan)) if bool(use_selberg_trace) else nan,
+            "L_comm": float(np.mean(L_comm_terms)) if L_comm_terms else nan,
+            "L_div": float(np.mean(L_div_terms)) if L_div_terms else nan,
+            "L_len": float(np.mean(L_len_terms)) if L_len_terms else nan,
+            "comm_norm_mean": float(np.mean(comm_norms)) if comm_norms else nan,
+            "diversity_penalty_mean": float(np.mean(div_pen_raw)) if div_pen_raw else nan,
+            "length_penalty_mean": float(np.mean(len_pen_raw)) if len_pen_raw else nan,
+            "dtes_comm_norm_mean": float(np.mean(dtes_comm_norms)) if dtes_comm_norms else nan,
+            "dtes_comm_norm_min": float(np.min(dtes_comm_norms)) if dtes_comm_norms else nan,
+            "dtes_ncg_loss_mean": float(np.mean(dtes_ncg_losses)) if dtes_ncg_losses else nan,
+            "dtes_ncg_loss_max": float(np.max(dtes_ncg_losses)) if dtes_ncg_losses else nan,
+            # DTES triple aliases (same series as dtes_*; not the lambda_comm probe).
+            "triple_comm_norm_mean": float(np.mean(dtes_comm_norms)) if dtes_comm_norms else nan,
+            "triple_comm_norm_min": float(np.min(dtes_comm_norms)) if dtes_comm_norms else nan,
+            "ncg_collapse_loss_mean": float(np.mean(dtes_ncg_losses)) if dtes_ncg_losses else nan,
+            "ncg_collapse_loss_max": float(np.max(dtes_ncg_losses)) if dtes_ncg_losses else nan,
+            "dtes_effective_weight": float(dtes_w),
             **adaptive_rep,
         }
         return scored, stats
@@ -826,6 +1133,18 @@ class ArtinACO:
             for i in range(len(a) - 1):
                 key = (int(a[i]), int(a[i + 1]))
                 self.pheromone[key] = _clip(self.pheromone.get(key, 1.0) + delta, self.tau_min, self.tau_max)
+
+    def reinforce_candidate(self, c: Candidate, *, weight: float = 1.0) -> None:
+        """Deposit pheromone along one candidate; ``weight`` scales deposit (elite/global-best reinforcement)."""
+        if weight <= 0.0:
+            return
+        a = list(c.a_list)
+        if len(a) < 2:
+            return
+        delta = float(weight) * self.q * float(c.reward)
+        for i in range(len(a) - 1):
+            key = (int(a[i]), int(a[i + 1]))
+            self.pheromone[key] = _clip(self.pheromone.get(key, 1.0) + delta, self.tau_min, self.tau_max)
 
     def run(
         self,
@@ -888,10 +1207,40 @@ class ArtinACO:
         use_seed_motifs: bool = False,
         seed_motif_frac: float = 0.25,
         seed_mutation_prob: float = 0.5,
+        elite_weight: float = 1.0,
+        lambda_comm: float = 0.0,
+        lambda_diversity: float = 0.0,
+        lambda_length: float = 0.0,
+        comm_eps: float = 1e-6,
+        diversity_sigma: float = 1.0,
+        target_length: float = 4.0,
+        lambda_dtes_triple: float = 0.0,
+        lambda_spectral_div: float = 0.0,
+        ncg_eps: float = 1e-6,
+        restart_patience: int = 0,
+        restart_fraction: float = 0.5,
+        exploration_floor: float = 0.0,
+        pheromone_min: float = 1e-6,
+        pheromone_max: float = 1e6,
+        bank_prune_fraction: float = 0.5,
+        alpha_anneal: float = 0.0,
+        beta_anneal: float = 0.0,
     ) -> Tuple[Dict[str, Any], List[Tuple[Any, ...]]]:
         history: List[Tuple[Any, ...]] = []
         best_snapshot: Dict[str, Any] = {"best_loss": float("inf"), "best_words": [], "best_lengths": []}
         recent_losses: List[float] = []
+        last_eval_stats: Dict[str, Any] = {}
+
+        alpha_base = float(self.alpha)
+        beta_base = float(self.beta)
+
+        global_best_loss = float("inf")
+        global_best_candidate: Optional[Candidate] = None
+        global_best_iter = -1
+        final_iter_best_loss = float("nan")
+        last_improvement_iter = -1
+        restart_count = 0
+        bank_saturation_iter: Optional[int] = None
 
         planner = None
         if use_planner:
@@ -913,6 +1262,32 @@ class ArtinACO:
         last_best_loss = float("inf")
 
         for it in range(int(num_iters)):
+            self.tau_min = float(pheromone_min)
+            self.tau_max = float(pheromone_max)
+            ni = max(1, int(num_iters) - 1)
+            t_scale = float(it) / float(ni)
+            alpha_eff = alpha_base * (1.0 + float(alpha_anneal) * t_scale)
+            beta_eff = beta_base * (1.0 + float(beta_anneal) * t_scale)
+            self._alpha_eff = alpha_eff
+            self._beta_eff = beta_eff
+            self._exploration_floor = float(exploration_floor)
+
+            rp = int(restart_patience)
+            if rp > 0 and it >= rp:
+                gap = int(it) - int(last_improvement_iter)
+                if gap >= rp:
+                    gb_l = float(global_best_loss) if global_best_candidate is not None else float("nan")
+                    self._pheromone_restart_blend(float(restart_fraction))
+                    restart_count += 1
+                    last_improvement_iter = int(it)
+                    o_b, n_b = self._prune_bank(float(bank_prune_fraction))
+                    print(
+                        f"[restart] iter={it} reason=no_global_improvement global_best={gb_l:.6g} "
+                        f"restart_count={restart_count}",
+                        flush=True,
+                    )
+                    print(f"[bank-prune] iter={it} old={o_b} new={n_b}", flush=True)
+
             t_it0 = time.perf_counter()
             # build raw population (optional seed motifs + local motif splice mutation)
             population = []
@@ -1124,6 +1499,15 @@ class ArtinACO:
                 lambda_trace=float(lambda_trace),
                 trace_sigma=float(trace_sigma),
                 trace_max_cycles=int(trace_max_cycles),
+                lambda_comm=float(lambda_comm),
+                lambda_diversity=float(lambda_diversity),
+                lambda_length=float(lambda_length),
+                comm_eps=float(comm_eps),
+                diversity_sigma=float(diversity_sigma),
+                target_length=float(target_length),
+                lambda_dtes_triple=float(lambda_dtes_triple),
+                lambda_spectral_div=float(lambda_spectral_div),
+                ncg_eps=float(ncg_eps),
             )
 
             stats["seed_used"] = float(seed_init_count)
@@ -1131,8 +1515,18 @@ class ArtinACO:
             stats["motif_hits"] = (
                 float(count_motif_occurrences(list(scored[0].a_list))) if scored else float("nan")
             )
+            last_eval_stats = dict(stats)
 
             best = scored[0]
+            iter_best_loss = float(best.loss)
+            iter_best_candidate = best
+            if iter_best_loss < global_best_loss:
+                global_best_loss = iter_best_loss
+                global_best_candidate = iter_best_candidate
+                global_best_iter = int(it)
+                last_improvement_iter = int(it)
+            final_iter_best_loss = iter_best_loss
+
             mean_loss = float(np.mean([c.loss for c in scored])) if scored else float("inf")
             best_reward = float(scored[0].reward) if scored else 0.0
             mean_reward = float(np.mean([c.reward for c in scored])) if scored else 0.0
@@ -1173,6 +1567,20 @@ class ArtinACO:
             seed_used_v = float(stats.get("seed_used", float("nan")))
             seed_frac_v = float(stats.get("seed_frac", float("nan")))
             motif_hits_v = float(stats.get("motif_hits", float("nan")))
+            L_comm_v = float(stats.get("L_comm", float("nan")))
+            L_div_v = float(stats.get("L_div", float("nan")))
+            L_len_v = float(stats.get("L_len", float("nan")))
+            comm_norm_mean_v = float(stats.get("comm_norm_mean", float("nan")))
+            div_pen_mean_v = float(stats.get("diversity_penalty_mean", float("nan")))
+            len_pen_mean_v = float(stats.get("length_penalty_mean", float("nan")))
+            dtes_comm_mean_v = float(stats.get("dtes_comm_norm_mean", float("nan")))
+            dtes_comm_min_v = float(stats.get("dtes_comm_norm_min", float("nan")))
+            dtes_ncg_lm_v = float(stats.get("dtes_ncg_loss_mean", float("nan")))
+            dtes_ncg_lx_v = float(stats.get("dtes_ncg_loss_max", float("nan")))
+            triple_cm_v = float(stats.get("triple_comm_norm_mean", float("nan")))
+            triple_cmin_v = float(stats.get("triple_comm_norm_min", float("nan")))
+            ncg_clm_v = float(stats.get("ncg_collapse_loss_mean", float("nan")))
+            ncg_clx_v = float(stats.get("ncg_collapse_loss_max", float("nan")))
             avg_ell = float(np.mean([c.length for c in scored])) if scored else float("nan")
             valid_rate = float(len(scored)) / float(max(1, self.num_ants))
 
@@ -1220,8 +1628,16 @@ class ArtinACO:
 
             self.evaporate()
             self.reinforce(scored[: self.best_k_ants])
+            if float(elite_weight) > 0.0 and global_best_candidate is not None:
+                self.reinforce_candidate(global_best_candidate, weight=float(elite_weight))
             if use_seed_motifs:
                 self._boost_motif_pheromone()
+            clamp_pheromone(self.pheromone, self.tau_min, self.tau_max)
+
+            if bank_saturation_iter is None and (
+                len(self._bank) >= int(self.bank_size) or len(self._bank) >= 1000
+            ):
+                bank_saturation_iter = int(it)
 
             history.append(
                 (
@@ -1279,11 +1695,26 @@ class ArtinACO:
                 [f"{list(c.a_list)} ℓ={c.length:.3g} L={c.loss:.3g} r={c.reward:.3g}" for c in top_words]
             )
             dt = time.perf_counter() - t_it0
+            gb_loss_log = (
+                float(global_best_loss) if global_best_candidate is not None else float("nan")
+            )
+            ae_v = float(getattr(self, "_alpha_eff", self.alpha))
+            be_v = float(getattr(self, "_beta_eff", self.beta))
             if it % 10 == 0:
                 print(
-                    f"[{it}] best={best.loss:.6g} mean={mean_loss:.6g} valid={len(scored)} "
+                    f"[{it}] best={gb_loss_log:.6g} iter_best={iter_best_loss:.6g} "
+                    f"global_best={gb_loss_log:.6g} global_best_iter={global_best_iter} "
+                    f"mean={mean_loss:.6g} valid={len(scored)} "
                     f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
+                    f"alpha_eff={ae_v:.4g} beta_eff={be_v:.4g} "
                     f"L_sel={L_selberg_raw:.3g} L_spec={L_spec_raw:.3g} "
+                    f"L_comm={L_comm_v:.3g} L_div={L_div_v:.3g} L_len={L_len_v:.3g} "
+                    f"comm_norm_mean={comm_norm_mean_v:.3g} diversity_penalty_mean={div_pen_mean_v:.3g} "
+                    f"length_penalty_mean={len_pen_mean_v:.3g} "
+                    f"triple_comm_norm_mean={triple_cm_v:.3g} triple_comm_norm_min={triple_cmin_v:.3g} "
+                    f"ncg_loss_mean={ncg_clm_v:.3g} ncg_loss_max={ncg_clx_v:.3g} "
+                    f"dtes_comm_norm_mean={dtes_comm_mean_v:.3g} dtes_comm_norm_min={dtes_comm_min_v:.3g} "
+                    f"dtes_ncg_loss_mean={dtes_ncg_lm_v:.3g} dtes_ncg_loss_max={dtes_ncg_lx_v:.3g} "
                     f"loss_std={loss_std:.3g} loss_iqr={loss_iqr:.3g} "
                     f"r_min={reward_min:.3g} r_max={reward_max:.3g} r_mean={reward_mean:.3g} "
                     f"best_r={best_reward:.3g} mean_r={mean_reward:.3g} mode={reward_mode} "
@@ -1292,13 +1723,107 @@ class ArtinACO:
                 )
             else:
                 print(
-                    f"[{it}] best={best.loss:.6g} mean={mean_loss:.6g} valid={len(scored)} "
+                    f"[{it}] best={gb_loss_log:.6g} iter_best={iter_best_loss:.6g} "
+                    f"global_best={gb_loss_log:.6g} global_best_iter={global_best_iter} "
+                    f"mean={mean_loss:.6g} valid={len(scored)} "
                     f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
+                    f"alpha_eff={ae_v:.4g} beta_eff={be_v:.4g} "
                     f"L_sel={L_selberg_raw:.3g} L_spec={L_spec_raw:.3g} "
+                    f"L_comm={L_comm_v:.3g} L_div={L_div_v:.3g} L_len={L_len_v:.3g} "
+                    f"comm_norm_mean={comm_norm_mean_v:.3g} diversity_penalty_mean={div_pen_mean_v:.3g} "
+                    f"length_penalty_mean={len_pen_mean_v:.3g} "
+                    f"triple_comm_norm_mean={triple_cm_v:.3g} triple_comm_norm_min={triple_cmin_v:.3g} "
+                    f"ncg_loss_mean={ncg_clm_v:.3g} ncg_loss_max={ncg_clx_v:.3g} "
+                    f"dtes_comm_norm_mean={dtes_comm_mean_v:.3g} dtes_comm_norm_min={dtes_comm_min_v:.3g} "
+                    f"dtes_ncg_loss_mean={dtes_ncg_lm_v:.3g} dtes_ncg_loss_max={dtes_ncg_lx_v:.3g} "
                     f"best_r={best_reward:.3g} mean_r={mean_reward:.3g} mode={reward_mode} "
                     f"builder={operator_builder} dt={dt:.3g}s :: {top_words_s}",
                     flush=True,
                 )
+
+        best_snapshot["global_best_loss"] = (
+            float(global_best_loss) if global_best_candidate is not None else float("nan")
+        )
+        best_snapshot["global_best_candidate"] = (
+            {
+                "a_list": list(global_best_candidate.a_list),
+                "loss": float(global_best_candidate.loss),
+                "length": float(global_best_candidate.length),
+                "trace": float(global_best_candidate.trace),
+                "reward": float(global_best_candidate.reward),
+            }
+            if global_best_candidate is not None
+            else None
+        )
+        best_snapshot["global_best_iter"] = int(global_best_iter)
+        best_snapshot["final_iter_best_loss"] = float(final_iter_best_loss)
+
+        nan_f = float("nan")
+        best_snapshot["lambda_ncg"] = float(lambda_ncg)
+        best_snapshot["lambda_comm"] = float(lambda_comm)
+        best_snapshot["lambda_diversity"] = float(lambda_diversity)
+        best_snapshot["lambda_length"] = float(lambda_length)
+        best_snapshot["regularizer_comm_norm_mean_final"] = float(
+            last_eval_stats.get("comm_norm_mean", nan_f)
+        )
+        best_snapshot["diversity_penalty_mean_final"] = float(
+            last_eval_stats.get("diversity_penalty_mean", nan_f)
+        )
+        best_snapshot["length_penalty_mean_final"] = float(last_eval_stats.get("length_penalty_mean", nan_f))
+        # DTES (A,H,D) spectral triple — NCG-inspired anti-collapse; not an RH proof.
+        best_snapshot["lambda_dtes_triple"] = float(lambda_dtes_triple)
+        best_snapshot["lambda_spectral_div"] = float(lambda_spectral_div)
+        best_snapshot["dtes_effective_weight_final"] = float(
+            last_eval_stats.get("dtes_effective_weight", nan_f)
+        )
+        best_snapshot["dtes_comm_norm_mean_final"] = float(
+            last_eval_stats.get("dtes_comm_norm_mean", nan_f)
+        )
+        best_snapshot["dtes_comm_norm_min_final"] = float(
+            last_eval_stats.get("dtes_comm_norm_min", nan_f)
+        )
+        best_snapshot["dtes_ncg_loss_mean_final"] = float(
+            last_eval_stats.get("dtes_ncg_loss_mean", nan_f)
+        )
+        best_snapshot["dtes_ncg_loss_max_final"] = float(
+            last_eval_stats.get("dtes_ncg_loss_max", nan_f)
+        )
+        # Flat aliases for DTES triple (distinct from lambda_comm probe comm_norm_mean_final).
+        best_snapshot["comm_norm_mean_final"] = float(
+            last_eval_stats.get("dtes_comm_norm_mean", nan_f)
+        )
+        best_snapshot["comm_norm_min_final"] = float(
+            last_eval_stats.get("dtes_comm_norm_min", nan_f)
+        )
+        best_snapshot["ncg_loss_mean_final"] = float(
+            last_eval_stats.get("dtes_ncg_loss_mean", nan_f)
+        )
+        best_snapshot["dtes_triple"] = {
+            "lambda_ncg": float(lambda_ncg),
+            "lambda_dtes_triple": float(lambda_dtes_triple),
+            "effective_weight": float(last_eval_stats.get("dtes_effective_weight", nan_f)),
+            "comm_norm_mean_final": float(last_eval_stats.get("dtes_comm_norm_mean", nan_f)),
+            "comm_norm_min_final": float(last_eval_stats.get("dtes_comm_norm_min", nan_f)),
+            "ncg_loss_mean_final": float(last_eval_stats.get("dtes_ncg_loss_mean", nan_f)),
+            "ncg_loss_max_final": float(last_eval_stats.get("dtes_ncg_loss_max", nan_f)),
+        }
+
+        # V12.7 stagnation escape / NCG-ready diagnostics (not an RH proof).
+        best_snapshot["restart_count"] = int(restart_count)
+        best_snapshot["bank_saturation_iter"] = (
+            int(bank_saturation_iter) if bank_saturation_iter is not None else None
+        )
+        best_snapshot["last_improvement_iter"] = int(last_improvement_iter)
+        best_snapshot["restart_patience"] = int(restart_patience)
+        best_snapshot["restart_fraction"] = float(restart_fraction)
+        best_snapshot["exploration_floor"] = float(exploration_floor)
+        best_snapshot["pheromone_min"] = float(pheromone_min)
+        best_snapshot["pheromone_max"] = float(pheromone_max)
+        best_snapshot["bank_prune_fraction"] = float(bank_prune_fraction)
+        best_snapshot["elite_weight"] = float(elite_weight)
+        best_snapshot["alpha_anneal"] = float(alpha_anneal)
+        best_snapshot["beta_anneal"] = float(beta_anneal)
+        best_snapshot["elite_reinforcement_enabled"] = bool(float(elite_weight) > 0.0)
 
         return best_snapshot, history
 
@@ -1383,7 +1908,7 @@ def _write_history_csv(
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="V12.3 ACO over Artin symbolic words (Selberg + operator losses)")
+    ap = argparse.ArgumentParser(description="V12.7 ACO (Selberg + operator + stagnation-escape); not an RH proof.")
     ap.add_argument("--num_ants", type=int, default=64)
     ap.add_argument("--num_iters", type=int, default=100)
     ap.add_argument("--max_length", type=int, default=8)
@@ -1406,7 +1931,16 @@ def main() -> None:
     ap.add_argument("--lambda_trace", type=float, default=0.0)
     ap.add_argument("--trace_sigma", type=float, default=0.75)
     ap.add_argument("--trace_max_cycles", type=int, default=16)
-    ap.add_argument("--lambda_ncg", type=float, default=0.0)
+    ap.add_argument(
+        "--lambda_ncg",
+        type=float,
+        default=0.0,
+        help=(
+            "With --use_ncg_braid: scales the NCG braid bundle loss. "
+            "Otherwise (or in addition if --lambda_dtes_triple is 0): scales DTES spectral-triple "
+            "ncg_collapse_loss = 1/(ncg_eps+||[D,A]||_F) (finite-dim NCG-inspired regularizer; not an RH proof)."
+        ),
+    )
     ap.add_argument("--lambda_ncg_spectral", type=float, default=1.0)
     ap.add_argument("--lambda_ncg_selfadjoint", type=float, default=0.01)
     ap.add_argument("--lambda_ncg_commutator", type=float, default=0.001)
@@ -1468,6 +2002,54 @@ def main() -> None:
     )
     ap.add_argument("--seed_motif_frac", type=float, default=0.25)
     ap.add_argument("--seed_mutation_prob", type=float, default=0.5)
+    ap.add_argument(
+        "--elite_weight",
+        type=float,
+        default=1.0,
+        help="Extra pheromone reinforcement scale for the global-best candidate each iteration (0 disables).",
+    )
+    # V12.7 ACO stagnation escape (diagnostic; not an RH proof).
+    ap.add_argument("--restart_patience", type=int, default=0, help="Iterations without global-best improvement before pheromone restart (0 disables).")
+    ap.add_argument("--restart_fraction", type=float, default=0.5, help="Blend toward uniform pheromone on restart.")
+    ap.add_argument("--exploration_floor", type=float, default=0.0, help="Additive uniform floor on action probabilities before normalize.")
+    ap.add_argument("--pheromone_min", type=float, default=1e-6, help="Clamp lower bound for edge pheromone.")
+    ap.add_argument("--pheromone_max", type=float, default=1e6, help="Clamp upper bound for edge pheromone.")
+    ap.add_argument(
+        "--bank_prune_fraction",
+        type=float,
+        default=0.5,
+        help="On restart, retain this fraction of bank by lowest loss.",
+    )
+    ap.add_argument("--alpha_anneal", type=float, default=0.0, help="Linear alpha multiplier ramp across iterations.")
+    ap.add_argument("--beta_anneal", type=float, default=0.0, help="Linear beta multiplier ramp across iterations.")
+    # NCG-inspired anti-collapse regularizers (NOT an RH proof); defaults preserve legacy behavior.
+    ap.add_argument("--lambda_comm", type=float, default=0.0)
+    ap.add_argument("--lambda_diversity", type=float, default=0.0)
+    ap.add_argument("--lambda_length", type=float, default=0.0)
+    ap.add_argument("--comm_eps", type=float, default=1e-6)
+    ap.add_argument("--diversity_sigma", type=float, default=1.0)
+    ap.add_argument("--target_length", type=float, default=4.0)
+    ap.add_argument(
+        "--lambda_dtes_triple",
+        type=float,
+        default=0.0,
+        help=(
+            "Weight for DTES (A,H,D) commutator-collapse via core.dtes_spectral_triple "
+            "(distinct from --lambda_ncg which scales the NCG braid bundle loss)."
+        ),
+    )
+    ap.add_argument(
+        "--lambda_spectral_div",
+        type=float,
+        default=0.0,
+        help="Added to --lambda_diversity for the same spectral-diversity penalty.",
+    )
+    ap.add_argument(
+        "--ncg_eps",
+        type=float,
+        default=1e-6,
+        help="Epsilon in DTES triple ncg_collapse_loss = 1/(eps+||[D,A]||_F).",
+    )
     args = ap.parse_args()
 
     print(
@@ -1477,7 +2059,7 @@ def main() -> None:
         flush=True,
     )
 
-    zeros = load_zeros(args.zeros)
+    zeros = resolve_zeros_cli(str(args.zeros))
     if zeros.size == 0:
         raise ValueError("zeros file is empty or unreadable")
 
@@ -1497,6 +2079,8 @@ def main() -> None:
         rho=float(args.rho),
         seed=int(args.seed),
         length_threshold=float(args.length_threshold),
+        tau_min=float(args.pheromone_min),
+        tau_max=float(args.pheromone_max),
         bank_size=int(args.bank_size),
         best_k_ants=int(args.best_k_ants),
     )
@@ -1564,6 +2148,24 @@ def main() -> None:
         use_seed_motifs=bool(args.use_seed_motifs),
         seed_motif_frac=float(args.seed_motif_frac),
         seed_mutation_prob=float(args.seed_mutation_prob),
+        elite_weight=float(args.elite_weight),
+        lambda_comm=float(args.lambda_comm),
+        lambda_diversity=float(args.lambda_diversity),
+        lambda_length=float(args.lambda_length),
+        comm_eps=float(args.comm_eps),
+        diversity_sigma=float(args.diversity_sigma),
+        target_length=float(args.target_length),
+        lambda_dtes_triple=float(args.lambda_dtes_triple),
+        lambda_spectral_div=float(args.lambda_spectral_div),
+        ncg_eps=float(args.ncg_eps),
+        restart_patience=int(args.restart_patience),
+        restart_fraction=float(args.restart_fraction),
+        exploration_floor=float(args.exploration_floor),
+        pheromone_min=float(args.pheromone_min),
+        pheromone_max=float(args.pheromone_max),
+        bank_prune_fraction=float(args.bank_prune_fraction),
+        alpha_anneal=float(args.alpha_anneal),
+        beta_anneal=float(args.beta_anneal),
     )
     dt = time.perf_counter() - t0
 
