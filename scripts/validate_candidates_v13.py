@@ -2,8 +2,9 @@
 """
 V13C: validate ACO candidate words — spectral loss, spacing, Wigner/GUE KS, Ramsey/Nijenhuis, commutator proxy.
 
-Run from repo root:
-  python3 scripts/validate_candidates_v13.py --zeros 128 --dim 128 --out_dir runs/v13_candidate_validation
+Run from repo root (same operator path as ACO ``operator_builder=word_sensitive``):
+
+  python3 scripts/validate_candidates_v13.py --zeros 128 --dim 128 --out_dir runs/v13_candidate_validation_word_sensitive
 """
 
 from __future__ import annotations
@@ -422,20 +423,39 @@ def main() -> None:
         candidates = loaded
 
     results: List[Dict[str, Any]] = []
+    H_mats: List[Optional[np.ndarray]] = []
     for c in candidates:
         if not isinstance(c, dict) or "word" not in c:
             continue
-        r = validate_one(c, zeros=zeros, dim=int(args.dim), sigma=float(args.sigma), eps=float(args.eps), seed=int(args.seed))
+        r, Hm = validate_one(
+            c,
+            zeros=zeros,
+            dim=int(args.dim),
+            eps=float(args.eps),
+            seed=int(args.seed),
+            geo_weight=float(args.geo_weight),
+            geo_sigma=float(args.geo_sigma),
+            potential_weight=float(args.potential_weight),
+        )
         results.append(r)
+        H_mats.append(Hm)
+
+    ids_list = [str(r["id"]) for r in results]
+    pairwise = pairwise_operator_fro_dists(ids_list, H_mats)
+    warn_identical_operator_hashes(results)
 
     results_sorted = sorted(results, key=_sort_key)
 
     payload = {
         "zeros_n": int(zeros.size),
         "dim": int(args.dim),
-        "sigma": float(args.sigma),
+        "operator_builder": "word_sensitive",
         "eps": float(args.eps),
+        "geo_weight": float(args.geo_weight),
+        "geo_sigma": float(args.geo_sigma),
+        "potential_weight": float(args.potential_weight),
         "seed": int(args.seed),
+        "pairwise_operator_distances": pairwise,
         "candidates": results_sorted,
     }
     with open(out_dir / "validation_results.json", "w", encoding="utf-8") as f:
@@ -443,6 +463,10 @@ def main() -> None:
 
     cols = [
         "id",
+        "operator_hash",
+        "operator_fro_norm",
+        "operator_trace",
+        "word_used",
         "spectral_log_mse",
         "ks_wigner",
         "nijenhuis_defect",
@@ -462,19 +486,25 @@ def main() -> None:
         w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
         w.writeheader()
         for r in results_sorted:
-            w.writerow({k: r.get(k) for k in cols})
+            flat = {k: r.get(k) for k in cols}
+            wu = flat.get("word_used")
+            if isinstance(wu, list):
+                flat["word_used"] = json.dumps(wu)
+            w.writerow(flat)
 
     if save_plots:
         for r in results:
             cid = str(r["id"])
             safe = re.sub(r"[^a-zA-Z0-9_.-]+", "_", cid)
-            word = r.get("word") or []
+            word = r.get("word_used") or r.get("word") or []
             try:
-                H, _ = _build_operator_H(
+                H, _ = build_operator_aco_word_sensitive(
                     [int(x) for x in word],
                     n_points=int(args.dim),
-                    sigma=float(args.sigma),
                     eps=float(args.eps),
+                    geo_weight=float(args.geo_weight),
+                    geo_sigma=float(args.geo_sigma),
+                    potential_weight=float(args.potential_weight),
                     seed=int(args.seed),
                 )
                 Ht = _symmetrize_torch(H)
