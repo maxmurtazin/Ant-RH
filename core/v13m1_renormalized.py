@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from core.v13l_self_consistent import DTYPE, EPS, rescale_gamma_to_range, sym_eps
+from core.v13l_self_consistent import DTYPE, EPS, rescale_gamma_preserve_order, rescale_gamma_to_range, sym_eps
 from core.v13l1_stabilized import (
     beta_schedule,
     clip_v_diag_percentile,
@@ -127,6 +127,7 @@ def run_renormalized_cell(
     stagnation_window: int = 20,
     stagnation_eps: float = 1e-5,
     stagnation_stop_only_if_operator_diff_below: Optional[float] = None,
+    target_positive_ordered: Optional[np.ndarray] = None,
     max_iter: int,
     tol: float,
 ) -> Dict[str, Any]:
@@ -137,6 +138,11 @@ def run_renormalized_cell(
     If ``stagnation_stop_only_if_operator_diff_below`` is set (e.g. ``1e-3`` for V13M.2),
     stagnation-based early exit runs only when ``operator_diff`` is already below that
     threshold; otherwise the stagnation counter is reset and iteration continues.
+
+    If ``target_positive_ordered`` is set (length ``ze``), it replaces the first ``ze`` sorted
+    pool zeros for building ``g_short``; values are **rescaled to** ``[lo, hi]`` **without**
+    sorting so that ``g_short[i]`` pairs with the ``i``-th smallest eigenvalue (V13O shuffle
+    and synthetic targets). Otherwise the pool branch sorts as in V13M.1.
     """
     H_base = np.asarray(H_base, dtype=DTYPE, copy=False)
     n = int(H_base.shape[0])
@@ -169,15 +175,28 @@ def run_renormalized_cell(
     zp = np.asarray(z_pool_positive, dtype=DTYPE).reshape(-1)
     zp = zp[np.isfinite(zp) & (zp > 0.0)]
     zp = np.sort(zp)
-    ze = int(min(int(zeros_eff), int(zp.size)))
-    if ze < 1:
-        meta["eig_error"] = "insufficient_zeros"
-        return _empty(H_base, meta, w0)
 
-    z_short = zp[:ze].astype(DTYPE, copy=False)
-    g_short = rescale_gamma_to_range(z_short, lo, hi)
-    g_short = np.sort(np.asarray(g_short, dtype=DTYPE).reshape(-1))
-    k_use = int(min(n, ze, g_short.size))
+    if target_positive_ordered is not None:
+        z_ord = np.asarray(target_positive_ordered, dtype=DTYPE).reshape(-1)
+        z_ord = z_ord[np.isfinite(z_ord) & (z_ord > 0.0)]
+        if z_ord.size < 1:
+            meta["eig_error"] = "empty_target_positive_ordered"
+            return _empty(H_base, meta, w0)
+        ze = int(min(int(zeros_eff), int(z_ord.size)))
+        z_ord = z_ord[:ze].astype(DTYPE, copy=False)
+        g_short = rescale_gamma_preserve_order(z_ord, lo, hi)
+        g_short = np.asarray(g_short, dtype=DTYPE).reshape(-1)
+        k_use = int(min(n, int(g_short.size)))
+    else:
+        ze = int(min(int(zeros_eff), int(zp.size)))
+        if ze < 1:
+            meta["eig_error"] = "insufficient_zeros"
+            return _empty(H_base, meta, w0)
+
+        z_short = zp[:ze].astype(DTYPE, copy=False)
+        g_short = rescale_gamma_to_range(z_short, lo, hi)
+        g_short = np.sort(np.asarray(g_short, dtype=DTYPE).reshape(-1))
+        k_use = int(min(n, ze, g_short.size))
 
     cap = float(abs_cap_factor * (hi - lo + 1.0) / max(float(alpha) * float(lambda_p_dim), EPS))
 

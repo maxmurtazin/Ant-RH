@@ -73,6 +73,18 @@ def rescale_gamma_to_range(gamma: np.ndarray, lo: float, hi: float) -> np.ndarra
     return (lo + (g - gmin) / span * (hi - lo + EPS)).astype(DTYPE, copy=False)
 
 
+def rescale_gamma_preserve_order(gamma: np.ndarray, lo: float, hi: float) -> np.ndarray:
+    """Linearly map finite values to ``[lo, hi]`` preserving input order (no sorting)."""
+    g = np.asarray(gamma, dtype=DTYPE).reshape(-1)
+    g = g[np.isfinite(g)]
+    if g.size == 0:
+        return np.zeros((0,), dtype=DTYPE)
+    gmin = float(np.min(g))
+    gmax = float(np.max(g))
+    span = gmax - gmin + EPS
+    return (float(lo) + (g - gmin) / span * (float(hi) - float(lo) + EPS)).astype(DTYPE, copy=False)
+
+
 def gaussian_smooth_1d(x: np.ndarray, sigma: float) -> np.ndarray:
     if sigma <= 0 or x.size <= 1:
         return np.asarray(x, dtype=DTYPE, copy=True)
