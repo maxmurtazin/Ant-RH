@@ -126,6 +126,55 @@ def resolve_zeros_cli(z: str) -> np.ndarray:
 
 _DTF = np.float64
 
+
+def tensor_stats(x: Any, name: str) -> Dict[str, Any]:
+    """Lightweight stats for torch tensors or NumPy arrays (spectral debug; not an RH proof)."""
+    out: Dict[str, Any] = {
+        "name": name,
+        "shape": None,
+        "finite": None,
+        "nan_count": None,
+        "inf_count": None,
+        "min": None,
+        "max": None,
+    }
+    if x is None:
+        return out
+    if torch.is_tensor(x):
+        if x.numel() == 0:
+            return out
+        out["shape"] = list(int(s) for s in x.shape)
+        out["finite"] = bool(torch.isfinite(x).all().item())
+        out["nan_count"] = int(torch.isnan(x).sum().item())
+        out["inf_count"] = int(torch.isinf(x).sum().item())
+        xn = torch.nan_to_num(x.detach().float(), nan=0.0, posinf=0.0, neginf=0.0)
+        out["min"] = float(xn.min().item())
+        out["max"] = float(xn.max().item())
+        return out
+    if isinstance(x, np.ndarray):
+        xa = np.asarray(x, dtype=np.float64)
+        if xa.size == 0:
+            out["shape"] = list(x.shape)
+            return out
+        out["shape"] = list(x.shape)
+        out["finite"] = bool(np.isfinite(xa).all())
+        out["nan_count"] = int(np.isnan(xa).sum())
+        out["inf_count"] = int(np.isinf(xa).sum())
+        xn = np.nan_to_num(xa, nan=0.0, posinf=0.0, neginf=0.0)
+        out["min"] = float(np.min(xn))
+        out["max"] = float(np.max(xn))
+        return out
+    return out
+
+
+def _append_spec_debug_jsonl(fp: Any, record: Dict[str, Any], written: List[int], limit: int) -> None:
+    """Append one JSONL debug record; respects ``limit`` total writes (not an RH proof)."""
+    if fp is None or int(written[0]) >= int(limit):
+        return
+    fp.write(json.dumps(record, default=str) + "\n")
+    written[0] = int(written[0]) + 1
+
+
 # Commutator-like braid fragments from prior ACO runs (algebraic prior; not an RH proof).
 SEED_MOTIFS = [
     [1, -1, 1, -1],
@@ -419,7 +468,8 @@ class ArtinACO:
 
         self._word_cache: Dict[Tuple[int, ...], Tuple[bool, float, float]] = {}
         self._bank: Dict[Tuple[int, ...], Candidate] = {}
-        self._op_cache: Dict[Tuple[Tuple[int, ...], ...], float] = {}
+        self._op_cache: Dict[Tuple[Any, ...], float] = {}
+        self._op_cache_meta: Dict[Tuple[Any, ...], Dict[str, int]] = {}
         self.best_ncg_export: Optional[Dict[str, Any]] = None
 
     def _assign_rewards(
@@ -659,11 +709,31 @@ class ArtinACO:
         geo_sigma: float,
         potential_weight: float,
         seed: int,
+        spec_diag: Optional[Dict[str, Any]] = None,
+        reject_nonfinite_operator: bool = True,
+        reject_nonfinite_eigs: bool = True,
+        min_spectral_points: int = 16,
     ) -> float:
+        """Bank-level operator spectral MSE vs ``zeros`` (diagnostic; not an RH proof)."""
+        if spec_diag is not None:
+            spec_diag.clear()
+
+        def _fill_diag(**kwargs: Any) -> None:
+            if spec_diag is None:
+                return
+            for k, v in kwargs.items():
+                spec_diag[k] = v
+
+        z_flat = np.asarray(zeros, dtype=_DTF).reshape(-1)
+        z_flat = z_flat[np.isfinite(z_flat)]
+        n_z_avail = int(z_flat.size)
+
         geodesics = self._bank_top_geodesics(top_k_geodesics)
         if not geodesics:
+            _fill_diag(reason="empty_geodesics")
             return float("inf")
 
+        msp = max(1, int(min_spectral_points))
         sig = (
             str(operator_builder).lower(),
             float(op_sigma),
@@ -672,15 +742,24 @@ class ArtinACO:
             float(geo_sigma),
             float(potential_weight),
             tuple(tuple(int(a) for a in g["a_list"]) for g in geodesics),
+            int(n_z_avail),
+            int(msp),
         )
         cached = self._op_cache.get(sig)
-        if cached is not None:
-            return cached
+        if cached is not None and (spec_diag is None or np.isfinite(float(cached))):
+            if spec_diag is not None:
+                meta = self._op_cache_meta.get(sig)
+                if meta:
+                    spec_diag.update(meta)
+            return float(cached)
+
+        sample_word = list(geodesics[0].get("a_list", [])) if geodesics else None
+        _fill_diag(sample_word=sample_word)
 
         Z = sample_domain(int(n_points), seed=int(seed))
         builder = str(operator_builder).lower()
+        H: Optional[np.ndarray] = None
         if builder == "word_sensitive" and _HAVE_WORD_SENSITIVE and build_word_sensitive_operator is not None:
-            # Word-sensitive builder explicitly depends on word entries/signs/etc.
             H, _ = build_word_sensitive_operator(
                 z_points=Z,
                 distances=None,
@@ -694,29 +773,95 @@ class ArtinACO:
             )
             H = np.asarray(H, dtype=_DTF, copy=False)
         else:
-            # Legacy baseline: graph Laplacian + geodesic kernel.
             L, _, _ = build_laplacian(Z, eps=float(op_eps))
             Kmat, used = build_geodesic_kernel(Z, geodesics, sigma=float(op_sigma))
             if used <= 0:
+                _fill_diag(reason="empty_kernel")
                 self._op_cache[sig] = float("inf")
                 return float("inf")
             H = -L + Kmat
             H = (H + H.T) * 0.5
 
-        eigvals = np.linalg.eigh(H, UPLO="U")[0].astype(_DTF, copy=False)
-        eigvals.sort()
+        _fill_diag(H_stats=tensor_stats(H, "H"), D_stats=None)
 
-        if zeros.size < eigvals.size:
+        if H is None or not np.isfinite(H).all():
+            _fill_diag(reason="nonfinite_operator")
+            if bool(reject_nonfinite_operator):
+                loss = float("inf")
+                self._op_cache[sig] = loss
+                return loss
+
+        eigvals: Optional[np.ndarray] = None
+        eig_err: Optional[str] = None
+        try:
+            eigvals = np.linalg.eigh(H, UPLO="U")[0].astype(_DTF, copy=False)
+        except Exception as ex:
+            eig_err = repr(ex)
+            _fill_diag(reason="eig_failed", eig_exception=eig_err, eig_stats=None)
             loss = float("inf")
-        else:
-            target = zeros[: eigvals.size].astype(_DTF, copy=False)
-            loss = float(np.mean((eigvals - target) ** 2))
+            self._op_cache[sig] = loss
+            return loss
+
+        eigvals.sort()
+        _fill_diag(eig_stats=tensor_stats(eigvals, "eigvals"))
+
+        if eigvals.size >= 2:
+            spacing = np.diff(eigvals.astype(np.float64, copy=False))
+            _fill_diag(spacing_stats=tensor_stats(spacing, "eig_spacing"))
+            if not np.isfinite(spacing).all():
+                _fill_diag(reason="nonfinite_spacing")
+                if bool(reject_nonfinite_eigs):
+                    loss = float("inf")
+                    self._op_cache[sig] = loss
+                    return loss
+
+        if not np.isfinite(eigvals).all():
+            _fill_diag(reason="nonfinite_eigs")
+            if bool(reject_nonfinite_eigs):
+                loss = float("inf")
+                self._op_cache[sig] = loss
+                return loss
+
+        n_e = int(eigvals.size)
+        k = int(min(n_e, n_z_avail))
+        _fill_diag(n_eig=n_e, n_zeros=n_z_avail, n_spec_used=int(k))
+        if k < msp:
+            _fill_diag(
+                reason="insufficient_overlap",
+                min_spectral_points=int(msp),
+                k_overlap=int(k),
+                target_stats=tensor_stats(z_flat, "target_zeros"),
+            )
+            loss = float("inf")
+            self._op_cache[sig] = loss
+            return loss
+
+        eig_use = eigvals[:k].astype(_DTF, copy=False)
+        target_use = z_flat[:k].astype(_DTF, copy=False)
+        _fill_diag(
+            n_spec_used=int(k),
+            target_stats=tensor_stats(target_use, "target_zeros"),
+            eig_stats=tensor_stats(eig_use, "eigvals_aligned"),
+        )
+        if not np.isfinite(target_use).all():
+            _fill_diag(reason="nonfinite_target")
+            loss = float("inf")
+            self._op_cache[sig] = loss
+            return loss
+
+        loss = float(np.mean((eig_use - target_use) ** 2))
+        if not np.isfinite(loss):
+            _fill_diag(reason="nonfinite_loss")
+            loss = float("inf")
 
         self._op_cache[sig] = loss
+        if spec_diag is not None and np.isfinite(loss):
+            self._op_cache_meta[sig] = {"n_eig": int(n_e), "n_zeros": int(n_z_avail), "n_spec_used": int(k)}
         if len(self._op_cache) > 64:
-            for k in list(self._op_cache.keys())[:16]:
-                self._op_cache.pop(k, None)
-        return loss
+            for kpop in list(self._op_cache.keys())[:16]:
+                self._op_cache.pop(kpop, None)
+                self._op_cache_meta.pop(kpop, None)
+        return float(loss)
 
     def _selberg_loss(self, zeros: np.ndarray, *, sigma: float, m_max: int, bank_top_n: int) -> float:
         if not self._bank:
@@ -789,8 +934,29 @@ class ArtinACO:
         lambda_spectral_div: float = 0.0,
         ncg_eps: float = 1e-6,
         spec_clip: float = 100.0,
+        spec_log_scale: bool = True,
         reject_nonfinite_spec: bool = False,
-    ) -> Tuple[List[Candidate], Dict[str, float]]:
+        iteration: int = -1,
+        debug_spec: bool = False,
+        debug_spec_limit: int = 10,
+        reject_nonfinite_operator: bool = True,
+        reject_nonfinite_eigs: bool = True,
+        spec_debug_fp: Optional[Any] = None,
+        spec_debug_written: Optional[List[int]] = None,
+        spec_tally: Optional[Dict[str, int]] = None,
+        lambda_ramsey: float = 0.0,
+        lambda_nijenhuis: float = 0.0,
+        ramsey_min_block: int = 2,
+        nijenhuis_dim: int = 16,
+        min_spectral_points: int = 16,
+    ) -> Tuple[List[Candidate], Dict[str, Any]]:
+        if spec_debug_written is None:
+            spec_debug_written = [0]
+        if spec_tally is None:
+            spec_tally = {"nonfinite": 0, "eig_fail": 0, "invalid": 0, "clip": 0}
+        spec_nonfinite_iter = 0
+        spec_eig_fail_iter = 0
+        spec_invalid_iter = 0
         # Update bank with newly found valid geodesics (placeholder losses/rewards for ranking)
         for a_list, ell, tr in candidates:
             key = _word_key(a_list)
@@ -806,6 +972,7 @@ class ArtinACO:
 
         # Compute global losses using current bank (raw components)
         L_selberg = self._selberg_loss(zeros, sigma=selberg_sigma, m_max=selberg_m_max, bank_top_n=selberg_bank_top_n)
+        spec_diag_op: Dict[str, Any] = {}
         L_spec_raw = self._operator_spectral_loss(
             zeros,
             n_points=n_points,
@@ -817,18 +984,63 @@ class ArtinACO:
             geo_sigma=float(geo_sigma),
             potential_weight=float(potential_weight),
             seed=self.seed,
+            spec_diag=spec_diag_op,
+            reject_nonfinite_operator=bool(reject_nonfinite_operator),
+            reject_nonfinite_eigs=bool(reject_nonfinite_eigs),
+            min_spectral_points=int(min_spectral_points),
         )
+        r_op = str(spec_diag_op.get("reason") or "")
+        if r_op == "eig_failed":
+            spec_eig_fail_iter += 1
+        elif r_op:
+            spec_nonfinite_iter += 1
+
+        if bool(debug_spec) and spec_debug_fp is not None and (not np.isfinite(L_spec_raw)) and int(spec_debug_written[0]) < int(debug_spec_limit):
+            _append_spec_debug_jsonl(
+                spec_debug_fp,
+                {
+                    "iteration": int(iteration),
+                    "candidate_rank": None,
+                    "ant_id": None,
+                    "word": spec_diag_op.get("sample_word"),
+                    "ell": None,
+                    "L_spec_raw": float(L_spec_raw),
+                    "reason": spec_diag_op.get("reason"),
+                    "n_zeros": spec_diag_op.get("n_zeros"),
+                    "n_eig": spec_diag_op.get("n_eig"),
+                    "n_spec_used": spec_diag_op.get("n_spec_used"),
+                    "H": spec_diag_op.get("H_stats"),
+                    "D": spec_diag_op.get("D_stats"),
+                    "eigvals": spec_diag_op.get("eig_stats"),
+                    "eig_spacing": spec_diag_op.get("spacing_stats"),
+                    "target_zeros": spec_diag_op.get("target_stats"),
+                    "eig_exception": spec_diag_op.get("eig_exception"),
+                },
+                spec_debug_written,
+                int(debug_spec_limit),
+            )
+
         spec_cf = float(spec_clip)
         spec_clip_iteration = 0
+        L_spec_log_val = float("nan")
         if not np.isfinite(L_spec_raw):
             if bool(reject_nonfinite_spec):
+                if spec_tally is not None:
+                    spec_tally["nonfinite"] = int(spec_tally.get("nonfinite", 0)) + int(spec_nonfinite_iter)
+                    spec_tally["eig_fail"] = int(spec_tally.get("eig_fail", 0)) + int(spec_eig_fail_iter)
+                    spec_tally["invalid"] = int(spec_tally.get("invalid", 0)) + int(spec_invalid_iter)
                 nan_v = float("nan")
                 return [], {
                     "L_spec_raw": float(L_spec_raw),
+                    "L_spec_log": nan_v,
                     "L_spec_eff": nan_v,
                     "L_spec_clipped": 0,
                     "spec_clip_iteration": 0,
+                    "spec_clip_count": 0,
                     "spec_nonfinite_rejected": 1,
+                    "spec_nonfinite_count": int(spec_nonfinite_iter),
+                    "spec_eig_fail_count": int(spec_eig_fail_iter),
+                    "spec_invalid_count": int(spec_invalid_iter),
                     "L_selberg_raw": float(L_selberg),
                     "L_spacing_raw": 0.0,
                     "L_selberg_norm": nan_v,
@@ -839,13 +1051,31 @@ class ArtinACO:
                     "L_total_global": nan_v,
                     "heat_trace": nan_v,
                     "spectral_entropy": nan_v,
+                    "L_ramsey": nan_v,
+                    "L_nijenhuis": nan_v,
+                    "ramsey_score_mean": nan_v,
+                    "ramsey_score_max": nan_v,
+                    "nijenhuis_defect_mean": nan_v,
+                    "nijenhuis_defect_min": nan_v,
+                    "n_eig": nan_v,
+                    "n_zeros": nan_v,
+                    "n_spec_used": nan_v,
                 }
             L_spec = float(spec_cf)
             spec_clip_iteration = 1
+            L_spec_log_val = float("nan")
         else:
-            L_spec = min(float(L_spec_raw), float(spec_cf))
-            if float(L_spec_raw) > float(spec_cf):
-                spec_clip_iteration = 1
+            if bool(spec_log_scale):
+                L_spec_log_val = float(np.log1p(max(0.0, float(L_spec_raw))))
+                L_spec = float(L_spec_log_val)
+                if float(L_spec_log_val) > float(spec_cf):
+                    L_spec = float(spec_cf)
+                    spec_clip_iteration = 1
+            else:
+                L_spec_log_val = float("nan")
+                L_spec = min(float(L_spec_raw), float(spec_cf))
+                if float(L_spec_raw) > float(spec_cf):
+                    spec_clip_iteration = 1
 
         L_spacing = 0.0
         if lambda_spacing != 0.0:
@@ -921,6 +1151,44 @@ class ArtinACO:
         if not np.isfinite(float(L_total_global)):
             L_total_global = float(loss_clip)
 
+        if bool(debug_spec) and spec_debug_fp is not None and int(spec_debug_written[0]) < int(debug_spec_limit):
+            if not all(
+                np.isfinite(float(x))
+                for x in (L_sel_norm, L_spec_norm, L_spacing_norm, L_zeta_norm, L_total_global)
+            ):
+                _append_spec_debug_jsonl(
+                    spec_debug_fp,
+                    {
+                        "iteration": int(iteration),
+                        "candidate_rank": None,
+                        "ant_id": None,
+                        "word": spec_diag_op.get("sample_word"),
+                        "ell": None,
+                        "L_spec_raw": float(L_spec_raw),
+                        "reason": "nonfinite_loss",
+                        "H": spec_diag_op.get("H_stats"),
+                        "D": spec_diag_op.get("D_stats"),
+                        "eigvals": spec_diag_op.get("eig_stats"),
+                        "eig_spacing": spec_diag_op.get("spacing_stats"),
+                        "target_zeros": spec_diag_op.get("target_stats"),
+                        "eig_exception": spec_diag_op.get("eig_exception"),
+                        "L_sel_norm": tensor_stats(
+                            np.array([float(L_sel_norm)], dtype=np.float64), "L_sel_norm"
+                        ),
+                        "L_spec_norm": tensor_stats(
+                            np.array([float(L_spec_norm)], dtype=np.float64), "L_spec_norm"
+                        ),
+                        "L_spacing_norm": tensor_stats(
+                            np.array([float(L_spacing_norm)], dtype=np.float64), "L_spacing_norm"
+                        ),
+                        "L_zeta_norm": tensor_stats(
+                            np.array([float(L_zeta_norm)], dtype=np.float64), "L_zeta_norm"
+                        ),
+                    },
+                    spec_debug_written,
+                    int(debug_spec_limit),
+                )
+
         tz_ncg = ncg_target_zeros
         if tz_ncg is None or np.asarray(tz_ncg).size == 0:
             tz_ncg = zeros
@@ -955,6 +1223,12 @@ class ArtinACO:
         dtes: Optional[DTESSpectralTriple] = None
         if dtes_w > 0.0:
             dtes = DTESSpectralTriple(int(ncg_dim), str(ncg_device), dtype=str(ncg_dtype))
+
+        lr_rn = float(lambda_ramsey)
+        ln_rn = float(lambda_nijenhuis)
+        warned_rn: List[bool] = [False]
+        ramsey_scores: List[float] = []
+        nijenhuis_defects: List[float] = []
 
         # Per-candidate total (when regularizers enabled):
         #   total_loss = base_loss
@@ -1068,20 +1342,75 @@ class ArtinACO:
                             comm_norms.append(comm_norm_val)
                             logged_comm = True
                         if ld > 0.0 and cand_idx < 64:
-                            eigs = np.linalg.eigh(H_np, UPLO="U")[0].astype(_DTF)
-                            eigs.sort()
-                            div_pen_val = 0.0
-                            if len(spectra_accum) >= 1:
-                                div_pen_val = _spectral_diversity_penalty(
-                                    eigs,
-                                    spectra_accum,
-                                    diversity_sigma=float(diversity_sigma),
-                                )
-                            spectra_accum.append(np.asarray(eigs, copy=True))
-                            div_pen_raw.append(div_pen_val)
-                            loss = float(loss) + ld * div_pen_val
-                            L_div_terms.append(ld * div_pen_val)
-                            logged_div = True
+                            div_skip = False
+                            div_reason = ""
+                            div_ex_msg: Optional[str] = None
+                            h_per = tensor_stats(H_np, "H_per_ant")
+                            if not np.isfinite(H_np).all():
+                                div_reason = "nonfinite_operator"
+                                if bool(reject_nonfinite_operator):
+                                    div_skip = True
+                            eigs_div: Optional[np.ndarray] = None
+                            if not div_skip:
+                                try:
+                                    eigs_div = np.linalg.eigh(H_np, UPLO="U")[0].astype(_DTF)
+                                except Exception as _ex:
+                                    div_ex_msg = repr(_ex)
+                                    div_reason = "eig_failed"
+                                    div_skip = True
+                                    spec_eig_fail_iter += 1
+                            if not div_skip and eigs_div is not None:
+                                if not np.isfinite(eigs_div).all():
+                                    div_reason = "nonfinite_eigs"
+                                    if bool(reject_nonfinite_eigs):
+                                        div_skip = True
+                                if not div_skip and int(eigs_div.size) >= 2:
+                                    if not np.isfinite(np.diff(eigs_div.astype(np.float64))).all():
+                                        div_reason = "nonfinite_spacing"
+                                        if bool(reject_nonfinite_eigs):
+                                            div_skip = True
+                            if div_skip:
+                                spec_invalid_iter += 1
+                                if bool(debug_spec) and spec_debug_fp is not None and int(spec_debug_written[0]) < int(debug_spec_limit):
+                                    _append_spec_debug_jsonl(
+                                        spec_debug_fp,
+                                        {
+                                            "iteration": int(iteration),
+                                            "candidate_rank": int(cand_idx),
+                                            "ant_id": int(cand_idx),
+                                            "word": list(a_list),
+                                            "ell": float(ell),
+                                            "L_spec_raw": float("nan"),
+                                            "reason": div_reason,
+                                            "H": h_per,
+                                            "D": None,
+                                            "eigvals": tensor_stats(eigs_div, "eigvals") if eigs_div is not None else None,
+                                            "eig_spacing": None,
+                                            "target_zeros": None,
+                                            "eig_exception": div_ex_msg,
+                                        },
+                                        spec_debug_written,
+                                        int(debug_spec_limit),
+                                    )
+                                div_pen_raw.append(0.0)
+                                L_div_terms.append(0.0)
+                                logged_div = True
+                            else:
+                                eigs = eigs_div
+                                assert eigs is not None
+                                eigs.sort()
+                                div_pen_val = 0.0
+                                if len(spectra_accum) >= 1:
+                                    div_pen_val = _spectral_diversity_penalty(
+                                        eigs,
+                                        spectra_accum,
+                                        diversity_sigma=float(diversity_sigma),
+                                    )
+                                spectra_accum.append(np.asarray(eigs, copy=True))
+                                div_pen_raw.append(div_pen_val)
+                                loss = float(loss) + ld * div_pen_val
+                                L_div_terms.append(ld * div_pen_val)
+                                logged_div = True
                         elif ld > 0.0:
                             div_pen_raw.append(0.0)
                             L_div_terms.append(0.0)
@@ -1100,6 +1429,31 @@ class ArtinACO:
                 if ld > 0.0 and not logged_div:
                     div_pen_raw.append(0.0)
                     L_div_terms.append(0.0)
+            if lr_rn > 0.0 or ln_rn > 0.0:
+                try:
+                    from core.ramsey_nijenhuis import ramsey_nijenhuis_loss as _rn_loss
+
+                    rd = _rn_loss(
+                        list(a_list),
+                        int(nijenhuis_dim),
+                        lambda_ramsey=lr_rn,
+                        lambda_nijenhuis=ln_rn,
+                        device=str(ncg_device),
+                        min_block=int(ramsey_min_block),
+                    )
+                    loss = float(loss) + float(rd["loss"])
+                    ramsey_scores.append(float(rd["ramsey_score"]))
+                    nijenhuis_defects.append(float(rd["nijenhuis_defect"]))
+                except Exception:
+                    if not warned_rn[0]:
+                        warnings.warn(
+                            "Ramsey–Nijenhuis (V13): regularizer failed for a candidate; using zero contribution.",
+                            UserWarning,
+                            stacklevel=2,
+                        )
+                        warned_rn[0] = True
+                    ramsey_scores.append(0.0)
+                    nijenhuis_defects.append(0.0)
             if not np.isfinite(loss):
                 loss = float(loss_clip)
             c = Candidate(a_list=key_w, length=float(ell), trace=float(tr), reward=0.0, loss=float(loss))
@@ -1137,18 +1491,37 @@ class ArtinACO:
             bm_trace = dict(per_trace.get(scored[0].a_list, {}))
         nan = float("nan")
 
+        if spec_tally is not None:
+            spec_tally["nonfinite"] = int(spec_tally.get("nonfinite", 0)) + int(spec_nonfinite_iter)
+            spec_tally["eig_fail"] = int(spec_tally.get("eig_fail", 0)) + int(spec_eig_fail_iter)
+            spec_tally["invalid"] = int(spec_tally.get("invalid", 0)) + int(spec_invalid_iter)
+            if int(spec_clip_iteration) > 0:
+                spec_tally["clip"] = int(spec_tally.get("clip", 0)) + int(spec_clip_iteration)
+
         def _gf(key: str, default: float = nan) -> float:
             v = bm.get(key)
             if v is None:
                 return float(default)
             return float(v)
 
+        rs_mean = float(np.mean(ramsey_scores)) if ramsey_scores else nan
+        rs_max = float(np.max(ramsey_scores)) if ramsey_scores else nan
+        nd_mean = float(np.mean(nijenhuis_defects)) if nijenhuis_defects else nan
+        nd_min = float(np.min(nijenhuis_defects)) if nijenhuis_defects else nan
+        L_ramsey_agg = (-lr_rn * rs_mean) if ramsey_scores and lr_rn > 0.0 else (nan if lr_rn <= 0.0 else 0.0)
+        L_nij_agg = (ln_rn * nd_mean) if nijenhuis_defects and ln_rn > 0.0 else (nan if ln_rn <= 0.0 else 0.0)
+
         stats = {
             "L_selberg_raw": float(L_selberg),
             "L_spec_raw": float(L_spec_raw),
+            "L_spec_log": float(L_spec_log_val) if np.isfinite(L_spec_log_val) else nan,
             "L_spec_eff": float(L_spec),
             "L_spec_clipped": int(spec_clip_iteration > 0),
             "spec_clip_iteration": int(spec_clip_iteration),
+            "spec_clip_count": int(spec_clip_iteration),
+            "spec_nonfinite_count": int(spec_nonfinite_iter),
+            "spec_eig_fail_count": int(spec_eig_fail_iter),
+            "spec_invalid_count": int(spec_invalid_iter),
             "L_spacing_raw": float(L_spacing),
             "L_selberg_norm": float(L_sel_norm),
             "L_spec_norm": float(L_spec_norm),
@@ -1197,6 +1570,21 @@ class ArtinACO:
             "ncg_collapse_loss_mean": float(np.mean(dtes_ncg_losses)) if dtes_ncg_losses else nan,
             "ncg_collapse_loss_max": float(np.max(dtes_ncg_losses)) if dtes_ncg_losses else nan,
             "dtes_effective_weight": float(dtes_w),
+            "L_ramsey": float(L_ramsey_agg),
+            "L_nijenhuis": float(L_nij_agg),
+            "ramsey_score_mean": float(rs_mean),
+            "ramsey_score_max": float(rs_max),
+            "nijenhuis_defect_mean": float(nd_mean),
+            "nijenhuis_defect_min": float(nd_min),
+            "n_eig": float(spec_diag_op.get("n_eig"))
+            if spec_diag_op.get("n_eig") is not None
+            else nan,
+            "n_zeros": float(spec_diag_op.get("n_zeros"))
+            if spec_diag_op.get("n_zeros") is not None
+            else nan,
+            "n_spec_used": float(spec_diag_op.get("n_spec_used"))
+            if spec_diag_op.get("n_spec_used") is not None
+            else nan,
             **adaptive_rep,
         }
         return scored, stats
@@ -1317,13 +1705,33 @@ class ArtinACO:
         lambda_diversity_max: float = 0.2,
         restart_patience_min: int = 4,
         spec_clip: float = 100.0,
+        spec_log_scale: bool = True,
         reject_nonfinite_spec: bool = False,
+        debug_spec: bool = False,
+        debug_spec_limit: int = 10,
+        reject_nonfinite_operator: bool = True,
+        reject_nonfinite_eigs: bool = True,
+        out_dir: Optional[str] = None,
+        lambda_ramsey: float = 0.0,
+        lambda_nijenhuis: float = 0.0,
+        ramsey_min_block: int = 2,
+        nijenhuis_dim: int = 16,
+        min_spectral_points: int = 16,
     ) -> Tuple[Dict[str, Any], List[Tuple[Any, ...]]]:
         history: List[Tuple[Any, ...]] = []
         best_snapshot: Dict[str, Any] = {"best_loss": float("inf"), "best_words": [], "best_lengths": []}
         recent_losses: List[float] = []
         last_eval_stats: Dict[str, Any] = {}
         spec_was_clipped_count = 0
+        spec_tally_run: Dict[str, int] = {"nonfinite": 0, "eig_fail": 0, "invalid": 0, "clip": 0}
+        spec_debug_written: List[int] = [0]
+        spec_debug_fp: Optional[Any] = None
+        spec_debug_path_res: Optional[str] = None
+        if bool(debug_spec):
+            od = Path(str(out_dir)) if out_dir is not None else Path(".")
+            od.mkdir(parents=True, exist_ok=True)
+            spec_debug_path_res = str(od / "spec_debug.jsonl")
+            spec_debug_fp = open(spec_debug_path_res, "w", encoding="utf-8")
 
         alpha_base = float(self.alpha)
         beta_base = float(self.beta)
@@ -1683,7 +2091,21 @@ class ArtinACO:
                 lambda_spectral_div=float(lambda_spectral_div),
                 ncg_eps=float(ncg_eps),
                 spec_clip=float(spec_clip),
+                spec_log_scale=bool(spec_log_scale),
                 reject_nonfinite_spec=bool(reject_nonfinite_spec),
+                iteration=int(it),
+                debug_spec=bool(debug_spec),
+                debug_spec_limit=int(debug_spec_limit),
+                reject_nonfinite_operator=bool(reject_nonfinite_operator),
+                reject_nonfinite_eigs=bool(reject_nonfinite_eigs),
+                spec_debug_fp=spec_debug_fp,
+                spec_debug_written=spec_debug_written,
+                spec_tally=spec_tally_run,
+                lambda_ramsey=float(lambda_ramsey),
+                lambda_nijenhuis=float(lambda_nijenhuis),
+                ramsey_min_block=int(ramsey_min_block),
+                nijenhuis_dim=int(nijenhuis_dim),
+                min_spectral_points=int(min_spectral_points),
             )
 
             spec_was_clipped_count += int(stats.get("spec_clip_iteration", 0))
@@ -1743,9 +2165,15 @@ class ArtinACO:
                 global_best_history.append(gb_h)
                 iter_best_history.append(float("inf"))
                 lsr = float(stats.get("L_spec_raw", float("nan")))
+                _snf = int(stats.get("spec_nonfinite_count", 0))
+                _sef = int(stats.get("spec_eig_fail_count", 0))
+                _sci = int(stats.get("spec_clip_count", 0))
+                _siv = int(stats.get("spec_invalid_count", 0))
                 print(
                     f"[{it}] spec_nonfinite_rejected valid={len(valids)} bank={len(self._bank)} "
                     f"L_spec_raw={lsr} L_spec_clipped={int(stats.get('L_spec_clipped', 0))} "
+                    f"spec_nonfinite_count={_snf} spec_eig_fail_count={_sef} "
+                    f"spec_clip_count_iter={_sci} spec_invalid_count={_siv} "
                     f"spec_clip_count={spec_was_clipped_count} "
                     f"scheduler_active={int(bool(adaptive_scheduler) and int(stagnation_iters) >= int(scheduler_window))} "
                     f"exploration_floor_eff={float(exploration_floor_eff):.6g} "
@@ -1792,8 +2220,13 @@ class ArtinACO:
             reward_mean = float(stats.get("reward_mean", float("nan")))
             L_selberg_raw = float(stats.get("L_selberg_raw", float("nan")))
             L_spec_raw = float(stats.get("L_spec_raw", float("nan")))
+            L_spec_log_v = float(stats.get("L_spec_log", float("nan")))
             L_spec_eff_v = float(stats.get("L_spec_eff", float("nan")))
             L_spec_clipped_v = int(stats.get("L_spec_clipped", 0))
+            spec_nf_i = int(stats.get("spec_nonfinite_count", 0))
+            spec_ef_i = int(stats.get("spec_eig_fail_count", 0))
+            spec_inv_i = int(stats.get("spec_invalid_count", 0))
+            spec_clip_i = int(stats.get("spec_clip_count", 0))
             L_spacing_raw = float(stats.get("L_spacing_raw", float("nan")))
             L_selberg_norm = float(stats.get("L_selberg_norm", float("nan")))
             L_spec_norm = float(stats.get("L_spec_norm", float("nan")))
@@ -1834,6 +2267,15 @@ class ArtinACO:
             triple_cmin_v = float(stats.get("triple_comm_norm_min", float("nan")))
             ncg_clm_v = float(stats.get("ncg_collapse_loss_mean", float("nan")))
             ncg_clx_v = float(stats.get("ncg_collapse_loss_max", float("nan")))
+            L_ramsey_v = float(stats.get("L_ramsey", float("nan")))
+            L_nij_v = float(stats.get("L_nijenhuis", float("nan")))
+            ramsey_mean_v = float(stats.get("ramsey_score_mean", float("nan")))
+            ramsey_max_v = float(stats.get("ramsey_score_max", float("nan")))
+            nij_mean_v = float(stats.get("nijenhuis_defect_mean", float("nan")))
+            nij_min_v = float(stats.get("nijenhuis_defect_min", float("nan")))
+            n_eig_v = float(stats.get("n_eig", float("nan")))
+            n_zeros_v = float(stats.get("n_zeros", float("nan")))
+            n_spec_used_v = float(stats.get("n_spec_used", float("nan")))
             avg_ell = float(np.mean([c.length for c in scored])) if scored else float("nan")
             valid_rate = float(len(scored)) / float(max(1, self.num_ants))
 
@@ -1962,8 +2404,14 @@ class ArtinACO:
                 f"lambda_diversity_eff={float(lambda_diversity_eff):.6g} "
                 f"restart_patience_eff={int(restart_patience_eff)} "
                 f"stagnation_iters={int(stagnation_iters)} "
-                f"L_spec_raw={L_spec_raw:.6g} L_spec_eff={L_spec_eff_v:.6g} "
-                f"L_spec_clipped={L_spec_clipped_v} spec_clip_count={spec_was_clipped_count}"
+                f"L_spec_raw={L_spec_raw:.6g} L_spec_log={L_spec_log_v:.6g} L_spec_eff={L_spec_eff_v:.6g} "
+                f"L_spec_clipped={L_spec_clipped_v} spec_clip_count={spec_was_clipped_count} "
+                f"spec_nonfinite_count={spec_nf_i} spec_eig_fail_count={spec_ef_i} "
+                f"spec_clip_count_iter={spec_clip_i} spec_invalid_count={spec_inv_i} "
+                f"L_ramsey={L_ramsey_v:.6g} L_nijenhuis={L_nij_v:.6g} "
+                f"ramsey_score_mean={ramsey_mean_v:.6g} ramsey_score_max={ramsey_max_v:.6g} "
+                f"nijenhuis_defect_mean={nij_mean_v:.6g} nijenhuis_defect_min={nij_min_v:.6g} "
+                f"n_eig={n_eig_v:.6g} n_zeros={n_zeros_v:.6g} n_spec_used={n_spec_used_v:.6g}"
             )
             if it % 10 == 0:
                 print(
@@ -1973,7 +2421,7 @@ class ArtinACO:
                     f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
                     f"{sched_log} "
                     f"alpha_eff={ae_v:.4g} beta_eff={be_v:.4g} "
-                    f"L_sel={L_selberg_raw:.3g} L_spec_raw={L_spec_raw:.3g} L_spec_eff={L_spec_eff_v:.3g} "
+                    f"L_sel={L_selberg_raw:.3g} L_spec_raw={L_spec_raw:.3g} L_spec_log={L_spec_log_v:.3g} L_spec_eff={L_spec_eff_v:.3g} "
                     f"L_comm={L_comm_v:.3g} L_div={L_div_v:.3g} L_len={L_len_v:.3g} "
                     f"comm_norm_mean={comm_norm_mean_v:.3g} diversity_penalty_mean={div_pen_mean_v:.3g} "
                     f"length_penalty_mean={len_pen_mean_v:.3g} "
@@ -1995,7 +2443,7 @@ class ArtinACO:
                     f"avg_ell={avg_ell:.6g} bank={len(self._bank)} "
                     f"{sched_log} "
                     f"alpha_eff={ae_v:.4g} beta_eff={be_v:.4g} "
-                    f"L_sel={L_selberg_raw:.3g} L_spec_raw={L_spec_raw:.3g} L_spec_eff={L_spec_eff_v:.3g} "
+                    f"L_sel={L_selberg_raw:.3g} L_spec_raw={L_spec_raw:.3g} L_spec_log={L_spec_log_v:.3g} L_spec_eff={L_spec_eff_v:.3g} "
                     f"L_comm={L_comm_v:.3g} L_div={L_div_v:.3g} L_len={L_len_v:.3g} "
                     f"comm_norm_mean={comm_norm_mean_v:.3g} diversity_penalty_mean={div_pen_mean_v:.3g} "
                     f"length_penalty_mean={len_pen_mean_v:.3g} "
@@ -2007,6 +2455,9 @@ class ArtinACO:
                     f"builder={operator_builder} dt={dt:.3g}s :: {top_words_s}",
                     flush=True,
                 )
+
+        if spec_debug_fp is not None:
+            spec_debug_fp.close()
 
         best_snapshot["global_best_loss"] = (
             float(global_best_loss) if global_best_candidate is not None else float("nan")
@@ -2030,6 +2481,17 @@ class ArtinACO:
         best_snapshot["lambda_comm"] = float(lambda_comm)
         best_snapshot["lambda_diversity"] = float(lambda_diversity)
         best_snapshot["lambda_length"] = float(lambda_length)
+        best_snapshot["lambda_ramsey"] = float(lambda_ramsey)
+        best_snapshot["lambda_nijenhuis"] = float(lambda_nijenhuis)
+        best_snapshot["ramsey_score_mean_final"] = float(last_eval_stats.get("ramsey_score_mean", nan_f))
+        best_snapshot["ramsey_score_max_final"] = float(last_eval_stats.get("ramsey_score_max", nan_f))
+        best_snapshot["nijenhuis_defect_mean_final"] = float(
+            last_eval_stats.get("nijenhuis_defect_mean", nan_f)
+        )
+        best_snapshot["nijenhuis_defect_min_final"] = float(
+            last_eval_stats.get("nijenhuis_defect_min", nan_f)
+        )
+        best_snapshot["n_spec_used_final"] = float(last_eval_stats.get("n_spec_used", nan_f))
         best_snapshot["regularizer_comm_norm_mean_final"] = float(
             last_eval_stats.get("comm_norm_mean", nan_f)
         )
@@ -2093,8 +2555,16 @@ class ArtinACO:
         best_snapshot["elite_reinforcement_enabled"] = bool(float(elite_weight) > 0.0)
 
         best_snapshot["spec_clip"] = float(spec_clip)
+        best_snapshot["spec_log_scale"] = bool(spec_log_scale)
+        best_snapshot["L_spec_raw_final"] = float(last_eval_stats.get("L_spec_raw", nan_f))
+        best_snapshot["L_spec_log_final"] = float(last_eval_stats.get("L_spec_log", nan_f))
         best_snapshot["spec_was_clipped_count"] = int(spec_was_clipped_count)
         best_snapshot["reject_nonfinite_spec"] = bool(reject_nonfinite_spec)
+        best_snapshot["spec_nonfinite_count_total"] = int(spec_tally_run.get("nonfinite", 0))
+        best_snapshot["spec_eig_fail_count_total"] = int(spec_tally_run.get("eig_fail", 0))
+        best_snapshot["spec_clip_count_total"] = int(spec_was_clipped_count)
+        best_snapshot["spec_invalid_count_total"] = int(spec_tally_run.get("invalid", 0))
+        best_snapshot["spec_debug_path"] = spec_debug_path_res if bool(debug_spec) else None
 
         # V12.8 adaptive stagnation scheduler (not an RH proof).
         best_snapshot["adaptive_scheduler"] = bool(adaptive_scheduler)
@@ -2217,7 +2687,13 @@ def main() -> None:
         "--spec_clip",
         type=float,
         default=100.0,
-        help="Cap raw operator spectral loss (finite values above this are clipped; non-finite uses this value unless rejected).",
+        help="Emergency cap on L_spec after log1p(L_spec_raw) when --spec_log_scale true; else caps raw L_spec (non-finite raw uses this unless rejected).",
+    )
+    ap.add_argument(
+        "--spec_log_scale",
+        type=str,
+        default="true",
+        help="When true, L_spec = log1p(L_spec_raw) then optional clip to --spec_clip; when false, legacy raw MSE with clip.",
     )
     ap.add_argument(
         "--reject_nonfinite_spec",
@@ -2372,6 +2848,46 @@ def main() -> None:
         default=1e-6,
         help="Epsilon in DTES triple ncg_collapse_loss = 1/(eps+||[D,A]||_F).",
     )
+    ap.add_argument(
+        "--debug_spec",
+        type=str,
+        default="false",
+        help="When true, write up to --debug_spec_limit JSONL records to out_dir/spec_debug.jsonl on non-finite spectral diagnostics.",
+    )
+    ap.add_argument(
+        "--debug_spec_limit",
+        type=int,
+        default=10,
+        help="Max JSONL debug records for spec_debug.jsonl (not an RH proof).",
+    )
+    ap.add_argument(
+        "--reject_nonfinite_operator",
+        type=str,
+        default="true",
+        help="Bank-level operator: if H is not finite, return inf spectral loss (skip bad operator).",
+    )
+    ap.add_argument(
+        "--reject_nonfinite_eigs",
+        type=str,
+        default="true",
+        help="Bank-level operator: if eigenvalues or spacing are not finite, return inf spectral loss.",
+    )
+    # V13 Ramsey–Nijenhuis guided ACO (structural prior; not an RH proof).
+    ap.add_argument("--lambda_ramsey", type=float, default=0.0, help="Reward homogeneous word structure (subtracts from loss).")
+    ap.add_argument(
+        "--lambda_nijenhuis",
+        type=float,
+        default=0.0,
+        help="Penalize Nijenhuis torsion proxy on a finite shift operator built from the word.",
+    )
+    ap.add_argument("--ramsey_min_block", type=int, default=2, help="Minimum run length for Ramsey run-length score.")
+    ap.add_argument("--nijenhuis_dim", type=int, default=16, help="Dimension for word_to_shift_operator / defect probe.")
+    ap.add_argument(
+        "--min_spectral_points",
+        type=int,
+        default=16,
+        help="Reject/clipped spectral loss only if k=min(n_eig, n_zeros) is below this; else MSE uses first k eigenvalues vs k targets.",
+    )
     args = ap.parse_args()
 
     print(
@@ -2495,7 +3011,18 @@ def main() -> None:
         lambda_diversity_max=float(args.lambda_diversity_max),
         restart_patience_min=int(args.restart_patience_min),
         spec_clip=float(args.spec_clip),
+        spec_log_scale=str(args.spec_log_scale).lower() in ["1", "true", "yes", "y"],
         reject_nonfinite_spec=str(args.reject_nonfinite_spec).lower() in ["1", "true", "yes", "y"],
+        debug_spec=str(args.debug_spec).lower() in ["1", "true", "yes", "y"],
+        debug_spec_limit=int(args.debug_spec_limit),
+        reject_nonfinite_operator=str(args.reject_nonfinite_operator).lower() in ["1", "true", "yes", "y"],
+        reject_nonfinite_eigs=str(args.reject_nonfinite_eigs).lower() in ["1", "true", "yes", "y"],
+        out_dir=str(out_dir),
+        lambda_ramsey=float(args.lambda_ramsey),
+        lambda_nijenhuis=float(args.lambda_nijenhuis),
+        ramsey_min_block=int(args.ramsey_min_block),
+        nijenhuis_dim=int(args.nijenhuis_dim),
+        min_spectral_points=int(args.min_spectral_points),
     )
     dt = time.perf_counter() - t0
 

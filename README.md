@@ -180,6 +180,20 @@ This is a numerical Hilbert-Polya-inspired diagnostic and fitting experiment.
 It does not constitute, and should not be interpreted as, a proof of the
 Riemann hypothesis.
 
+### V13: Ramsey–Nijenhuis guided ACO (smoke)
+
+```bash
+python3 -m core.artin_aco \
+  --num_ants 32 \
+  --num_iters 10 \
+  --max_length 16 \
+  --zeros 64 \
+  --lambda_ramsey 0.01 \
+  --lambda_nijenhuis 0.01 \
+  --nijenhuis_dim 16 \
+  --out_dir runs/v13_smoke
+```
+
 ---
 
 ## Documentation
